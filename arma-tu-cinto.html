@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es-UY" data-page="armar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Armá tu cinto · Decora.te</title>
+  <meta name="description" content="Armá tu cinto de cuero paso a paso: tipo, cueros, hebilla, unión y decoración. Mirá cómo queda y cuánto sale.">
+  <meta name="theme-color" content="#efe7da">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1410'/%3E%3Cpath d='M16 25s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 24 14c0 6-8 11-8 11z' fill='%23efe7da'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/arranque.js"></script>
+</head>
+<body style="background:var(--crema)">
+  <main>
+    <section class="builder" aria-labelledby="arma-title" data-builder>
+      <div class="wrap">
+        <header class="builder__top">
+          <p class="eyebrow" data-fade>A tu medida</p>
+          <h1 class="display" id="arma-title" data-split>Armá el tuyo</h1>
+          <p data-fade>Elegí paso a paso, mirá cómo queda con el cuero real y sabé cuánto sale antes de pedirlo.</p>
+        </header>
+
+        <div class="builder__grid">
+          <div class="builder__stagecol">
+            <div class="stage" data-stage>
+              <div class="stage__belt" data-belt></div>
+              <p class="stage__caption"><span data-stage-caption></span><span class="stage__total" data-total>—</span></p>
+            </div>
+            <div class="builder__total">
+              <span class="builder__total-label">Total estimado</span>
+              <span class="builder__total-value" data-total aria-live="polite">—</span>
+            </div>
+          </div>
+
+          <div class="builder__panel">
+            <ol class="steps" data-steps aria-label="Pasos"></ol>
+            <div class="builder__step" data-step-body></div>
+            <div class="builder__nav">
+              <button class="btn btn--ghost" type="button" data-prev>Anterior</button>
+              <button class="btn" type="button" data-next>Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="builder__bar" data-bar>
+        <div>
+          <span class="builder__total-label">Total estimado</span>
+          <span class="builder__total-value" data-total>—</span>
+        </div>
+        <button class="btn" type="button" data-next-bar>Siguiente</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/datos.js"></script>
+  <script src="js/stock.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="js/sitio.js" defer></script>
+  <script src="js/cinto.js" defer></script>
+  <script src="js/armador.js" defer></script>
+</body>
+</html>

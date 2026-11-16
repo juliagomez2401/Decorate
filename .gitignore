@@ -1,0 +1,15 @@
+# Originales y material privado: se quedan solo en la compu
+fotos/
+precios/
+revision-stock/
+_sin-uso/
+fotos-para-pedir.jpg
+.claude/
+
+# Versión vieja que ya no se usa
+js/main.js
+
+# Archivos del sistema
+Thumbs.db
+desktop.ini
+*.tmp

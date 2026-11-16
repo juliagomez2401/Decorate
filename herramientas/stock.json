@@ -1,0 +1,92 @@
+{
+  "_nota": "Inventario del stock identificado a partir de las fotos image000XX.jpeg de la carpeta fotos. Los números son los de cada archivo. Revisar con la dueña.",
+  "categorias": [
+    {
+      "id": "cintos-decorativos", "nombre": "Cintos decorativos",
+      "nota": "Los que no ajustan el pantalón: se usan sobre la ropa. Son los que tienen fotos puestos en la modelo.",
+      "productos": [
+        { "id": "D1", "nombre": "Faja plateada", "fotos": [78, 79], "fotosModelo": [28, 29, 83, 84, 80] },
+        { "id": "D2", "nombre": "Faja negra y blanca, hebilla ovalada", "fotos": [77], "fotosModelo": [30, 31, 32] },
+        { "id": "D3", "nombre": "Faja dorada y chocolate, hebilla redonda", "fotos": [74], "fotosModelo": [33, 36, 37, 40] },
+        { "id": "D4", "nombre": "Faja chocolate y dorada, hebilla flor", "fotos": [75, 76], "fotosModelo": [34, 35] },
+        { "id": "D5", "nombre": "Faja azul y cebra, hebilla ovalada", "fotos": [69], "fotosModelo": [38, 39, 42, 43, 73] },
+        { "id": "D6", "nombre": "Faja roja y cebra, hebilla ovalada", "fotos": [82], "fotosModelo": [41, 44, 45, 46] }
+      ]
+    },
+    {
+      "id": "cintos-funcionales", "nombre": "Cintos funcionales",
+      "nota": "Los que ajustan el pantalón. Solo tienen fotos del producto, sin modelo.",
+      "productos": [
+        { "id": "F1", "nombre": "Cinto negro con tachas, hebilla con piedras turquesa", "fotos": [64, 65] },
+        { "id": "F2", "nombre": "Cinto turquesa y chocolate, hebilla cuadrada", "fotos": [66, 70] },
+        { "id": "F3", "nombre": "Cinto chocolate con tachas, hebilla redonda", "fotos": [67, 68] },
+        { "id": "F4", "nombre": "Cinto cebra, hebilla redonda plateada", "fotos": [71, 72] }
+      ]
+    },
+    {
+      "id": "tarjeteros", "nombre": "Tarjeteros",
+      "productos": [
+        { "id": "T1", "nombre": "Tarjetero negro plegable con broches", "fotos": [2, 1] },
+        { "id": "T2", "nombre": "Serpiente con franja plateada", "fotos": [3, 24, 27] },
+        { "id": "T3", "nombre": "Plateado con franja serpiente", "fotos": [22, 23] },
+        { "id": "T4", "nombre": "Plata metalizada con V verde", "fotos": [4] },
+        { "id": "T5", "nombre": "Azul marino con V beige", "fotos": [5] },
+        { "id": "T6", "nombre": "Chocolate con V verde", "fotos": [6] },
+        { "id": "T7", "nombre": "Bronce metalizado con V negra", "fotos": [7] },
+        { "id": "T8", "nombre": "Azul con V plateada", "fotos": [8], "duda": "¿Es el mismo que T9 con otra luz?" },
+        { "id": "T9", "nombre": "Azul con V dorada", "fotos": [10], "duda": "¿Es el mismo que T8 con otra luz?" },
+        { "id": "T10", "nombre": "Suela con franja azul", "fotos": [9, 13] },
+        { "id": "T11", "nombre": "Marrón con franja azul", "fotos": [12] },
+        { "id": "T12", "nombre": "Chocolate con leopardo", "fotos": [11, 14] },
+        { "id": "T13", "nombre": "Leopardo", "fotos": [15] },
+        { "id": "T14", "nombre": "Croco turquesa", "fotos": [17, 20] },
+        { "id": "T15", "nombre": "Croco bordó con franja bordó", "fotos": [21] },
+        { "id": "T16", "nombre": "Croco rojo con franja plateada", "fotos": [26, 25], "duda": "Las fotos 25 y 26 se ven de distinto rojo: ¿es uno solo o son dos?" }
+      ]
+    },
+    {
+      "id": "porta-lentes", "nombre": "Porta lentes",
+      "productos": [
+        { "id": "P1", "nombre": "Bordó con tachas y dije", "fotos": [16, 18, 19] },
+        { "id": "P2", "nombre": "Chocolate con tachas y dije", "fotos": [53] },
+        { "id": "P3", "nombre": "Croco verde con tachas", "fotos": [47, 48] },
+        { "id": "P4", "nombre": "Croco bordó con correa", "fotos": [49, 81] },
+        { "id": "P5", "nombre": "Croco verde agua con correa", "fotos": [54, 55] },
+        { "id": "P6", "nombre": "Cebra", "fotos": [52, 50, 51] },
+        { "id": "P7", "nombre": "Negro charol con tachas", "fotos": [57, 58] },
+        { "id": "P8", "nombre": "Celeste con costura azul", "fotos": [59, 62, 63] },
+        { "id": "P9", "nombre": "Azul francia y plateado con tachas", "fotos": [56, 60] },
+        { "id": "P10", "nombre": "Azul marino y plateado con tachas", "fotos": [61] }
+      ]
+    },
+    {
+      "id": "portafuegos", "nombre": "Portafuegos",
+      "productos": [
+        { "id": "PF1", "nombre": "Azul con estrellas", "fotos": [339, 340] },
+        { "id": "PF2", "nombre": "Verde con flecos", "fotos": [341] },
+        { "id": "PF3", "nombre": "Turquesa con tachas y estrella", "fotos": [342] },
+        { "id": "PF4", "nombre": "Turquesa con tachas", "fotos": [344] },
+        { "id": "PF5", "nombre": "Plateado con tachas", "fotos": [343] },
+        { "id": "PF0", "nombre": "Foto grupal con encendedores", "fotos": [337, 338], "duda": "En la foto grupal hay más portafuegos que no tienen foto sola (dorado, cebra, negro, croco turquesa): ¿están en stock?" }
+      ]
+    },
+    {
+      "id": "llaveros", "nombre": "Llaveros",
+      "productos": [
+        { "id": "L1", "nombre": "Estrella croco turquesa con tachas", "fotos": [345] },
+        { "id": "L2", "nombre": "Estrella bordó con tachas", "fotos": [347] },
+        { "id": "L3", "nombre": "Dos estrellas rojas", "fotos": [353] },
+        { "id": "L4", "nombre": "Dos estrellas rojas texturadas", "fotos": [355] },
+        { "id": "L5", "nombre": "Estrella plateada cosida", "fotos": [354] },
+        { "id": "L6", "nombre": "Estrella dorada cosida", "fotos": [356], "duda": "¿Es la misma que L5 con otra luz?" },
+        { "id": "L7", "nombre": "Tres estrellas bronce", "fotos": [348] },
+        { "id": "L8", "nombre": "Racimo de estrellas doradas", "fotos": [352] },
+        { "id": "L9", "nombre": "Cascada de estrellas doradas", "fotos": [349] },
+        { "id": "L10", "nombre": "Luna azul con tachas", "fotos": [350] },
+        { "id": "L11", "nombre": "Rayo dorado con tachas", "fotos": [351] },
+        { "id": "L12", "nombre": "Gota de vaca", "fotos": [346] },
+        { "id": "L13", "nombre": "Corazón rojo cosido", "fotos": [357] }
+      ]
+    }
+  ]
+}
