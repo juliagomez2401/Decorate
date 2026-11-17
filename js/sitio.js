@@ -47,7 +47,6 @@
   /* ---------------- estructura común ---------------- */
   const MORE = [
     { href: 'arma.html?p=cinto', label: 'Armá el tuyo', id: 'armar' },
-    { href: 'nosotras.html', label: 'Nosotras', id: 'nosotras' },
     { href: 'como-comprar.html', label: 'Cómo comprar', id: 'como' },
   ];
   const wa = (text) => `https://wa.me/${D.whatsapp}${text ? '?text=' + encodeURIComponent(text) : ''}`;
@@ -98,15 +97,20 @@
         </div>
         <p class="menu__label">Tienda</p>
         <ul class="menu__list">
-          ${D.categorias.map((c, i) => `<li><a href="${c.href}"><span class="menu__n">${String(i + 1).padStart(2, '0')}</span><span class="menu__name">${esc(c.name)}</span><small>Desde ${money(c.desde)}</small></a></li>`).join('')}
-          <li><a href="tienda.html" class="menu__all"><span class="menu__n"></span><span class="menu__name">Ver todo</span></a></li>
+          ${D.categorias.map((c) => `<li><a href="${c.href}"><span class="menu__name">${esc(c.name)}</span><small>Desde ${money(c.desde)}</small></a></li>`).join('')}
         </ul>
-        <ul class="menu__list menu__list--more">
-          ${MORE.map((n) => `<li><a href="${n.href}" ${n.id === page ? 'aria-current="page"' : ''}>${n.label}</a></li>`).join('')}
-        </ul>
+        <a class="menu__all" href="tienda.html">Ver toda la tienda</a>
+        <div class="menu__make">
+          <p class="menu__label">A medida</p>
+          <p class="menu__make-txt">Cualquier pieza se puede hacer en el cuero que elijas.</p>
+          <ul class="menu__make-list">
+            ${D.categorias.filter((c) => c.custom).map((c) => `<li><a href="${c.custom.href}">${esc(c.custom.label.replace(/^Armá tu (.)/, (m, l) => l.toUpperCase()))}</a></li>`).join('')}
+          </ul>
+        </div>
         <div class="menu__foot">
-          <a href="${wa()}" target="_blank" rel="noopener">WhatsApp ${D.whatsappVisible}</a>
-          <a href="https://www.instagram.com/${D.instagram}/" target="_blank" rel="noopener">Instagram @${D.instagram}</a>
+          ${MORE.filter((n) => n.id !== 'armar').map((n) => `<a href="${n.href}" ${n.id === page ? 'aria-current="page"' : ''}>${n.label}</a>`).join('')}
+          <a href="${wa()}" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="https://www.instagram.com/${D.instagram}/" target="_blank" rel="noopener">Instagram</a>
         </div>
       </nav>
     </div>
@@ -245,7 +249,6 @@
     ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html?p=cinto', swatch: c.id })),
     { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma.html?p=cinto', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
     { title: 'Cómo comprar', kind: 'Ayuda', href: 'como-comprar.html', extra: 'pago transferencia efectivo' },
-    { title: 'Nosotras', kind: 'Decora.te', href: 'nosotras.html', extra: 'historia taller' },
   ];
   function runSearch() {
     const q = norm(sInput.value.trim());
@@ -302,7 +305,7 @@
     $('[data-cart-count-txt]').textContent = n ? `(${n})` : '';
     $('[data-cart-open]').setAttribute('aria-label', `Abrir carrito, ${n} ${n === 1 ? 'pieza' : 'piezas'}`);
     if (!Cart.items.length) {
-      list.innerHTML = `<div class="drawer__empty"><p>Todavía no agregaste nada.</p><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma-tu-cinto.html">Armar un cinto</a></div>`;
+      list.innerHTML = `<div class="drawer__empty"><p>Todavía no agregaste nada.</p><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html?p=cinto">Armá el tuyo</a></div>`;
       foot.innerHTML = '';
       return;
     }
@@ -310,7 +313,7 @@
     const t = Cart.total();
     foot.innerHTML = `
       <div class="drawer__total"><span>Subtotal</span><strong>${range(t.min, t.max)}</strong></div>
-      <p class="drawer__note">El envío se coordina al confirmar. No se cobra nada en la web: pagás en efectivo o por transferencia.</p>
+      <p class="drawer__note">No se cobra nada en la web: pagás en efectivo o por transferencia.</p>
       <a class="btn" href="carrito.html">Finalizar compra</a>
       <button type="button" class="link drawer__keep" data-drawer-close>Seguir mirando</button>`;
   }
