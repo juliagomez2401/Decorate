@@ -33,6 +33,7 @@ window.DT = {
     { id: 'llaveros', name: 'Llaveros', href: 'tienda.html?c=llaveros', foto: 'stock/352', desde: 300,
       custom: { href: 'producto.html?p=llavero', label: 'Llavero a medida', txt: 'En el cuero que elijas.' } },
     { id: 'pulseras', name: 'Pulseras', href: 'tienda.html?c=pulseras', foto: 'pulsera', pos: '50% 60%', desde: 250,
+      subs: [{ id: 'anchas', name: 'Anchas' }, { id: 'finas', name: 'Finas' }],
       custom: { href: 'producto.html?p=pulsera', label: 'Pulsera a medida', txt: 'En tres anchos y en el cuero que elijas.' } },
     { id: 'collares', name: 'Collares', href: 'tienda.html?c=collares', foto: 'collar', desde: 350,
       custom: { href: 'producto.html?p=collar', label: 'Collar a medida', txt: 'Fino o más grueso, con o sin decoración.' } },

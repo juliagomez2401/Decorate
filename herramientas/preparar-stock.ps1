@@ -18,9 +18,11 @@ function Save($img, [int]$maxSide, [string]$path, [long]$q) {
   $g.DrawImage($img, 0, 0, $w, $h); $g.Dispose()
   $bmp.Save($path, $codec, (Q $q)); $bmp.Dispose()
 }
-$files = Get-ChildItem $src -Filter 'image*.jpeg'
+# tanda 2 (pulseras y collares): tanda2-imageNNNNN.jpeg -> img\stock\(1000+N).jpg
+$files = @(Get-ChildItem $src -Recurse -Filter 'image*.jpeg') + @(Get-ChildItem $src -Recurse -Filter 'tanda2-image*.jpeg')
 foreach ($f in $files) {
-  $n = [int]($f.BaseName -replace 'image0*', '')
+  $n = [int]($f.BaseName -replace '^(tanda2-)?image0*', '')
+  if ($f.BaseName -like 'tanda2-*') { $n += 1000 }
   $big = Join-Path $out "$n.jpg"
   if ((Test-Path $big) -and (Get-Item $big).LastWriteTime -gt $f.LastWriteTime) { continue }
   $img = Load $f.FullName

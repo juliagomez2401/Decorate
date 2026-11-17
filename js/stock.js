@@ -912,5 +912,588 @@ window.DT_STOCK = [
   "desde": false,
   "confirmar": false,
   "duda": null
+ },
+ {
+  "id": "pu1",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera gamuza gris con flecos y tachas",
+  "fotos": [
+   1020,
+   1025
+  ],
+  "portada": 1020,
+  "hover": 1025,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu2",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera chocolate con sol bordado",
+  "fotos": [
+   1021,
+   1022
+  ],
+  "portada": 1021,
+  "hover": 1022,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu3",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera plateada con estrellas y tachas",
+  "fotos": [
+   1023,
+   1024
+  ],
+  "portada": 1023,
+  "hover": 1024,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu4",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera tigre con costura suela",
+  "fotos": [
+   1026,
+   1031
+  ],
+  "portada": 1026,
+  "hover": 1031,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu5",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera azul marino con estrellas doradas",
+  "fotos": [
+   1027,
+   1028
+  ],
+  "portada": 1027,
+  "hover": 1028,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu6",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera negra con estrellas plateadas",
+  "fotos": [
+   1029,
+   1030
+  ],
+  "portada": 1029,
+  "hover": 1030,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu7",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera leopardo claro con broche",
+  "fotos": [
+   1032
+  ],
+  "portada": 1032,
+  "hover": null,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": "¿Es la misma que PU9 (leopardo)?"
+ },
+ {
+  "id": "pu8",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera vaca con broche",
+  "fotos": [
+   1033,
+   1034
+  ],
+  "portada": 1033,
+  "hover": 1034,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu9",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera leopardo con broche",
+  "fotos": [
+   1035,
+   1036,
+   1037
+  ],
+  "portada": 1035,
+  "hover": 1036,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": "¿Las 3 fotos son la misma pulsera?"
+ },
+ {
+  "id": "pu10",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera cebra con tres tachas",
+  "fotos": [
+   1038
+  ],
+  "portada": 1038,
+  "hover": null,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu11",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera cebra con tachas y broches",
+  "fotos": [
+   1039,
+   1040
+  ],
+  "portada": 1039,
+  "hover": 1040,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu12",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera croco verde metalizado con ojalillos",
+  "fotos": [
+   1041,
+   1042,
+   1043
+  ],
+  "portada": 1041,
+  "hover": 1042,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu13",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera marrón con bordado de rombos",
+  "fotos": [
+   1044,
+   1045,
+   1046
+  ],
+  "portada": 1044,
+  "hover": 1045,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu14",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera azul francia de tiras con tachas",
+  "fotos": [
+   1047
+  ],
+  "portada": 1047,
+  "hover": null,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu15",
+  "cat": "pulseras",
+  "sub": "anchas",
+  "name": "Pulsera azul marino de tiras con tachas",
+  "fotos": [
+   1048,
+   1049
+  ],
+  "portada": 1048,
+  "hover": 1049,
+  "min": 350,
+  "max": 350,
+  "desde": false,
+  "confirmar": false,
+  "duda": null
+ },
+ {
+  "id": "pu16",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera cebra fina con tachas",
+  "fotos": [
+   1050,
+   1055
+  ],
+  "portada": 1050,
+  "hover": 1055,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Las fotos 50 y 55 son la misma?"
+ },
+ {
+  "id": "pu17",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera cebra de doble vuelta con tachas",
+  "fotos": [
+   1051,
+   1052
+  ],
+  "portada": 1051,
+  "hover": 1052,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "pu18",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera cebra fina con estrella",
+  "fotos": [
+   1053
+  ],
+  "portada": 1053,
+  "hover": null,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Es la misma que PU19?"
+ },
+ {
+  "id": "pu19",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera cebra con estrellas cobre",
+  "fotos": [
+   1054,
+   1058
+  ],
+  "portada": 1054,
+  "hover": 1058,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "pu20",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera plomo con tachas",
+  "fotos": [
+   1056,
+   1060
+  ],
+  "portada": 1056,
+  "hover": 1060,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "pu21",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera champagne con tachas",
+  "fotos": [
+   1057
+  ],
+  "portada": 1057,
+  "hover": null,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Es la misma que PU20?"
+ },
+ {
+  "id": "pu22",
+  "cat": "pulseras",
+  "sub": "finas",
+  "name": "Pulsera verde agua con franja marrón",
+  "fotos": [
+   1059,
+   1061
+  ],
+  "portada": 1059,
+  "hover": 1061,
+  "min": 250,
+  "max": 300,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co1",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar chocolate con costura suela",
+  "fotos": [
+   1001
+  ],
+  "portada": 1001,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co2",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar plateado con costura negra",
+  "fotos": [
+   1002
+  ],
+  "portada": 1002,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co3",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar champagne con costura suela",
+  "fotos": [
+   1003
+  ],
+  "portada": 1003,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co4",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar azul marino con costura suela",
+  "fotos": [
+   1004
+  ],
+  "portada": 1004,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co5",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar cebra con costura azul",
+  "fotos": [
+   1005
+  ],
+  "portada": 1005,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co6",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar negro con costura natural",
+  "fotos": [
+   1006
+  ],
+  "portada": 1006,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co7",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar dorado con costura marrón",
+  "fotos": [
+   1007
+  ],
+  "portada": 1007,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co8",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar blanco con estrellas y tachas",
+  "fotos": [
+   1008,
+   1013
+  ],
+  "portada": 1008,
+  "hover": 1013,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Collar o pulsera?"
+ },
+ {
+  "id": "co9",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar gamuza turquesa con costura dorada",
+  "fotos": [
+   1009
+  ],
+  "portada": 1009,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co10",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar bordó con costura natural",
+  "fotos": [
+   1010
+  ],
+  "portada": 1010,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": null
+ },
+ {
+  "id": "co11",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar croco plomo con costura bordó",
+  "fotos": [
+   1011,
+   1012
+  ],
+  "portada": 1011,
+  "hover": 1012,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Collar o pulsera?"
+ },
+ {
+  "id": "co12",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar negro con tachas",
+  "fotos": [
+   1014,
+   1015
+  ],
+  "portada": 1014,
+  "hover": 1015,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Collar o pulsera?"
+ },
+ {
+  "id": "co13",
+  "cat": "collares",
+  "sub": null,
+  "name": "Collar croco bronce con costura bordó",
+  "fotos": [
+   1016
+  ],
+  "portada": 1016,
+  "hover": null,
+  "min": 350,
+  "max": 550,
+  "desde": false,
+  "confirmar": true,
+  "duda": "¿Es el mismo que CO11?"
  }
 ];

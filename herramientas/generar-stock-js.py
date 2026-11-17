@@ -14,6 +14,9 @@ GRUPOS = {
     'porta-lentes': {'cat': 'porta-lentes', 'singular': 'Porta lentes', 'min': 550, 'max': 650, 'confirmar': True},
     'portafuegos': {'cat': 'portafuegos', 'singular': 'Portafuego', 'min': 150, 'max': 200, 'confirmar': True},
     'llaveros': {'cat': 'llaveros', 'singular': 'Llavero', 'min': 300, 'max': 300, 'confirmar': False},
+    'pulseras-anchas': {'cat': 'pulseras', 'sub': 'anchas', 'singular': 'Pulsera', 'min': 350, 'max': 350, 'confirmar': False},
+    'pulseras-finas': {'cat': 'pulseras', 'sub': 'finas', 'singular': 'Pulsera', 'min': 250, 'max': 300, 'confirmar': True},
+    'collares': {'cat': 'collares', 'singular': 'Collar', 'min': 350, 'max': 550, 'confirmar': True},
 }
 
 def slug(s):

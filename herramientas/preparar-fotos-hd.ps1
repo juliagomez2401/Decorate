@@ -4,6 +4,8 @@
 Add-Type -AssemblyName System.Drawing
 $root = Split-Path $PSScriptRoot -Parent
 $src = Join-Path $root 'fotos'
+# las fotos están ordenadas en subcarpetas por categoría (fotos\cintos, fotos\pulseras, ...)
+function Foto($name) { (Get-ChildItem $src -Recurse -File | Where-Object { $_.Name -eq $name } | Select-Object -First 1).FullName }
 $out = Join-Path $root 'img'
 $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
 function Q([long]$q) { $p = New-Object System.Drawing.Imaging.EncoderParameters 1; $p.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter ([System.Drawing.Imaging.Encoder]::Quality), $q; $p }
@@ -40,7 +42,7 @@ $map = [ordered]@{
   'taller-mesa' = 'B6D174C9-259C-461E-9DF2-3AD22019084E.JPG'; 'taller-herramientas' = 'IMG_1680.jpeg'; 'taller-cueros' = 'IMG_3196.jpeg'
 }
 foreach ($name in $map.Keys) {
-  $img = Load (Join-Path $src $map[$name])
+  $img = Load (Foto $map[$name])
   if ($name -like 'hero-*') {
     Save $img 0 0 $img.Width $img.Height 2400 (Join-Path $out "$name.jpg") 86
     Save $img 0 0 $img.Width $img.Height 1200 (Join-Path $out "$name-sm.jpg") 84
@@ -61,7 +63,7 @@ $cueros = [ordered]@{
 }
 foreach ($n in $cueros.Keys) {
   $c = $cueros[$n]
-  $img = Load (Join-Path $src $c[0])
+  $img = Load (Foto $c[0])
   $k = $img.Width / $c[1]
   Save $img ($c[2] * $k) ($c[3] * $k) ($c[4] * $k) ($c[4] * $k) 600 (Join-Path $out "$n.jpg") 88
   "$n <- $($c[0])"
@@ -78,14 +80,14 @@ $cueros800 = [ordered]@{
 }
 foreach ($n in $cueros800.Keys) {
   $c = $cueros800[$n]
-  $img = Load (Join-Path $src $c[0])
+  $img = Load (Foto $c[0])
   $k = $img.Width / 800
   Save $img ($c[1] * $k) ($c[2] * $k) ($c[3] * $k) ($c[3] * $k) 600 (Join-Path $out "$n.jpg") 88
   "$n <- $($c[0])"
   $img.Dispose()
 }
 # Foto única del inicio (horizontal)
-$img = Load (Join-Path $src 'IMG_0191.JPG')
+$img = Load (Foto 'IMG_0191.JPG')
 Save $img 0 0 $img.Width $img.Height 2600 (Join-Path $out 'inicio.jpg') 86
 Save $img 0 0 $img.Width $img.Height 1300 (Join-Path $out 'inicio-sm.jpg') 84
 $img.Dispose()
