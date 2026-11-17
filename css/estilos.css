@@ -1478,3 +1478,7 @@ html { scrollbar-gutter: stable; background: var(--espresso); }
 .ft__grid--3 { grid-template-columns: 1fr 1fr; }
 .ft__grid--3 .ft__col:first-child { grid-column: 1 / -1; }
 @media (min-width: 700px) { .ft__grid--3 { grid-template-columns: repeat(3, 1fr); } .ft__grid--3 .ft__col:first-child { grid-column: auto; } }
+
+/* v18: portada vertical en pantallas paradas */
+.hero__photo picture { display: contents; }
+@media (max-aspect-ratio: 1/1) { .hero__photo img { object-position: 50% 58%; } }

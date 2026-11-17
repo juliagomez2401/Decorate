@@ -20,7 +20,11 @@
     <!-- ============ INICIO ============ -->
     <section class="hero hero--single" aria-label="Inicio" data-page-hero>
       <div class="hero__photo">
-        <img data-page-hero-img src="img/inicio-sm.jpg" srcset="img/inicio-sm.jpg 1300w, img/inicio.jpg 2600w" sizes="100vw" alt="Dos cintos de cuero apoyados en el suelo: uno negro con hebilla redonda dorada y uno turquesa con tachas y hebilla cuadrada" fetchpriority="high">
+        <picture>
+          <!-- en pantallas paradas (celular, tablet vertical) va una foto vertical -->
+          <source media="(max-aspect-ratio: 1/1)" srcset="img/inicio-movil-sm.jpg 900w, img/inicio-movil.jpg 1500w" sizes="100vw">
+          <img data-page-hero-img src="img/inicio-sm.jpg" srcset="img/inicio-sm.jpg 1300w, img/inicio.jpg 2600w" sizes="100vw" alt="Cintos de cuero hechos a mano por Decora.te" fetchpriority="high">
+        </picture>
       </div>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__content">
