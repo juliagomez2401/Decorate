@@ -13,3 +13,5 @@ js/main.js
 Thumbs.db
 desktop.ini
 *.tmp
+
+.venv-fotos/

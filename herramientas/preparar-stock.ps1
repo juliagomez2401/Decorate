@@ -1,4 +1,4 @@
-# Copias livianas de las fotos del stock (fotos\imageNNNNN.jpeg) para la web: img\stock\NN.jpg y NN-sm.jpg.
+﻿# Copias livianas de las fotos del stock (fotos\imageNNNNN.jpeg) para la web: img\stock\NN.jpg y NN-sm.jpg.
 # Respeta la orientación de la cámara. Los originales no se tocan.
 # Uso: powershell -ExecutionPolicy Bypass -File herramientas\preparar-stock.ps1
 Add-Type -AssemblyName System.Drawing
@@ -20,12 +20,19 @@ function Save($img, [int]$maxSide, [string]$path, [long]$q) {
 }
 # tanda 2 (pulseras y collares): tanda2-imageNNNNN.jpeg -> img\stock\(1000+N).jpg
 $files = @(Get-ChildItem $src -Recurse -Filter 'image*.jpeg') + @(Get-ChildItem $src -Recurse -Filter 'tanda2-image*.jpeg')
+# fotos que se sacaron dadas vuelta: se giran 180° (número de foto en la web)
+$girar = @(14, 18)
+$forzar = $args -contains '-forzar'
+# llaveros y portafuegos: ya tienen fondo tabaco (herramientas/fondo-tabaco.py); no se pisan
+$conFondo = 339..357
 foreach ($f in $files) {
   $n = [int]($f.BaseName -replace '^(tanda2-)?image0*', '')
   if ($f.BaseName -like 'tanda2-*') { $n += 1000 }
+  if ($conFondo -contains $n) { continue }
   $big = Join-Path $out "$n.jpg"
-  if ((Test-Path $big) -and (Get-Item $big).LastWriteTime -gt $f.LastWriteTime) { continue }
+  if (-not ($forzar -and $girar -contains $n) -and (Test-Path $big) -and (Get-Item $big).LastWriteTime -gt $f.LastWriteTime) { continue }
   $img = Load $f.FullName
+  if ($girar -contains $n) { $img.RotateFlip('Rotate180FlipNone') }
   Save $img 1600 $big 84
   Save $img 760 (Join-Path $out "$n-sm.jpg") 82
   $img.Dispose()

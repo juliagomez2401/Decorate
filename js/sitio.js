@@ -55,19 +55,27 @@
     bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l-1 12.5h-11z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
     search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M15.2 15.2 20 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   };
+  // flecha para volver: en todas las páginas menos el inicio
+  const enInicio = html.dataset.page === 'inicio';
+  const volverA = { piezas: 'tienda.html' }[html.dataset.page] || 'index.html';
 
   document.body.insertAdjacentHTML('afterbegin', `
     <a class="skip" href="#contenido">Saltar al contenido</a>
     <div class="bar" aria-label="Avisos"><div class="bar__msgs">${D.avisos.map((t, i) => `<span class="${i ? '' : 'is-on'}">${esc(t)}</span>`).join('')}</div></div>
     <header class="hd" data-header>
-      <button class="hd__menu-txt" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>Menú</button>
+      <div class="hd__start">
+        ${enInicio ? '' : `<a class="hd__icon hd__back" href="${volverA}" data-back aria-label="Volver">${ICON.back}</a>`}
+        <button class="hd__menu-txt" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>Menú</button>
+      </div>
       <a class="hd__logo" href="index.html" aria-label="Decora.te, inicio"><img class="logo-img" src="img/logo-claro.png" alt="Decora.te" width="900" height="180"></a>
       <div class="hd__end">
         <button class="hd__icon" type="button" data-search-open aria-label="Buscar" aria-expanded="false" aria-controls="buscar">${ICON.search}</button>
         <button class="hd__icon hd__cart" type="button" data-cart-open aria-label="Abrir carrito">${ICON.bag}<span class="hd__count" data-cart-count>0</span></button>
       </div>
     </header>
+    ${html.dataset.page === 'tienda' ? '' : `<nav class="catbar" aria-label="Categorías"><div class="catbar__in">${D.categorias.map((c) => `<a href="${c.href}">${esc(c.name)}</a>`).join('')}</div></nav>`}
 
     <div class="search" id="buscar" data-search aria-hidden="true">
       <div class="search__veil" data-search-close></div>
@@ -131,8 +139,6 @@
           <div class="ft__col" data-fade>
             <span class="ft__label">Ayuda</span>
             <a href="como-comprar.html">Cómo comprar</a>
-            <a href="como-comprar.html#envios">Envíos y retiro</a>
-            <a href="nosotras.html">Nosotras</a>
           </div>
           <div class="ft__col" data-fade>
             <span class="ft__label">Pagos</span>
@@ -184,6 +190,18 @@
     if (lenis) lenis.scrollTo(el, { offset, duration: 1.4, easing: (x) => 1 - Math.pow(1 - x, 4) });
     else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: motion ? 'smooth' : 'auto' });
   };
+
+  /* ---------------- franja de categorías: marca la actual ---------------- */
+  const catActual = new URLSearchParams(location.search).get('c');
+  if (catActual) $$('.catbar a').forEach((a) => { if (a.getAttribute('href').endsWith('c=' + catActual)) a.setAttribute('aria-current', 'page'); });
+
+  /* ---------------- volver ---------------- */
+  const backBtn = $('[data-back]');
+  if (backBtn) backBtn.addEventListener('click', (e) => {
+    let mismoSitio = false;
+    try { mismoSitio = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+    if (mismoSitio && history.length > 1) { e.preventDefault(); history.back(); }
+  });
 
   /* ---------------- cabecera ---------------- */
   // la cabecera queda siempre visible; solo suma una sombra suave al bajar
