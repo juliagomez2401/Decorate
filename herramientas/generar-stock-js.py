@@ -11,7 +11,7 @@ GRUPOS = {
     'cintos-decorativos': {'cat': 'cintos', 'sub': 'decorativos', 'singular': 'Cinto', 'min': 1250, 'max': None, 'confirmar': True},
     'cintos-funcionales': {'cat': 'cintos', 'sub': 'funcionales', 'singular': 'Cinto', 'min': 1000, 'max': None, 'confirmar': True},
     'tarjeteros': {'cat': 'tarjeteros', 'singular': 'Tarjetero', 'min': 650, 'max': 650, 'confirmar': False},
-    'porta-lentes': {'cat': 'porta-lentes', 'singular': 'Porta lentes', 'min': 550, 'max': 650, 'confirmar': True},
+    'porta-lentes': {'cat': 'porta-lentes', 'singular': 'Estuche de lentes', 'min': 550, 'max': 650, 'confirmar': True},
     'portafuegos': {'cat': 'portafuegos', 'singular': 'Portafuego', 'min': 150, 'max': 200, 'confirmar': True},
     'llaveros': {'cat': 'llaveros', 'singular': 'Llavero', 'min': 300, 'max': 300, 'confirmar': False},
     'pulseras-anchas': {'cat': 'pulseras', 'sub': 'anchas', 'singular': 'Pulsera', 'min': 350, 'max': 350, 'confirmar': False},
@@ -23,6 +23,11 @@ def slug(s):
     s = unicodedata.normalize('NFD', s.lower())
     s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
     return re.sub(r'[^a-z0-9]+', '-', s).strip('-')
+
+# fotos sacadas con flash (dato de la cámara, ver herramientas/fotos-con-flash.txt):
+# no van de portada ni al pasar el mouse; quedan para adentro de cada pieza
+FLASH = {int(x) for x in (root / 'herramientas' / 'fotos-con-flash.txt').read_text().split(',') if x.strip()}
+sin_flash_primero = lambda fs: sorted(fs, key=lambda n: n in FLASH)
 
 items = []
 for grupo in data['categorias']:
@@ -36,10 +41,12 @@ for grupo in data['categorias']:
             titulo = nombre
         else:
             titulo = f"{g['singular']} {nombre[0].lower()}{nombre[1:]}"
-        modelo = list(p.get('fotosModelo', []))
-        fotos = list(p['fotos']) + modelo  # en la página de la pieza: primero el producto solo, abajo puesto
-        portada = p['fotos'][0]  # en la tienda, la portada es el producto solo
-        hover = modelo[0] if modelo else (p['fotos'][1] if len(p['fotos']) > 1 else None)
+        modelo = sin_flash_primero(p.get('fotosModelo', []))
+        prod = sin_flash_primero(p['fotos'])
+        fotos = prod + modelo  # en la página de la pieza: primero el producto solo, abajo puesto
+        portada = prod[0]  # en la tienda, la portada es el producto solo (sin flash si hay)
+        otras = [n for n in prod[1:] if n not in FLASH]
+        hover = modelo[0] if modelo and modelo[0] not in FLASH else (otras[0] if otras else None)
         items.append({
             'id': p['id'].lower(),
             'cat': g['cat'],

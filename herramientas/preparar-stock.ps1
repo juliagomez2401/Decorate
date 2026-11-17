@@ -20,9 +20,17 @@ function Save($img, [int]$maxSide, [string]$path, [long]$q) {
 }
 # tanda 2 (pulseras y collares): tanda2-imageNNNNN.jpeg -> img\stock\(1000+N).jpg
 $files = @(Get-ChildItem $src -Recurse -Filter 'image*.jpeg') + @(Get-ChildItem $src -Recurse -Filter 'tanda2-image*.jpeg')
-# fotos que se sacaron dadas vuelta: se giran 180° (número de foto en la web)
-$girar = @(14, 18)
+# fotos que hay que girar (número de foto en la web), contando desde el original:
+# 14: se sacó dada vuelta. Porta lentes: todos parados con el enganche arriba, como los llaveros
+# (son fotos desde arriba, así que girarlas no se nota).
+$giro = @{ 14 = 'Rotate180FlipNone' }
+foreach ($n in 16, 18, 19, 47, 48, 49, 81, 52, 57, 58, 59, 56, 60, 61) { $giro[$n] = 'Rotate90FlipNone' }
+foreach ($n in 53) { $giro[$n] = 'Rotate270FlipNone' }
+foreach ($n in 54, 55, 62, 63) { $giro[$n] = 'Rotate180FlipNone' }
+# 50 y 51 ya vienen paradas con el enganche arriba
+$girar = @($giro.Keys)
 $forzar = $args -contains '-forzar'
+$rehacer = @(50, 51)  # vuelven a su forma original
 # llaveros y portafuegos: ya tienen fondo tabaco (herramientas/fondo-tabaco.py); no se pisan
 $conFondo = 339..357
 foreach ($f in $files) {
@@ -30,9 +38,9 @@ foreach ($f in $files) {
   if ($f.BaseName -like 'tanda2-*') { $n += 1000 }
   if ($conFondo -contains $n) { continue }
   $big = Join-Path $out "$n.jpg"
-  if (-not ($forzar -and $girar -contains $n) -and (Test-Path $big) -and (Get-Item $big).LastWriteTime -gt $f.LastWriteTime) { continue }
+  if (-not ($forzar -and ($girar -contains $n -or $rehacer -contains $n)) -and (Test-Path $big) -and (Get-Item $big).LastWriteTime -gt $f.LastWriteTime) { continue }
   $img = Load $f.FullName
-  if ($girar -contains $n) { $img.RotateFlip('Rotate180FlipNone') }
+  if ($giro.ContainsKey($n)) { $img.RotateFlip($giro[$n]) }
   Save $img 1600 $big 84
   Save $img 760 (Join-Path $out "$n-sm.jpg") 82
   $img.Dispose()

@@ -46,7 +46,7 @@
 
   /* ---------------- estructura común ---------------- */
   const MORE = [
-    { href: 'arma-tu-cinto.html', label: 'Armá el tuyo', id: 'armar' },
+    { href: 'arma.html?p=cinto', label: 'Armá el tuyo', id: 'armar' },
     { href: 'nosotras.html', label: 'Nosotras', id: 'nosotras' },
     { href: 'como-comprar.html', label: 'Cómo comprar', id: 'como' },
   ];
@@ -82,7 +82,7 @@
       <div class="search__panel" role="dialog" aria-label="Buscar">
         <div class="wrap search__row">
           ${ICON.search}
-          <input type="search" placeholder="Buscar cintos, porta lentes, cueros…" aria-label="Buscar en la tienda" data-search-input autocomplete="off">
+          <input type="search" placeholder="Buscar cintos, estuches de lentes, cueros…" aria-label="Buscar en la tienda" data-search-input autocomplete="off">
           <button type="button" class="hd__icon" data-search-close aria-label="Cerrar búsqueda">${ICON.close}</button>
         </div>
         <div class="wrap search__results" data-search-results></div>
@@ -241,15 +241,15 @@
   const INDEX = [
     ...D.categorias.map((c) => ({ title: c.name, kind: 'Categoría', href: c.href, img: c.foto })),
     ...(window.DT_STOCK || []).map((s) => { const c = D.categorias.find((x) => x.id === s.cat); return { title: s.name, kind: `${c ? c.name : ''} · en stock`, href: `producto.html?id=${s.id}`, img: `stock/${s.portada || s.fotos[0]}`, extra: `${s.sub || ''} ${s.id}` }; }),
-    ...D.productos.map((p) => ({ title: `${p.name} a medida`, kind: 'A tu medida', href: `producto.html?p=${p.id}`, img: p.fotos[0], extra: p.desc })),
-    ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma-tu-cinto.html', swatch: c.id })),
-    { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma-tu-cinto.html', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
-    { title: 'Cómo comprar', kind: 'Ayuda', href: 'como-comprar.html', extra: 'envios retiro pago transferencia efectivo' },
+    ...D.productos.map((p) => ({ title: `${p.name} a medida`, kind: 'A tu medida', href: `arma.html?p=${p.id}`, img: p.fotos[0], extra: p.desc })),
+    ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html?p=cinto', swatch: c.id })),
+    { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma.html?p=cinto', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
+    { title: 'Cómo comprar', kind: 'Ayuda', href: 'como-comprar.html', extra: 'pago transferencia efectivo' },
     { title: 'Nosotras', kind: 'Decora.te', href: 'nosotras.html', extra: 'historia taller' },
   ];
   function runSearch() {
     const q = norm(sInput.value.trim());
-    if (!q) { sResults.innerHTML = `<p class="search__hint">Probá con <button type="button" data-q="cinto">cinto</button>, <button type="button" data-q="porta lentes">porta lentes</button> o <button type="button" data-q="cebra">cebra</button>.</p>`; return; }
+    if (!q) { sResults.innerHTML = `<p class="search__hint">Probá con <button type="button" data-q="cinto">cinto</button>, <button type="button" data-q="estuche de lentes">estuche de lentes</button> o <button type="button" data-q="cebra">cebra</button>.</p>`; return; }
     const words = q.split(/\s+/);
     const hits = INDEX.filter((it) => { const hay = norm(`${it.title} ${it.kind} ${it.extra || ''}`); return words.every((w) => hay.includes(w)); }).slice(0, 8);
     sResults.innerHTML = hits.length

@@ -23,20 +23,20 @@ window.DT = {
   categorias: [
     { id: 'cintos', name: 'Cintos', href: 'tienda.html?c=cintos', foto: 'stock/44', pos: '50% 55%', desde: 1000,
       subs: [{ id: 'decorativos', name: 'Decorativos' }, { id: 'funcionales', name: 'Funcionales' }],
-      custom: { href: 'arma-tu-cinto.html', label: 'Armá tu cinto', txt: 'Elegís el tipo, los cueros, la hebilla y la unión.' } },
+      custom: { href: 'arma.html?p=cinto', label: 'Armá tu cinto', txt: 'Elegís el tipo, los cueros, la hebilla y la unión.' } },
     { id: 'tarjeteros', name: 'Tarjeteros', href: 'tienda.html?c=tarjeteros', foto: 'stock/5', desde: 650,
-      custom: { href: 'arma-tu-tarjetero.html', label: 'Armá tu tarjetero', txt: 'Elegís el cuero, el detalle y si lleva tachas.' } },
-    { id: 'porta-lentes', name: 'Porta lentes', href: 'tienda.html?c=porta-lentes', foto: 'stock/50', pos: '50% 40%', desde: 550,
-      custom: { href: 'producto.html?p=porta-lentes', label: 'Armá tu porta lentes', txt: 'Con o sin tapa, en el cuero que elijas.' } },
+      custom: { href: 'arma.html?p=tarjetero', label: 'Armá tu tarjetero', txt: 'Elegís el cuero, el detalle y si lleva tachas.' } },
+    { id: 'porta-lentes', name: 'Estuches de lentes', href: 'tienda.html?c=porta-lentes', foto: 'stock/50', pos: '50% 40%', desde: 550,
+      custom: { href: 'arma.html?p=porta-lentes', label: 'Armá tu estuche de lentes', txt: 'Con o sin tapa, en el cuero que elijas.' } },
     { id: 'portafuegos', name: 'Portafuegos', href: 'tienda.html?c=portafuegos', foto: 'stock/338', portada: 'stock/338', desde: 150,
-      custom: { href: 'producto.html?p=portafuego', label: 'Armá tu portafuego', txt: 'Chico o grande, en el cuero que elijas.' } },
+      custom: { href: 'arma.html?p=portafuego', label: 'Armá tu portafuego', txt: 'Chico o grande, en el cuero que elijas.' } },
     { id: 'llaveros', name: 'Llaveros', href: 'tienda.html?c=llaveros', foto: 'stock/352', desde: 300,
-      custom: { href: 'producto.html?p=llavero', label: 'Armá tu llavero', txt: 'En el cuero que elijas.' } },
+      custom: { href: 'arma.html?p=llavero', label: 'Armá tu llavero', txt: 'En el cuero que elijas.' } },
     { id: 'pulseras', name: 'Pulseras', href: 'tienda.html?c=pulseras', foto: 'pulsera', pos: '50% 60%', desde: 250,
       subs: [{ id: 'anchas', name: 'Anchas' }, { id: 'finas', name: 'Finas' }],
-      custom: { href: 'producto.html?p=pulsera', label: 'Armá tu pulsera', txt: 'En tres anchos y en el cuero que elijas.' } },
+      custom: { href: 'arma.html?p=pulsera', label: 'Armá tu pulsera', txt: 'En tres anchos y en el cuero que elijas.' } },
     { id: 'collares', name: 'Collares', href: 'tienda.html?c=collares', foto: 'collar', desde: 350,
-      custom: { href: 'producto.html?p=collar', label: 'Armá tu collar', txt: 'Fino o más grueso, con o sin decoración.' } },
+      custom: { href: 'arma.html?p=collar', label: 'Armá tu collar', txt: 'Fino o más grueso, con o sin decoración.' } },
   ],
 
   /* ---------- Cintos (Armá el tuyo) ---------- */
@@ -77,10 +77,10 @@ window.DT = {
   /* ---------- Piezas ---------- */
   productos: [
     {
-      id: 'porta-lentes', name: 'Porta lentes', line: 'Para guardar',
+      id: 'porta-lentes', name: 'Estuche de lentes', line: 'Para guardar',
       fotos: ['portalentes-cebra', 'portalentes-croco', 'portalentes-par', 'portalentes-leopardo', 'portalentes-chocolate'],
       pos: ['74% 50%'], // encuadre de cada foto cuando se recorta (la primera es horizontal)
-      alts: ['Porta lentes de cebra con costura roja', 'Porta lentes de croco turquesa con tachas', 'Dos porta lentes, turquesa y bordó, con tachas', 'Porta lentes de leopardo con lentes de sol', 'Porta lentes chocolate con tachas doradas'],
+      alts: ['Estuche de lentes de cebra con costura roja', 'Estuche de lentes de croco turquesa con tachas', 'Dos estuches de lentes, turquesa y bordó, con tachas', 'Estuche de lentes de leopardo con lentes de sol', 'Porta lentes chocolate con tachas doradas'],
       desc: 'Funda para lentes con mosquetón para colgar. Con o sin tapa, en el cuero que elijas.',
       opciones: [{ key: 'modelo', label: 'Modelo', items: [{ id: 'sin-tapa', name: 'Sin tapa', price: 550 }, { id: 'con-tapa', name: 'Con tapa', price: 650 }] }],
       cuero: true,

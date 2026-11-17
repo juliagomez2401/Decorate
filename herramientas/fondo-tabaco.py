@@ -23,13 +23,29 @@ def fondo(w, h):
             px[x, y] = tuple(round(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
     return small.resize((w, h), Image.BICUBIC)
 
+# llaveros que se sacaron acostados: se paran (colgando del mosquetón) en un lienzo vertical como el resto
+PARAR = {345: 90, 352: 90, 357: -90,   # llaveros
+         339: 90, 340: 90, 341: -90, 342: 90, 343: 90, 344: 90}   # portafuegos; grados, sentido antihorario
+VERTICAL = (898, 1600)
+if os.environ.get('SIN_PARAR'): PARAR = {}   # para sacar una versión acostada (ej. tarjetas del inicio)
+
 for n in nums:
     src = next((root / 'fotos').rglob(f'image{n:05d}.jpeg'))
     im = ImageOps.exif_transpose(Image.open(src)).convert('RGB')
     im.thumbnail((1600, 1600), Image.LANCZOS)
     cut = remove(im, session=session, post_process_mask=True)
+    if n in PARAR:
+        cut = cut.rotate(PARAR[n], expand=True, resample=Image.BICUBIC)
+        cut = cut.crop(cut.split()[3].getbbox())
+        W, H = VERTICAL
+        f = min(W * 0.62 / cut.width, H * 0.62 / cut.height)
+        cut = cut.resize((round(cut.width * f), round(cut.height * f)), Image.LANCZOS)
+        lienzo = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+        lienzo.paste(cut, ((W - cut.width) // 2, round((H - cut.height) * 0.42)))
+        cut = lienzo
+    im = cut.convert('RGB')
     a = cut.split()[3]
-    w, h = im.size
+    w, h = cut.size
     bg = fondo(w, h)
     k = w / 1600
     sombra = a.filter(ImageFilter.GaussianBlur(22 * k)).point(lambda v: int(v * 0.55))

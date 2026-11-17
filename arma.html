@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es-UY" data-page="armar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Armá el tuyo · Decora.te</title>
+  <meta name="description" content="Armá tu pieza de cuero a medida: cinto, tarjetero, estuche de lentes, portafuego, llavero, pulsera o collar. Mirala en 3D con el cuero real y sabé cuánto sale.">
+  <meta name="theme-color" content="#efe7da">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1410'/%3E%3Cpath d='M16 25s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 24 14c0 6-8 11-8 11z' fill='%23efe7da'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+  <script src="js/arranque.js"></script>
+</head>
+<body style="background:var(--crema)">
+  <main>
+    <section class="builder" aria-labelledby="arma-title" data-pieza>
+      <div class="wrap">
+        <header class="builder__top">
+          <p class="eyebrow" data-fade>A tu medida</p>
+          <h1 class="display" id="arma-title" data-arma-title>Armá el tuyo</h1>
+          <p data-arma-lead></p>
+          <nav class="arma-otros" aria-label="Otras piezas para armar" data-arma-otros></nav>
+        </header>
+
+        <div class="builder__grid">
+          <div class="builder__stagecol">
+            <div class="stage" data-stage>
+              <div class="stage__3d" data-draw></div>
+              <p class="stage__caption"><span data-stage-caption></span><span class="stage__total" data-total>—</span></p>
+            </div>
+            <div class="builder__total">
+              <span class="builder__total-label">Total estimado</span>
+              <span class="builder__total-value" data-total aria-live="polite">—</span>
+            </div>
+          </div>
+
+          <div class="builder__panel">
+            <ol class="steps" data-steps aria-label="Pasos"></ol>
+            <div class="builder__step" data-step-body></div>
+            <div class="builder__nav">
+              <button class="btn btn--ghost" type="button" data-prev>Anterior</button>
+              <button class="btn" type="button" data-next>Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="builder__bar is-on" data-bar>
+        <div class="builder__bar-in">
+          <button class="btn btn--ghost" type="button" data-prev-bar>Atrás</button>
+          <div class="builder__bar-total">
+            <span class="builder__total-label">Total estimado</span>
+            <span class="builder__total-value" data-total>—</span>
+          </div>
+          <button class="btn" type="button" data-next-bar>Siguiente</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/datos.js"></script>
+  <script src="js/stock.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="js/sitio.js" defer></script>
+  <!-- abriendo la web como archivo (doble clic), el 3D necesita las muestras de cuero dentro del JS -->
+  <script>if (location.protocol === 'file:') document.write('<script src="js/cueros-datos.js"><\/script>');</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="js/pieza3d.js?v=10" defer></script>
+  <script src="js/armador-pieza.js?v=4" defer></script>
+</body>
+</html>

@@ -6,15 +6,15 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja plateada",
   "fotos": [
-   78,
    79,
+   78,
    28,
    29,
    83,
    84,
    80
   ],
-  "portada": 78,
+  "portada": 79,
   "hover": 28,
   "min": 1250,
   "max": 1250,
@@ -34,7 +34,7 @@ window.DT_STOCK = [
    32
   ],
   "portada": 77,
-  "hover": 30,
+  "hover": null,
   "min": 1250,
   "max": 1250,
   "desde": true,
@@ -67,12 +67,12 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja chocolate y dorada, hebilla flor",
   "fotos": [
-   75,
    76,
+   75,
    34,
    35
   ],
-  "portada": 75,
+  "portada": 76,
   "hover": 34,
   "min": 1250,
   "max": 1250,
@@ -87,14 +87,14 @@ window.DT_STOCK = [
   "name": "Faja azul y cebra, hebilla ovalada",
   "fotos": [
    69,
-   38,
    39,
+   73,
+   38,
    42,
-   43,
-   73
+   43
   ],
   "portada": 69,
-  "hover": 38,
+  "hover": 39,
   "min": 1250,
   "max": 1250,
   "desde": true,
@@ -114,7 +114,7 @@ window.DT_STOCK = [
    46
   ],
   "portada": 82,
-  "hover": 41,
+  "hover": null,
   "min": 1250,
   "max": 1250,
   "desde": true,
@@ -131,7 +131,7 @@ window.DT_STOCK = [
    65
   ],
   "portada": 64,
-  "hover": 65,
+  "hover": null,
   "min": 1000,
   "max": 1000,
   "desde": true,
@@ -148,7 +148,7 @@ window.DT_STOCK = [
    70
   ],
   "portada": 66,
-  "hover": 70,
+  "hover": null,
   "min": 1000,
   "max": 1000,
   "desde": true,
@@ -165,7 +165,7 @@ window.DT_STOCK = [
    68
   ],
   "portada": 67,
-  "hover": 68,
+  "hover": null,
   "min": 1000,
   "max": 1000,
   "desde": true,
@@ -178,11 +178,11 @@ window.DT_STOCK = [
   "sub": "funcionales",
   "name": "Cinto cebra, hebilla redonda plateada",
   "fotos": [
-   71,
-   72
+   72,
+   71
   ],
-  "portada": 71,
-  "hover": 72,
+  "portada": 72,
+  "hover": null,
   "min": 1000,
   "max": 1000,
   "desde": true,
@@ -199,7 +199,7 @@ window.DT_STOCK = [
    1
   ],
   "portada": 2,
-  "hover": 1,
+  "hover": null,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -212,12 +212,12 @@ window.DT_STOCK = [
   "sub": null,
   "name": "Tarjetero serpiente con franja plateada",
   "fotos": [
-   3,
    24,
-   27
+   27,
+   3
   ],
-  "portada": 3,
-  "hover": 24,
+  "portada": 24,
+  "hover": 27,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -230,11 +230,11 @@ window.DT_STOCK = [
   "sub": null,
   "name": "Tarjetero plateado con franja serpiente",
   "fotos": [
-   22,
-   23
+   23,
+   22
   ],
-  "portada": 22,
-  "hover": 23,
+  "portada": 23,
+  "hover": null,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -347,7 +347,7 @@ window.DT_STOCK = [
    13
   ],
   "portada": 9,
-  "hover": 13,
+  "hover": null,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -380,7 +380,7 @@ window.DT_STOCK = [
    14
   ],
   "portada": 11,
-  "hover": 14,
+  "hover": null,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -446,7 +446,7 @@ window.DT_STOCK = [
    25
   ],
   "portada": 26,
-  "hover": 25,
+  "hover": null,
   "min": 650,
   "max": 650,
   "desde": false,
@@ -457,14 +457,14 @@ window.DT_STOCK = [
   "id": "p1",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes bordó con tachas y dije",
+  "name": "Estuche de lentes bordó con tachas y dije",
   "fotos": [
    16,
    18,
    19
   ],
   "portada": 16,
-  "hover": 18,
+  "hover": null,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -475,7 +475,7 @@ window.DT_STOCK = [
   "id": "p2",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes chocolate con tachas y dije",
+  "name": "Estuche de lentes chocolate con tachas y dije",
   "fotos": [
    53
   ],
@@ -491,13 +491,13 @@ window.DT_STOCK = [
   "id": "p3",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes croco verde con tachas",
+  "name": "Estuche de lentes croco verde con tachas",
   "fotos": [
    47,
    48
   ],
   "portada": 47,
-  "hover": 48,
+  "hover": null,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -508,7 +508,7 @@ window.DT_STOCK = [
   "id": "p4",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes croco bordó con correa",
+  "name": "Estuche de lentes croco bordó con correa",
   "fotos": [
    49,
    81
@@ -525,7 +525,7 @@ window.DT_STOCK = [
   "id": "p5",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes croco verde agua con correa",
+  "name": "Estuche de lentes croco verde agua con correa",
   "fotos": [
    54,
    55
@@ -542,14 +542,14 @@ window.DT_STOCK = [
   "id": "p6",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes cebra",
+  "name": "Estuche de lentes cebra",
   "fotos": [
    52,
-   50,
-   51
+   51,
+   50
   ],
   "portada": 52,
-  "hover": 50,
+  "hover": 51,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -560,13 +560,13 @@ window.DT_STOCK = [
   "id": "p7",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes negro charol con tachas",
+  "name": "Estuche de lentes negro charol con tachas",
   "fotos": [
-   57,
-   58
+   58,
+   57
   ],
-  "portada": 57,
-  "hover": 58,
+  "portada": 58,
+  "hover": null,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -577,14 +577,14 @@ window.DT_STOCK = [
   "id": "p8",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes celeste con costura azul",
+  "name": "Estuche de lentes celeste con costura azul",
   "fotos": [
    59,
    62,
    63
   ],
   "portada": 59,
-  "hover": 62,
+  "hover": null,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -595,13 +595,13 @@ window.DT_STOCK = [
   "id": "p9",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes azul francia y plateado con tachas",
+  "name": "Estuche de lentes azul francia y plateado con tachas",
   "fotos": [
-   56,
-   60
+   60,
+   56
   ],
-  "portada": 56,
-  "hover": 60,
+  "portada": 60,
+  "hover": null,
   "min": 550,
   "max": 650,
   "desde": false,
@@ -612,7 +612,7 @@ window.DT_STOCK = [
   "id": "p10",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Porta lentes azul marino y plateado con tachas",
+  "name": "Estuche de lentes azul marino y plateado con tachas",
   "fotos": [
    61
   ],
@@ -634,7 +634,7 @@ window.DT_STOCK = [
    340
   ],
   "portada": 339,
-  "hover": 340,
+  "hover": null,
   "min": 150,
   "max": 200,
   "desde": false,
@@ -923,7 +923,7 @@ window.DT_STOCK = [
    1025
   ],
   "portada": 1020,
-  "hover": 1025,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -940,7 +940,7 @@ window.DT_STOCK = [
    1022
   ],
   "portada": 1021,
-  "hover": 1022,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -953,11 +953,11 @@ window.DT_STOCK = [
   "sub": "anchas",
   "name": "Pulsera plateada con estrellas y tachas",
   "fotos": [
-   1023,
-   1024
+   1024,
+   1023
   ],
-  "portada": 1023,
-  "hover": 1024,
+  "portada": 1024,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -974,7 +974,7 @@ window.DT_STOCK = [
    1031
   ],
   "portada": 1026,
-  "hover": 1031,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -987,11 +987,11 @@ window.DT_STOCK = [
   "sub": "anchas",
   "name": "Pulsera azul marino con estrellas doradas",
   "fotos": [
-   1027,
-   1028
+   1028,
+   1027
   ],
-  "portada": 1027,
-  "hover": 1028,
+  "portada": 1028,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1004,11 +1004,11 @@ window.DT_STOCK = [
   "sub": "anchas",
   "name": "Pulsera negra con estrellas plateadas",
   "fotos": [
-   1029,
-   1030
+   1030,
+   1029
   ],
-  "portada": 1029,
-  "hover": 1030,
+  "portada": 1030,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1041,7 +1041,7 @@ window.DT_STOCK = [
    1034
   ],
   "portada": 1033,
-  "hover": 1034,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1054,12 +1054,12 @@ window.DT_STOCK = [
   "sub": "anchas",
   "name": "Pulsera leopardo con broche",
   "fotos": [
-   1035,
    1036,
-   1037
+   1037,
+   1035
   ],
-  "portada": 1035,
-  "hover": 1036,
+  "portada": 1036,
+  "hover": 1037,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1092,7 +1092,7 @@ window.DT_STOCK = [
    1040
   ],
   "portada": 1039,
-  "hover": 1040,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1123,12 +1123,12 @@ window.DT_STOCK = [
   "sub": "anchas",
   "name": "Pulsera marrón con bordado de rombos",
   "fotos": [
+   1046,
    1044,
-   1045,
-   1046
+   1045
   ],
-  "portada": 1044,
-  "hover": 1045,
+  "portada": 1046,
+  "hover": null,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1174,11 +1174,11 @@ window.DT_STOCK = [
   "sub": "finas",
   "name": "Pulsera cebra fina con tachas",
   "fotos": [
-   1050,
-   1055
+   1055,
+   1050
   ],
-  "portada": 1050,
-  "hover": 1055,
+  "portada": 1055,
+  "hover": null,
   "min": 250,
   "max": 300,
   "desde": false,
@@ -1195,7 +1195,7 @@ window.DT_STOCK = [
    1052
   ],
   "portada": 1051,
-  "hover": 1052,
+  "hover": null,
   "min": 250,
   "max": 300,
   "desde": false,
@@ -1228,7 +1228,7 @@ window.DT_STOCK = [
    1058
   ],
   "portada": 1054,
-  "hover": 1058,
+  "hover": null,
   "min": 250,
   "max": 300,
   "desde": false,
@@ -1241,11 +1241,11 @@ window.DT_STOCK = [
   "sub": "finas",
   "name": "Pulsera plomo con tachas",
   "fotos": [
-   1056,
-   1060
+   1060,
+   1056
   ],
-  "portada": 1056,
-  "hover": 1060,
+  "portada": 1060,
+  "hover": null,
   "min": 250,
   "max": 300,
   "desde": false,
@@ -1278,7 +1278,7 @@ window.DT_STOCK = [
    1061
   ],
   "portada": 1059,
-  "hover": 1061,
+  "hover": null,
   "min": 250,
   "max": 300,
   "desde": false,
@@ -1407,7 +1407,7 @@ window.DT_STOCK = [
    1013
   ],
   "portada": 1008,
-  "hover": 1013,
+  "hover": null,
   "min": 350,
   "max": 550,
   "desde": false,
@@ -1456,7 +1456,7 @@ window.DT_STOCK = [
    1012
   ],
   "portada": 1011,
-  "hover": 1012,
+  "hover": null,
   "min": 350,
   "max": 550,
   "desde": false,

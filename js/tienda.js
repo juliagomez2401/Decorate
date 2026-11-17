@@ -103,7 +103,9 @@
   const cat = (id) => D.categorias.find((c) => c.id === id);
   const stockPrice = (s) => (s.desde ? `Desde ${money(s.min)}` : range(s.min, s.max));
   const img = (f, sm = true) => `img/${f}${sm ? '-sm' : ''}.jpg`;
-  const stockImg = (n, sm = true) => `img/stock/${n}${sm ? '-sm' : ''}.jpg`;
+  // ?v=…: subirlo cuando se cambian fotos con el mismo nombre, así el navegador no muestra las viejas
+  const FOTOS_V = '3';
+  const stockImg = (n, sm = true) => `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`;
 
   function itemCard(s) {
     const a = s.portada || s.fotos[0], b = s.hover;
@@ -113,12 +115,19 @@
       <span class="item__price">${stockPrice(s)}</span>
     </a>`;
   }
+  // Tarjeta "Armá el tuyo": misma forma que las fotos de su categoría (los llaveros son verticales)
+  const VERTICALES = ['llaveros', 'porta-lentes', 'portafuegos'];
+  const gridClass = (id) => 'shop__grid' + (VERTICALES.includes(id) ? ' shop__grid--vert' : '');
   function customCard(c) {
     if (!c.custom) return '';
-    return `<a class="item item--custom" href="${c.custom.href}">
-      <span class="item__img"><span class="item__custom"><small>A tu medida</small><b>${esc(c.custom.label)}</b><span>${esc(c.custom.txt)}</span><i class="item__swatches">${D.cueros.slice(0, 5).map((x) => `<em style="background-image:url(img/cuero-${x.id}.jpg)"></em>`).join('')}</i></span></span>
-      <span class="item__name">Hacelo a tu gusto</span>
-      <span class="item__price">Desde ${money(c.desde)}</span>
+    const ar = VERTICALES.includes(c.id) ? '898 / 1600' : '760 / 427';
+    return `<a class="item item--custom" href="${c.custom.href}" style="--ar:${ar}">
+      <span class="mk">
+        <small class="mk__tag">A medida</small>
+        <b class="mk__title">${esc(c.custom.label)}</b>
+        <span class="mk__txt">${esc(c.custom.txt)} Desde ${money(c.desde)}.</span>
+        <span class="mk__foot"><i class="mk__sw">${D.cueros.slice(0, 5).map((x) => `<em style="background-image:url(img/cuero-${x.id}.jpg)"></em>`).join('')}</i><span class="mk__go">Personalizar</span></span>
+      </span>
     </a>`;
   }
 
@@ -181,7 +190,7 @@
   /* ---------------- fila de piezas en stock (inicio) ---------------- */
   const stockRow = $('[data-stock-row]');
   if (stockRow) {
-    const elegidas = ['d6', 't2', 'p1', 'f2'];
+    const elegidas = ['d6', 't2', 'pu2', 'f2'];  // todas horizontales, para que la fila quede pareja
     const lista = elegidas.map((id) => STOCK.find((s) => s.id === id)).filter(Boolean);
     stockRow.innerHTML = lista.map(itemCard).join('');
   }
@@ -192,7 +201,7 @@
     const sw = $('[data-mto-cueros]');
     if (sw) sw.innerHTML = D.cueros.map((c) => `<li><img src="img/cuero-${c.id}.jpg" alt="" loading="lazy" width="600" height="600"><span>${esc(c.name)}</span></li>`).join('');
     // fotos apaisadas para que todas las tarjetas tengan la misma forma
-    const fotos = { cintos: 'stock/44', tarjeteros: 'stock/3', 'porta-lentes': 'stock/48', portafuegos: 'stock/342', llaveros: 'stock/357', pulseras: 'stock/1044', collares: 'stock/1005' };
+    const fotos = { cintos: 'stock/44', tarjeteros: 'stock/26', 'porta-lentes': 'inicio-portalentes', portafuegos: 'inicio-portafuego', llaveros: 'inicio-llavero', pulseras: 'stock/1044', collares: 'stock/1005' };
     mtoGrid.innerHTML = D.categorias.map((c, i) => {
       const f = fotos[c.id] || c.foto;
       const main = i === 0;
@@ -212,37 +221,111 @@
   /* ---------------- página de categoría (tienda.html?c=…&s=…) ---------------- */
   const shop = $('[data-shop]');
   if (shop) {
-    const qs = new URLSearchParams(location.search);
-    const c = cat(qs.get('c'));
-    const sub = qs.get('s');
-    const tabs = $('[data-shop-cats]', shop);
-    tabs.innerHTML = `<a href="tienda.html" ${!c ? 'aria-current="page"' : ''}>Todo</a>` + D.categorias.map((x) => `<a href="${x.href}" ${c && c.id === x.id ? 'aria-current="page"' : ''}>${esc(x.name)}</a>`).join('');
     const grid = $('[data-shop-grid]', shop);
-    if (c) {
-      document.title = `${c.name} · Decora.te`;
-      let items = STOCK.filter((s) => s.cat === c.id);
-      $('[data-shop-title]', shop).textContent = c.name;
-      if (c.subs) {
-        $('[data-shop-subs]', shop).innerHTML = `<a href="${c.href}" ${!sub ? 'aria-current="page"' : ''}>Todos</a>` + c.subs.map((s) => `<a href="${c.href}&s=${s.id}" ${sub === s.id ? 'aria-current="page"' : ''}>${esc(s.name)}</a>`).join('');
-        if (sub) items = items.filter((s) => s.sub === sub);
+    const tabs = $('[data-shop-cats]', shop);
+    const subsEl = $('[data-shop-subs]', shop);
+    function renderShop() {
+      const qs = new URLSearchParams(location.search);
+      const c = cat(qs.get('c'));
+      const sub = qs.get('s');
+      tabs.innerHTML = `<a href="tienda.html" ${!c ? 'aria-current="page"' : ''}>Todo</a>` + D.categorias.map((x) => `<a href="${x.href}" ${c && c.id === x.id ? 'aria-current="page"' : ''}>${esc(x.name)}</a>`).join('');
+      subsEl.innerHTML = '';
+      if (c) {
+        document.title = `${c.name} · Decora.te`;
+        let items = STOCK.filter((s) => s.cat === c.id);
+        $('[data-shop-title]', shop).textContent = c.name;
+        if (c.subs) {
+          subsEl.innerHTML = `<a href="${c.href}" ${!sub ? 'aria-current="page"' : ''}>Todos</a>` + c.subs.map((s) => `<a href="${c.href}&s=${s.id}" ${sub === s.id ? 'aria-current="page"' : ''}>${esc(s.name)}</a>`).join('');
+          if (sub) items = items.filter((s) => s.sub === sub);
+        }
+        const subName = sub && c.subs ? c.subs.find((s) => s.id === sub) : null;
+        $('[data-shop-count]', shop).textContent = items.length
+          ? `${items.length} ${items.length === 1 ? 'pieza' : 'piezas'} en stock${subName ? ' · ' + subName.name.toLowerCase() : ''}`
+          : 'Por ahora sin stock: se hacen a pedido.';
+        grid.className = gridClass(c.id);
+        grid.innerHTML = items.map(itemCard).join('') + customCard(c);
+      } else {
+        document.title = 'Tienda · Decora.te';
+        $('[data-shop-title]', shop).textContent = 'Tienda';
+        $('[data-shop-count]', shop).textContent = `${STOCK.length} piezas únicas en stock`;
+        grid.className = 'shop__groups';
+        grid.innerHTML = D.categorias.map((x) => {
+          const its = STOCK.filter((s) => s.cat === x.id);
+          return `<section class="shop__group">
+            <div class="shop__group-head"><h2>${esc(x.name)}</h2><a class="link" href="${x.href}">Ver ${its.length ? 'todos' : 'más'}</a></div>
+            <div class="${gridClass(x.id)} shop__grid--todo">${its.slice(0, 2).map(itemCard).join('')}${customCard(x)}</div>
+          </section>`;
+        }).join('');
       }
-      const subName = sub && c.subs ? c.subs.find((s) => s.id === sub) : null;
-      $('[data-shop-count]', shop).textContent = items.length
-        ? `${items.length} ${items.length === 1 ? 'pieza' : 'piezas'} en stock${subName ? ' · ' + subName.name.toLowerCase() : ''}`
-        : 'Por ahora sin stock: se hacen a pedido.';
-      grid.innerHTML = items.map(itemCard).join('') + customCard(c);
-    } else {
-      document.title = 'Tienda · Decora.te';
-      $('[data-shop-title]', shop).textContent = 'Tienda';
-      $('[data-shop-count]', shop).textContent = `${STOCK.length} piezas únicas en stock`;
-      grid.outerHTML = D.categorias.map((x) => {
-        const its = STOCK.filter((s) => s.cat === x.id);
-        return `<section class="shop__group">
-          <div class="shop__group-head"><h2>${esc(x.name)}</h2><a class="link" href="${x.href}">Ver ${its.length ? 'todos' : 'más'}</a></div>
-          <div class="shop__grid">${its.slice(0, 7).map(itemCard).join('')}${customCard(x)}</div>
-        </section>`;
-      }).join('');
+      fixHover(shop);
+      const cur = tabs.querySelector('[aria-current]');
+      if (cur) tabs.scrollTo({ left: cur.offsetLeft - 20, behavior: 'smooth' });
     }
+    renderShop();
+
+    // cambiar de categoría sin recargar la página: se desvanece, cambia y vuelve a aparecer
+    const body = [grid, subsEl, $('.shop__head', shop)];
+    let busy = false;
+    function swap(push, href) {
+      if (busy) return;
+      busy = true;
+      if (push) history.pushState(null, '', href);
+      body.forEach((e) => e.classList.add('is-swapping'));
+      setTimeout(() => {
+        renderShop();
+        if (window.scrollY > 0) { if (S.lenis) S.lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0); }
+        setTimeout(() => { body.forEach((e) => e.classList.remove('is-swapping')); busy = false; }, 30);
+      }, 180);
+    }
+    shop.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="tienda.html"]');
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      if (a.getAttribute('href') === location.pathname.split('/').pop() + location.search) return;
+      swap(true, a.getAttribute('href'));
+    });
+    window.addEventListener('popstate', () => swap(false));
+  }
+
+  /* ---------------- fotos en pantalla completa con zoom ---------------- */
+  function openLightbox(srcs, start, alt) {
+    let i = start, zoom = false;
+    const lb = document.createElement('div');
+    lb.className = 'lb';
+    lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-label', 'Fotos de ' + alt);
+    lb.innerHTML = `<div class="lb__stage"><img class="lb__img" alt="${esc(alt)}"></div>
+      <button type="button" class="lb__close">Cerrar</button>
+      <div class="lb__bar"><span class="lb__count"></span><span class="lb__hint">Tocá la foto para acercar · tocá afuera para volver</span></div>
+      ${srcs.length > 1 ? '<button type="button" class="lb__side lb__side--prev" aria-label="Foto anterior"><span class="lb__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button><button type="button" class="lb__side lb__side--next" aria-label="Foto siguiente"><span class="lb__arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>' : ''}`;
+    document.body.appendChild(lb);
+    const img = lb.querySelector('.lb__img'), count = lb.querySelector('.lb__count');
+    const set = (k) => { i = (k + srcs.length) % srcs.length; zoom = false; img.classList.toggle('is-zoom', false); img.style.transformOrigin = ''; img.src = srcs[i]; count.textContent = srcs.length > 1 ? `${i + 1} / ${srcs.length}` : ''; };
+    set(i);
+    if (S.lenis) S.lenis.stop();
+    document.documentElement.style.overflow = 'hidden';
+    requestAnimationFrame(() => lb.classList.add('is-open'));
+    const key = (e) => { if (e.key === 'Escape') close(); if (e.key === 'ArrowRight') set(i + 1); if (e.key === 'ArrowLeft') set(i - 1); };
+    function close() {
+      lb.classList.toggle('is-open', false);
+      document.documentElement.style.overflow = '';
+      if (S.lenis) S.lenis.start();
+      document.removeEventListener('keydown', key);
+      setTimeout(() => lb.parentNode && lb.parentNode.removeChild(lb), 300);
+    }
+    document.addEventListener('keydown', key);
+    const aim = (e) => { const r = img.getBoundingClientRect(); img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`; };
+    img.addEventListener('click', (e) => { zoom = !zoom; aim(e); img.classList.toggle('is-zoom', zoom); });
+    img.addEventListener('pointermove', (e) => { if (zoom) aim(e); });
+    lb.addEventListener('click', (e) => {
+      if (e.target.closest('.lb__close')) close();
+      else if (e.target.closest('.lb__side--prev')) set(i - 1);
+      else if (e.target.closest('.lb__side--next')) set(i + 1);
+      else if (!e.target.closest('.lb__img, .lb__bar')) close();  // tocar afuera de la foto vuelve a la pieza
+    });
+    // deslizar con el dedo para cambiar de foto
+    let x0 = null;
+    lb.addEventListener('touchstart', (e) => { if (!zoom) x0 = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) set(i + (dx < 0 ? 1 : -1)); x0 = null; });
   }
 
   /* ---------------- página de una pieza en stock (producto.html?id=…) ---------------- */
@@ -256,12 +339,14 @@
       const c = cat(s.cat);
       document.title = `${s.name} · Decora.te`;
       const subName = s.sub && c.subs ? c.subs.find((x) => x.id === s.sub).name : '';
-      const shots = s.fotos.map((n, i) => `<figure class="pdp__shot"><img src="${stockImg(n, i > 0)}" srcset="${stockImg(n)} 760w, ${stockImg(n, false)} 1600w" sizes="(min-width: 900px) 56vw, 100vw" alt="${esc(s.name)}${i ? '' : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></figure>`).join('');
-      const related = STOCK.filter((x) => x.cat === s.cat && x.id !== s.id).slice(0, 3);
+      const shots = s.fotos.map((n, i) => `<figure class="pdp__shot${i ? '' : ' is-on'}" data-shot="${i}"><img src="${stockImg(n, i > 0)}" srcset="${stockImg(n)} 760w, ${stockImg(n, false)} 1600w" sizes="(min-width: 900px) 56vw, 100vw" alt="${esc(s.name)}${i ? '' : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></figure>`).join('');
+      const related = STOCK.filter((x) => x.cat === s.cat && x.id !== s.id).slice(0, 4);
+      const thumbs = s.fotos.length > 1 ? `<div class="pdp__thumbs">${s.fotos.map((n, i) => `<button type="button" class="${i ? '' : 'is-on'}" data-thumb="${i}" aria-label="Ver foto ${i + 1}"><img src="${stockImg(n)}" alt="" loading="lazy"></button>`).join('')}</div>` : '';
       const ask = S.wa(`Hola Decora.te! Me interesa: ${s.name} (código ${s.id.toUpperCase()}).`);
       pdpEl.innerHTML = `
         <div class="wrap pdp">
-          <div class="pdp__media">
+          <div class="pdp__media${s.fotos.length > 1 ? ' has-thumbs' : ''}">
+            ${thumbs}
             <div class="pdp__gallery" data-gallery>${shots}</div>
             ${s.fotos.length > 1 ? `<div class="pdp__dots" aria-hidden="true">${s.fotos.map((_, i) => `<span class="${i ? '' : 'is-on'}"></span>`).join('')}</div>` : ''}
           </div>
@@ -270,8 +355,8 @@
             <h1 class="pdp__name">${esc(s.name)}</h1>
             <p class="pdp__price">${stockPrice(s)}</p>
             ${s.confirmar ? '<p class="pdp__note"><span class="placeholder">[PLACEHOLDER] Precio exacto de esta pieza a confirmar</span></p>' : ''}
-            <p class="pdp__stock"><span></span>Pieza única · en stock, lista para entregar</p>
-            <div class="pdp__buy pdp__buy--one">
+            <p class="pdp__stock"><span></span>Pieza única · en stock</p>
+            <div class="pdp__buy pdp__buy--one" data-buy>
               <button type="button" class="btn" data-add-stock>Agregar al carrito</button>
             </div>
             <p class="added" data-added aria-live="polite"></p>
@@ -279,18 +364,22 @@
             ${c.custom ? `<a class="pdp__custom" href="${c.custom.href}"><small>¿Lo querés en otro cuero?</small><b>${esc(c.custom.label)}</b></a>` : ''}
             <ul class="pdp__notes">
               <li><span>Código</span><span>${s.id.toUpperCase()}</span></li>
+              <li><span>Medidas</span><span class="placeholder">[PLACEHOLDER] Medidas de la pieza</span></li>
               <li><span>Elaboración</span><span>Hecho a mano</span></li>
               <li><span>Pago</span><span>Efectivo o transferencia</span></li>
-              <li><span>Envío</span><span class="placeholder">[PLACEHOLDER] Zonas y costo de envío</span></li>
             </ul>
           </div>
         </div>
         ${related.length ? `<section class="sec sec--tight">
           <div class="wrap">
             <div class="shop__group-head"><h2>Más ${esc(c.name.toLowerCase())}</h2><a class="link" href="${c.href}">Ver todos</a></div>
-            <div class="shop__grid shop__grid--related">${related.map(itemCard).join('')}</div>
+            <div class="${gridClass(c.id)} shop__grid--rel4">${related.map(itemCard).join('')}</div>
           </div>
-        </section>` : ''}`;
+        </section>` : ''}
+        <div class="pdp-bar" data-pdp-bar aria-hidden="true">
+          <div><span class="pdp-bar__name">${esc(s.name)}</span><span class="pdp-bar__price">${stockPrice(s)}</span></div>
+          <button type="button" class="btn" data-add-stock tabindex="-1">Agregar al carrito</button>
+        </div>`;
       pdpEl.addEventListener('click', (e) => {
         if (!e.target.closest('[data-add-stock]')) return;
         const already = Cart.items.some((i) => i.key === 'stock|' + s.id);
@@ -302,6 +391,29 @@
       const gal = $('[data-gallery]', pdpEl);
       const dots = $$('.pdp__dots span', pdpEl);
       if (gal && dots.length) gal.addEventListener('scroll', () => { const i = Math.round(gal.scrollLeft / gal.clientWidth); dots.forEach((d, k) => d.classList.toggle('is-on', k === i)); }, { passive: true });
+      fixHover(pdpEl);
+
+      // compu: miniaturas al costado, una foto grande por vez
+      const shotsEl = $$('[data-shot]', pdpEl), thumbsEl = $$('[data-thumb]', pdpEl);
+      const show = (i) => { shotsEl.forEach((f, k) => f.classList.toggle('is-on', k === i)); thumbsEl.forEach((t, k) => t.classList.toggle('is-on', k === i)); };
+      pdpEl.addEventListener('click', (e) => { const t = e.target.closest('[data-thumb]'); if (t) show(+t.dataset.thumb); });
+
+      // al tocar una foto se abre en pantalla completa, con zoom
+      const fotos = s.fotos.map((n) => stockImg(n, false));
+      pdpEl.addEventListener('click', (e) => {
+        const f = e.target.closest('[data-shot]');
+        if (f) openLightbox(fotos, +f.dataset.shot, s.name);
+      });
+
+      // celular: barra fija con el precio y el botón cuando el botón principal ya no se ve
+      const bar = $('[data-pdp-bar]', pdpEl), buy = $('[data-buy]', pdpEl);
+      if (bar && buy && 'IntersectionObserver' in window) {
+        new IntersectionObserver(([en]) => {
+          const on = !en.isIntersecting && en.boundingClientRect.top < 0;
+          bar.classList.toggle('is-on', on); bar.setAttribute('aria-hidden', String(!on));
+          document.documentElement.classList.toggle('has-pdp-bar', on);
+        }).observe(buy);
+      }
     }
   }
 
@@ -323,7 +435,8 @@
         : `<figure class="pdp__shot"><span class="placeholder">${esc(p.placeholder)}</span></figure>`;
       pdp.innerHTML = `
         <div class="wrap pdp">
-          <div class="pdp__media">
+          <div class="pdp__media${s.fotos.length > 1 ? ' has-thumbs' : ''}">
+            ${thumbs}
             <div class="pdp__gallery" data-gallery>${shots}</div>
             ${p.fotos.length > 1 ? `<div class="pdp__dots" aria-hidden="true">${p.fotos.map((_, i) => `<span class="${i ? '' : 'is-on'}"></span>`).join('')}</div>` : ''}
           </div>
@@ -350,7 +463,6 @@
               <li><span>Elaboración</span><span>Hecho a mano, a pedido</span></li>
               <li><span>Anticipación</span><span>72 horas</span></li>
               <li><span>Pago</span><span>Efectivo o transferencia</span></li>
-              <li><span>Envío</span><span class="placeholder">[PLACEHOLDER] Zonas y costo de envío</span></li>
             </ul>
           </div>
         </div>
@@ -410,8 +522,7 @@
   if (co) {
     const itemsBox = $('[data-co-items]', co);
     const formBox = $('[data-co-form]', co);
-    const st = { nombre: '', entrega: '', direccion: '', pago: '', nota: '' };
-    const ENTREGA = { envio: 'Envío', retiro: 'Retiro' };
+    const st = { nombre: '', pago: '', nota: '' };
     const PAGO = { efectivo: 'Efectivo', transferencia: 'Transferencia bancaria' };
 
     const orderCode = () => {
@@ -427,7 +538,7 @@
       });
       lines.push('', `Total estimado: ${range(t.min, t.max)}`);
       if (Cart.items.some((i) => i.min !== i.max || i.confirmar)) lines.push('(sé que algunos precios se confirman al hablar)');
-      lines.push('', `Nombre: ${st.nombre.trim()}`, `Entrega: ${ENTREGA[st.entrega]}${st.entrega === 'envio' && st.direccion.trim() ? ' a ' + st.direccion.trim() : ''}`, `Pago: ${PAGO[st.pago]}`);
+      lines.push('', `Nombre: ${st.nombre.trim()}`, `Pago: ${PAGO[st.pago]}`);
       if (st.nota.trim()) lines.push(`Comentarios: ${st.nota.trim()}`);
       return lines.join('\n');
     }
@@ -450,14 +561,6 @@
     formBox.innerHTML = `
       <h2>Tus datos</h2>
       <div class="field"><label for="c-nombre">Nombre</label><input id="c-nombre" data-f="nombre" autocomplete="name" required><p class="field__err" data-err="nombre"></p></div>
-      <fieldset class="field" style="border:0;margin:0;padding:0"><legend>Entrega</legend>
-        <div class="radio-rows">
-          <label class="radio-row"><input type="radio" name="entrega" value="envio" data-f="entrega"><span><b>Envío</b><small>Se coordina por WhatsApp.</small><span class="placeholder">[PLACEHOLDER] Zonas y costo de envío</span></span></label>
-          <label class="radio-row"><input type="radio" name="entrega" value="retiro" data-f="entrega"><span><b>Retiro</b><span class="placeholder">[PLACEHOLDER] Ciudad o punto de retiro</span></span></label>
-        </div>
-        <p class="field__err" data-err="entrega"></p>
-      </fieldset>
-      <div class="field" data-dir hidden><label for="c-dir">Dirección y ciudad</label><input id="c-dir" data-f="direccion" autocomplete="street-address"></div>
       <fieldset class="field" style="border:0;margin:0;padding:0"><legend>Pago</legend>
         <div class="radio-rows">
           <label class="radio-row"><input type="radio" name="pago" value="efectivo" data-f="pago"><span><b>Efectivo</b></span></label>
@@ -466,15 +569,14 @@
         <p class="field__err" data-err="pago"></p>
       </fieldset>
       <div class="field"><label for="c-nota">Comentarios (opcional)</label><textarea id="c-nota" data-f="nota" rows="2"></textarea></div>
-      <ul class="totals"><li><span>Subtotal</span><strong data-co-sub></strong></li><li><span>Envío</span><span>Se coordina al confirmar</span></li></ul>
+      <ul class="totals"><li><span>Total estimado</span><strong data-co-sub></strong></li></ul>
       <button type="button" class="btn btn--wide" data-co-send>Enviar pedido por WhatsApp</button>
-      <p class="send-note">No se cobra nada en la web. Te respondemos por WhatsApp para confirmar el pedido, el pago y la entrega. Trabajamos con 72 horas de anticipación.</p>`;
+      <p class="send-note">No se cobra nada en la web. Te respondemos por WhatsApp para confirmar el pedido y el pago. Trabajamos con 72 horas de anticipación.</p>`;
 
     co.addEventListener('input', (e) => {
       const f = e.target.dataset.f;
       if (!f) return;
       st[f] = e.target.value;
-      if (f === 'entrega') $('[data-dir]', co).hidden = st.entrega !== 'envio';
       const err = $(`[data-err="${f}"]`, co);
       if (err) err.textContent = '';
       e.target.removeAttribute('aria-invalid');
@@ -486,7 +588,6 @@
       if (e.target.closest('[data-co-send]')) {
         const errs = {};
         if (!st.nombre.trim()) errs.nombre = 'Contanos tu nombre.';
-        if (!st.entrega) errs.entrega = 'Elegí cómo lo recibís.';
         if (!st.pago) errs.pago = 'Elegí cómo pagás.';
         Object.entries(errs).forEach(([k, v]) => { $(`[data-err="${k}"]`, co).textContent = v; });
         if (errs.nombre) $('#c-nombre').setAttribute('aria-invalid', 'true');
