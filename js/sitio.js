@@ -61,7 +61,7 @@
     <a class="skip" href="#contenido">Saltar al contenido</a>
     <div class="bar" aria-label="Avisos"><div class="bar__msgs">${D.avisos.map((t, i) => `<span class="${i ? '' : 'is-on'}">${esc(t)}</span>`).join('')}</div></div>
     <header class="hd" data-header>
-      <button class="hd__icon hd__burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú" data-menu-btn><span></span><span></span><span></span></button>
+      <button class="hd__menu-txt" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>Menú</button>
       <a class="hd__logo" href="index.html" aria-label="Decora.te, inicio"><img class="logo-img" src="img/logo-claro.png" alt="Decora.te" width="900" height="180"></a>
       <div class="hd__end">
         <button class="hd__icon" type="button" data-search-open aria-label="Buscar" aria-expanded="false" aria-controls="buscar">${ICON.search}</button>
@@ -122,30 +122,20 @@
   document.body.insertAdjacentHTML('beforeend', `
     <footer class="ft">
       <div class="wrap">
-        <div class="ft__grid">
-          <div class="ft__col ft__col--brand" data-fade>
-            <span class="ft__label">Decora.te</span>
+        <div class="ft__grid ft__grid--3">
+          <div class="ft__col" data-fade>
+            <span class="ft__label">Contacto</span>
             <a href="${wa()}" target="_blank" rel="noopener">WhatsApp ${D.whatsappVisible}</a>
             <a href="https://www.instagram.com/${D.instagram}/" target="_blank" rel="noopener">Instagram @${D.instagram}</a>
-            <span class="ft__sub">Retiro</span>
-            <span class="placeholder placeholder--dark">[PLACEHOLDER] Ciudad, punto de retiro y horarios</span>
-          </div>
-          <div class="ft__col" data-fade>
-            <span class="ft__label">Tienda</span>
-            ${D.categorias.map((c) => `<a href="${c.href}">${esc(c.name)}</a>`).join('')}
-            <a href="arma-tu-cinto.html">Armá el tuyo</a>
           </div>
           <div class="ft__col" data-fade>
             <span class="ft__label">Ayuda</span>
             <a href="como-comprar.html">Cómo comprar</a>
             <a href="como-comprar.html#envios">Envíos y retiro</a>
-            ${D.ayudaPendiente.map((t) => `<span class="ft__soon">${esc(t)}</span>`).join('')}
+            <a href="nosotras.html">Nosotras</a>
           </div>
           <div class="ft__col" data-fade>
-            <span class="ft__label">Nosotras</span>
-            <a href="nosotras.html">Nuestra historia</a>
-            <a href="nosotras.html">El taller</a>
-            <span class="ft__sub">Formas de pago</span>
+            <span class="ft__label">Pagos</span>
             <div class="ft__pay">${D.pagos.map((p) => `<span>${esc(p)}</span>`).join('')}</div>
           </div>
         </div>
@@ -476,7 +466,7 @@
       gsap.set(words, { yPercent: 118, rotate: 4, transformOrigin: '0 100%' });
       const tw = { yPercent: 0, rotate: 0, duration: 1.6, ease: 'expo.out', stagger: 0.045 };
       if (inHero) introDone.then(() => gsap.to(words, { ...tw, duration: 1.8, stagger: 0.06, delay: 0.25 }));
-      else gsap.to(words, { ...tw, scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' } });
+      else gsap.to(words, { ...tw, scrollTrigger: { trigger: el, start: 'top bottom', toggleActions: 'play none none none' } });
     });
 
     $$('[data-fade]').forEach((el) => {
@@ -484,14 +474,14 @@
       const tw = { opacity: 1, y: 0, duration: 1.5, ease: 'power3.out' };
       gsap.set(el, { opacity: 0, y: 34 });
       if (inHero) introDone.then(() => gsap.to(el, { ...tw, delay: 0.6 }));
-      else gsap.to(el, { ...tw, scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' } });
+      else gsap.to(el, { ...tw, scrollTrigger: { trigger: el, start: 'top bottom', toggleActions: 'play none none none' } });
     });
 
     $$('[data-reveal]').forEach((el) => {
       const img = $('img', el);
       const dir = el.dataset.reveal || 'up';
       const from = { up: 'inset(100% 0% 0% 0%)', down: 'inset(0% 0% 100% 0%)', left: 'inset(0% 100% 0% 0%)', right: 'inset(0% 0% 0% 100%)' }[dir] || 'inset(100% 0% 0% 0%)';
-      const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' } });
+      const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top bottom', toggleActions: 'play none none none' } });
       tl.fromTo(el, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.8, ease: 'expo.inOut' });
       if (img) tl.fromTo(img, { scale: 1.4 }, { scale: 1, duration: 2.4, ease: 'expo.out' }, 0.1);
     });
@@ -541,12 +531,12 @@
 
     // Escalonados
     $$('[data-stagger]').forEach((el) => {
-      gsap.from(el.children, { y: 60, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' } });
+      gsap.from(el.children, { y: 60, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top bottom', toggleActions: 'play none none none' } });
     });
 
     // Líneas que se dibujan
     $$('[data-line]').forEach((el) => {
-      gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, transformOrigin: '0 50%', duration: 1.6, ease: 'expo.inOut', scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' } });
+      gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, transformOrigin: '0 50%', duration: 1.6, ease: 'expo.inOut', scrollTrigger: { trigger: el, start: 'top bottom', toggleActions: 'play none none none' } });
     });
 
     // Recorridos horizontales fijados (solo compu)

@@ -34,7 +34,7 @@ for grupo in data['categorias']:
         else:
             titulo = f"{g['singular']} {nombre[0].lower()}{nombre[1:]}"
         modelo = list(p.get('fotosModelo', []))
-        fotos = modelo + list(p['fotos'])  # en la página de la pieza, primero puesto en la modelo
+        fotos = list(p['fotos']) + modelo  # en la página de la pieza: primero el producto solo, abajo puesto
         portada = p['fotos'][0]  # en la tienda, la portada es el producto solo
         hover = modelo[0] if modelo else (p['fotos'][1] if len(p['fotos']) > 1 else None)
         items.append({

@@ -122,6 +122,92 @@
     </a>`;
   }
 
+  // La foto que aparece al pasar el mouse solo se usa si tiene la misma forma que la portada
+  // (si una es horizontal y la otra vertical, se vería recortada y rara).
+  function fixHover(root = document) {
+    $$('.item__alt', root).forEach((alt) => {
+      const main = alt.parentElement.querySelector('img:not(.item__alt)');
+      const check = () => {
+        if (!main.naturalWidth || !alt.naturalWidth) return;
+        const r1 = main.naturalWidth / main.naturalHeight, r2 = alt.naturalWidth / alt.naturalHeight;
+        if (Math.abs(r1 - r2) / r1 > 0.12) alt.remove();
+      };
+      [main, alt].forEach((im) => { if (im.complete) check(); else im.addEventListener('load', check, { once: true }); });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => fixHover());
+
+  /* ---------------- vitrina de categorías en movimiento (inicio) ---------------- */
+  const show = $('[data-showcase]');
+  if (show) {
+    const card = (c, i) => `
+      <a class="sc sc--${i % 3}" href="${c.href}" draggable="false">
+        <span class="sc__img"><img src="img/${c.foto}-sm.jpg" alt="" draggable="false"></span>
+        <span class="sc__txt"><b>${esc(c.name)}</b><small>Desde ${money(c.desde)}</small></span>
+      </a>`;
+    const make = `
+      <a class="sc sc--make" href="arma-tu-cinto.html" draggable="false">
+        <span class="sc__img sc__img--make"><span>${D.cueros.slice(0, 9).map((x) => `<i style="background-image:url(img/cuero-${x.id}.jpg)"></i>`).join('')}</span></span>
+        <span class="sc__txt"><b>Armá el tuyo</b><small>A tu medida</small></span>
+      </a>`;
+    const set = D.categorias.map(card).join('') + make;
+    show.innerHTML = `<div class="showcase__row">${set}</div><div class="showcase__row" aria-hidden="true">${set}</div>`;
+    $$('.showcase__row[aria-hidden] a', show).forEach((a) => a.setAttribute('tabindex', '-1'));
+
+    // se mueve solo, más rápido al scrollear, más lento con el mouse encima; se puede arrastrar
+    let pos = 0, speed = 0.45, target = 0.45, boost = 0, lastY = window.scrollY, dragging = false, dragX = 0, dragPos = 0, moved = 0, idleUntil = 0;
+    const rowW = () => show.firstElementChild.offsetWidth;
+    window.addEventListener('scroll', () => { const y = window.scrollY; boost = Math.min(6, boost + Math.abs(y - lastY) * 0.05); lastY = y; }, { passive: true });
+    show.addEventListener('mouseenter', () => { target = 0.12; });
+    show.addEventListener('mouseleave', () => { target = 0.45; });
+    show.addEventListener('pointerdown', (e) => { dragging = true; moved = 0; dragX = e.clientX; dragPos = pos; show.classList.add('is-drag'); show.setPointerCapture(e.pointerId); });
+    show.addEventListener('pointermove', (e) => { if (!dragging) return; const dx = e.clientX - dragX; moved = Math.max(moved, Math.abs(dx)); pos = dragPos + dx; });
+    const end = () => { if (!dragging) return; dragging = false; show.classList.remove('is-drag'); idleUntil = performance.now() + 1200; };
+    show.addEventListener('pointerup', end);
+    show.addEventListener('pointercancel', end);
+    show.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+    const tick = (now) => {
+      speed += (target - speed) * 0.05;
+      boost *= 0.93;
+      if (!dragging && now > idleUntil) pos -= speed + boost;
+      const W = rowW();
+      if (W) { while (pos <= -W) pos += W; while (pos > 0) pos -= W; }
+      show.style.setProperty('--x', `${pos}px`);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- fila de piezas en stock (inicio) ---------------- */
+  const stockRow = $('[data-stock-row]');
+  if (stockRow) {
+    const elegidas = ['d6', 't2', 'p1', 'f2'];
+    const lista = elegidas.map((id) => STOCK.find((s) => s.id === id)).filter(Boolean);
+    stockRow.innerHTML = lista.map(itemCard).join('');
+  }
+
+  /* ---------------- Armá el tuyo (inicio): cueros + categorías a medida ---------------- */
+  const mtoGrid = $('[data-mto-grid]');
+  if (mtoGrid) {
+    const sw = $('[data-mto-cueros]');
+    if (sw) sw.innerHTML = D.cueros.map((c) => `<li><img src="img/cuero-${c.id}.jpg" alt="" loading="lazy" width="600" height="600"><span>${esc(c.name)}</span></li>`).join('');
+    // fotos apaisadas para que todas las tarjetas tengan la misma forma
+    const fotos = { cintos: 'stock/44', tarjeteros: 'stock/3', 'porta-lentes': 'stock/16', portafuegos: 'stock/339', llaveros: 'stock/352', pulseras: 'pulsera', collares: 'collar' };
+    mtoGrid.innerHTML = D.categorias.map((c, i) => {
+      const f = fotos[c.id] || c.foto;
+      const main = i === 0;
+      return `<a class="mto__card${main ? ' mto__card--main' : ''} mto__card--${c.id}" href="${c.custom.href}" data-fade>
+        <span class="mto__img"><img src="img/${f}${main ? '' : '-sm'}.jpg" alt="${esc(c.name)} hechos a mano" loading="lazy"></span>
+        <span class="mto__info">
+          <b class="mto__name">${main ? esc(c.custom.label) : esc(c.name)}</b>
+          <span class="mto__desc">${esc(c.custom.txt)}</span>
+          <span class="mto__price">Desde ${money(c.desde)}</span>
+          ${main ? '<span class="btn btn--cream mto__go">Empezar</span>' : ''}
+        </span>
+      </a>`;
+    }).join('');
+  }
+
   /* ---------------- página de categoría (tienda.html?c=…&s=…) ---------------- */
   const shop = $('[data-shop]');
   if (shop) {

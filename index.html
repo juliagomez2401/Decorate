@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1410'/%3E%3Cpath d='M16 25s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 24 14c0 6-8 11-8 11z' fill='%23efe7da'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css">
   <script src="js/arranque.js"></script>
 </head>
@@ -24,24 +24,36 @@
       </div>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="hero__content">
+        <p class="hero__kicker" data-fade>Hecho a mano, <em>hecho para vos.</em></p>
         <a class="btn btn--cream" href="tienda.html" data-fade>Ver la tienda</a>
       </div>
     </section>
 
-    <!-- ============ CATEGORÍAS (fila de cuadros chicos) ============ -->
-    <section class="catrow" aria-labelledby="catrow-title">
+    <!-- ============ PIEZAS EN STOCK ============ -->
+    <section class="stockrow" aria-labelledby="stock-title">
       <div class="wrap">
-        <h2 class="catrow__title" id="catrow-title" data-fade>Tienda</h2>
-        <div class="catrow__list" data-cat-row data-stagger></div>
+        <div class="stockrow__head">
+          <h2 id="stock-title" data-fade>Piezas únicas en stock</h2>
+          <a class="link" href="tienda.html" data-fade>Ver todas</a>
+        </div>
       </div>
+      <div class="wrap"><div class="stockrow__grid" data-stock-row></div></div>
     </section>
 
-    <!-- ============ FRANJA ============ -->
-    <section class="band" aria-label="Armá el tuyo">
-      <div class="band__bg" data-parallax="10"><img src="img/fondo-cuero.jpg" alt="" loading="lazy"></div>
-      <div class="wrap band__in">
-        <p class="band__txt" data-fade>Elegí el cuero, la hebilla y los detalles. <em>Lo hacemos a mano para vos.</em></p>
-        <a class="btn btn--light" href="arma-tu-cinto.html" data-fade>Armá el tuyo</a>
+    <!-- ============ ARMÁ EL TUYO ============ -->
+    <section class="mto" aria-labelledby="mto-title">
+      <div class="mto__bg" data-parallax="10"><img src="img/fondo-cuero.jpg" alt="" loading="lazy"></div>
+      <div class="wrap mto__in">
+        <div class="mto__head">
+          <p class="mto__kicker" data-fade>A medida</p>
+          <h2 id="mto-title" class="mto__title" data-fade>Armá el tuyo</h2>
+          <p class="mto__txt" data-fade>Elegís la pieza, el cuero y los detalles, y la hacemos a mano. Pedidos con 72 horas de anticipación.</p>
+        </div>
+        <div class="mto__cueros" data-fade>
+          <p class="mto__label">Cueros</p>
+          <ul class="mto__swatches" data-mto-cueros></ul>
+        </div>
+        <div class="mto__grid" data-mto-grid></div>
       </div>
     </section>
 

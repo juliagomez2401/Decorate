@@ -6,13 +6,13 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja plateada",
   "fotos": [
+   78,
+   79,
    28,
    29,
    83,
    84,
-   80,
-   78,
-   79
+   80
   ],
   "portada": 78,
   "hover": 28,
@@ -28,10 +28,10 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja negra y blanca, hebilla ovalada",
   "fotos": [
+   77,
    30,
    31,
-   32,
-   77
+   32
   ],
   "portada": 77,
   "hover": 30,
@@ -47,11 +47,11 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja dorada y chocolate, hebilla redonda",
   "fotos": [
+   74,
    33,
    36,
    37,
-   40,
-   74
+   40
   ],
   "portada": 74,
   "hover": 33,
@@ -67,10 +67,10 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja chocolate y dorada, hebilla flor",
   "fotos": [
-   34,
-   35,
    75,
-   76
+   76,
+   34,
+   35
   ],
   "portada": 75,
   "hover": 34,
@@ -86,12 +86,12 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja azul y cebra, hebilla ovalada",
   "fotos": [
+   69,
    38,
    39,
    42,
    43,
-   73,
-   69
+   73
   ],
   "portada": 69,
   "hover": 38,
@@ -107,11 +107,11 @@ window.DT_STOCK = [
   "sub": "decorativos",
   "name": "Faja roja y cebra, hebilla ovalada",
   "fotos": [
+   82,
    41,
    44,
    45,
-   46,
-   82
+   46
   ],
   "portada": 82,
   "hover": 41,
