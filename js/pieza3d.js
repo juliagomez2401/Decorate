@@ -16,13 +16,20 @@ window.DT3D = (() => {
 
   /* ---------------- cueros ---------------- */
   // rugosidad, relieve, brillo; los de pelo (cebra, leopardo, vaca) son mates
-  const CUERO = {
-    cebra: { rough: 0.82, bump: 0.06 }, leopardo: { rough: 0.82, bump: 0.06 }, vaca: { rough: 0.82, bump: 0.06 },
-    'croco-chocolate': { rough: 0.5, bump: 0.2, clear: 0.12, tile: 6.5 }, 'croco-turquesa': { rough: 0.5, bump: 0.2, clear: 0.12, tile: 6.5 },
-    bordo: { rough: 0.5, bump: 0.08, clear: 0.2 }, rojo: { rough: 0.5, bump: 0.08, clear: 0.2 },
-    'azul-charol': { rough: 0.12, bump: 0.02, clear: 1 }, 'azul-lavado': { rough: 0.72, bump: 0.08 },
-    plateado: { rough: 0.32, bump: 0.06, metal: 0.6 },
+  // cómo refleja la luz cada familia de cuero (la familia viene de js/datos.js)
+  const FAMILIA = {
+    pelo: { rough: 0.85, bump: 0.05 },
+    liso: { rough: 0.55, bump: 0.08, clear: 0.2 },
+    lavado: { rough: 0.35, bump: 0.1, clear: 0.45 },
+    charol: { rough: 0.12, bump: 0.02, clear: 1 },
+    metal: { rough: 0.32, bump: 0.06, metal: 0.3, clear: 0.3 },
+    gamuza: { rough: 0.97, bump: 0.03 },
+    croco: { rough: 0.45, bump: 0.2, clear: 0.2, tile: 6.5 },
+    'croco-metal': { rough: 0.32, bump: 0.2, metal: 0.3, clear: 0.3, tile: 6.5 },
+    reptil: { rough: 0.5, bump: 0.15, clear: 0.1, tile: 6.5 },
   };
+  const CUERO = {};
+  ((window.DT && window.DT.cueros) || []).forEach((c) => { CUERO[c.id] = FAMILIA[c.familia] || FAMILIA.liso; });
   const listeners = new Set();
   const texCache = {}, matCache = {};
   function leatherTex(id) {
@@ -35,26 +42,15 @@ window.DT3D = (() => {
     const rep = TILE / ((CUERO[id] || {}).tile || TILE); tex.repeat.set(rep, rep); bump.repeat.set(rep, rep);
     const img = new Image();
     img.onload = () => {
-      // textura continua: abajo la foto corrida a la mitad (sus bordes empalman), arriba la foto
-      // original que se desvanece hacia los bordes. Así se repite sin cortes y sin efecto espejo.
-      const S = 1024, h = S / 2, g = cv.getContext('2d');
-      [[-h, -h], [h, -h], [-h, h], [h, h]].forEach(([x, y]) => g.drawImage(img, x, y, S, S));
-      const top = document.createElement('canvas'); top.width = top.height = S;
-      const t = top.getContext('2d');
-      t.drawImage(img, 0, 0, S, S);
-      t.globalCompositeOperation = 'destination-in';
-      const gx = t.createLinearGradient(0, 0, S, 0); gx.addColorStop(0, 'rgba(0,0,0,0)'); gx.addColorStop(0.28, '#000'); gx.addColorStop(0.72, '#000'); gx.addColorStop(1, 'rgba(0,0,0,0)');
-      t.fillStyle = gx; t.fillRect(0, 0, S, S);
-      const gy = t.createLinearGradient(0, 0, 0, S); gy.addColorStop(0, 'rgba(0,0,0,0)'); gy.addColorStop(0.28, '#000'); gy.addColorStop(0.72, '#000'); gy.addColorStop(1, 'rgba(0,0,0,0)');
-      t.fillStyle = gy; t.fillRect(0, 0, S, S);
-      g.drawImage(top, 0, 0);
+      // la textura ya viene continua y con la luz pareja (herramientas/texturas-3d.py)
+      cv.getContext('2d').drawImage(img, 0, 0, 1024, 1024);
       cv.dataset.ok = '1';
       tex.needsUpdate = true; bump.needsUpdate = true;
       listeners.forEach((fn) => fn());
     };
     // abriendo la web como archivo (doble clic) el navegador no deja usar fotos sueltas en 3D:
     // ahí se usan las muestras que vienen dentro de js/cueros-datos.js
-    img.src = (window.DT_CUEROS_B64 && window.DT_CUEROS_B64[id]) || `img/cuero-${id}.jpg`;
+    img.src = (window.DT_CUEROS_B64 && window.DT_CUEROS_B64[id]) || `img/textura-${id}.jpg`;
     return (texCache[id] = { tex, bump, cv });
   }
   function leather(id) {
@@ -72,6 +68,7 @@ window.DT3D = (() => {
     canto: new T.MeshStandardMaterial({ color: 0x3b2a1f, roughness: 0.75, side: T.DoubleSide }),
     bronce: new T.MeshStandardMaterial({ color: 0xc7a160, metalness: 1, roughness: 0.28 }),
     plata: new T.MeshStandardMaterial({ color: 0xd2d2d6, metalness: 1, roughness: 0.22 }),
+    oro: new T.MeshStandardMaterial({ color: 0xe0b84e, metalness: 1, roughness: 0.2 }),
     hilo: new T.MeshStandardMaterial({ color: 0xefe2c6, roughness: 0.9 }),
     hiloOscuro: new T.MeshStandardMaterial({ color: 0x2b1d15, roughness: 0.9 }),
     piedra: new T.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.1, clearcoat: 1, reflectivity: 1 }),
@@ -382,30 +379,41 @@ window.DT3D = (() => {
     return { group: g, pitch: -0.02 };
   };
 
-  function hebilla(tipo, H) {
+  function hebilla(id, H) {
+    const hb = ((window.DT && window.DT.hebillas) || []).find((x) => x.id === id) || { tipo: 'marco', forma: 'rect', metal: 'bronce' };
+    const mat = hb.metal === 'plata' ? MAT.plata : hb.metal === 'oro' ? MAT.oro : MAT.bronce;
     const g = new T.Group();
-    if (tipo === 'rellena') {
-      const s = new T.Shape(); s.absellipse(0, 0, H * 0.46, H * 0.56, 0, Math.PI * 2);
-      const geo = new T.ExtrudeGeometry(s, { depth: 0.35, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.3, bevelSegments: 4, curveSegments: 48 });
-      g.add(new T.Mesh(geo, MAT.bronce));
-      const r1 = torus(H * 0.36, 0.12, MAT.bronce); r1.scale.set(1, 1.2, 1); r1.position.z = 0.7; g.add(r1);
-      const dome = new T.Mesh(new T.SphereGeometry(H * 0.13, 24, 16), MAT.bronce); dome.scale.z = 0.5; dome.position.z = 0.7; g.add(dome);
-      for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; const ray = new T.Mesh(new T.BoxGeometry(H * 0.16, 0.08, 0.08), MAT.bronce); ray.position.set(Math.cos(a) * H * 0.24, Math.sin(a) * H * 0.29, 0.72); ray.rotation.z = a; g.add(ray); }
+    const ext = (shape, depth, bev) => new T.Mesh(new T.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 4, curveSegments: 48 }), mat);
+    const ellipse = (rx, ry) => { const sh = new T.Shape(); sh.absellipse(0, 0, rx, ry, 0, Math.PI * 2); return sh; };
+    const holeEllipse = (rx, ry) => { const ph = new T.Path(); ph.absellipse(0, 0, rx, ry, 0, Math.PI * 2, true); return ph; };
+    if (hb.tipo === 'rellena') {
+      if (hb.forma === 'cuadrada') {
+        g.add(ext(roundedRect(H * 0.9, H * 0.9, H * 0.04), 0.35, 0.2));
+        const list = [];
+        for (let k = 0; k < 4; k++) for (let q = 0; q < 4; q++) { const t = -0.4 + q * 0.8 / 3; const pts = [[t, -0.4], [t, 0.4], [-0.4, t], [0.4, t]][k]; list.push({ p: V(pts[0] * H, pts[1] * H, 0.62), n: V(0, 0, 1) }); }
+        g.add(many(new T.SphereGeometry(H * 0.03, 10, 8), mat, list));
+      } else if (hb.forma === 'flor') {
+        const sh = new T.Shape(), N = 12;
+        for (let k = 0; k <= N * 8; k++) { const a = k / (N * 8) * Math.PI * 2; const r = H * (0.42 + 0.07 * Math.cos(a * N)); if (k === 0) sh.moveTo(r * Math.cos(a), r * Math.sin(a)); else sh.lineTo(r * Math.cos(a), r * Math.sin(a)); }
+        g.add(ext(sh, 0.35, 0.3));
+        const r1 = torus(H * 0.28, 0.1, mat); r1.position.z = 0.7; g.add(r1);
+        const dome = new T.Mesh(new T.SphereGeometry(H * 0.15, 24, 16), mat); dome.scale.z = 0.6; dome.position.z = 0.7; g.add(dome);
+      } else {
+        const rx = hb.forma === 'oval' ? H * 0.38 : H * 0.44, ry = H * 0.46;
+        g.add(ext(ellipse(rx, ry), 0.35, 0.3));
+        const r1 = torus(1, 0.1, mat); r1.scale.set(rx * 0.78, ry * 0.78, 1); r1.position.z = 0.7; g.add(r1);
+        if (hb.forma === 'oval') for (let k = 0; k < 18; k++) { const a = k / 18 * Math.PI * 2; const ray = new T.Mesh(new T.BoxGeometry(H * 0.18, 0.08, 0.08), mat); ray.position.set(Math.cos(a) * rx * 0.4, Math.sin(a) * ry * 0.4, 0.72); ray.rotation.z = a; g.add(ray); }
+      }
       return g;
     }
-    const w = H * 0.72, frame = roundedRect(w, H, H * 0.12), hole = roundedRect(w - H * 0.22, H - H * 0.22, H * 0.06);
-    frame.holes.push(hole);
-    const geo = new T.ExtrudeGeometry(frame, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.16, bevelSegments: 4, curveSegments: 24 });
-    g.add(new T.Mesh(geo, MAT.bronce));
-    const bar = new T.Mesh(new T.CylinderGeometry(0.2, 0.2, w * 0.98, 12), MAT.bronce); bar.rotation.z = Math.PI / 2; bar.position.z = 0.3; g.add(bar);
-    const tongue = new T.Mesh(new T.BoxGeometry(w * 0.5, 0.26, 0.2), MAT.bronce); tongue.position.set(w * 0.22, 0, 0.45); g.add(tongue);
-    if (tipo === 'pedreria') {
-      const list = []; const inner = H * 0.055;
-      for (let t = 0; t < 1; t += 1 / 26) { const p = frame.getPointAt(t); list.push({ p: V(p.x * 0.9, p.y * 0.9, 0.62), n: V(0, 0, 1) }); }
-      void inner;
-      const sg = new T.SphereGeometry(H * 0.045, 16, 10); sg.scale(1, 1, 0.7);
-      g.add(many(sg, MAT.piedra, list));
-    }
+    // marco con púa
+    let frame, w;
+    if (hb.forma === 'rect') { w = H * 0.8; frame = roundedRect(w, H, H * 0.1); frame.holes.push(roundedRect(w - H * 0.2, H - H * 0.3, H * 0.05)); }
+    else { const rx = hb.forma === 'oval' ? H * 0.62 : H * 0.48, ry = H * 0.48, t = hb.id.includes('fina') ? H * 0.07 : hb.id.includes('ancha') ? H * 0.16 : H * 0.1; w = rx * 2; frame = ellipse(rx, ry); frame.holes.push(holeEllipse(rx - t, ry - t)); }
+    g.add(ext(frame, 0.3, hb.id === 'oval-labrada' ? 0.24 : 0.16));
+    const bar = new T.Mesh(new T.CylinderGeometry(0.16, 0.16, H * 0.92, 12), mat); bar.position.z = 0.25; g.add(bar);
+    const puas = hb.id === 'doble-plateada' ? [-H * 0.18, H * 0.18] : [0];
+    puas.forEach((y) => { const tongue = new T.Mesh(new T.BoxGeometry(w * 0.48, 0.24, 0.2), mat); tongue.position.set(w * 0.22, y, 0.45); g.add(tongue); });
     return g;
   }
 
@@ -667,7 +675,21 @@ window.DT3D = (() => {
       renderer.render(scene, camera); dirty = false;
     })(last);
 
-    return { update, el };
+    // foto de la pieza tal como se ve ahora, sobre fondo crema (va al carrito y al pedido)
+    function snapshot(size = 520) {
+      if (!model) return null;
+      pivot.rotation.set(pitch, yaw, 0);
+      renderer.render(scene, camera);
+      const src = renderer.domElement, out = document.createElement('canvas');
+      const k = size / Math.max(src.width, src.height);
+      out.width = Math.round(src.width * k); out.height = Math.round(src.height * k);
+      const g = out.getContext('2d');
+      g.fillStyle = '#f2ebdf'; g.fillRect(0, 0, out.width, out.height);
+      g.drawImage(src, 0, 0, out.width, out.height);
+      try { return out.toDataURL('image/jpeg', 0.8); } catch (e) { return null; }
+    }
+
+    return { update, el, snapshot };
   }
 
   return { create, formas: Object.keys(FORMAS) };

@@ -245,11 +245,13 @@ window.DT_STOCK = [
   "id": "t4",
   "cat": "tarjeteros",
   "sub": null,
-  "name": "Tarjetero plata metalizada con V verde",
+  "name": "Tarjetero bronce metalizado con V verde",
   "fotos": [
-   4
+   6,
+   4,
+   7
   ],
-  "portada": 4,
+  "portada": 6,
   "hover": null,
   "min": 650,
   "max": 650,
@@ -261,9 +263,11 @@ window.DT_STOCK = [
   "id": "t5",
   "cat": "tarjeteros",
   "sub": null,
-  "name": "Tarjetero azul marino con V beige",
+  "name": "Tarjetero azul marino con V metalizada",
   "fotos": [
-   5
+   5,
+   8,
+   10
   ],
   "portada": 5,
   "hover": null,
@@ -274,93 +278,14 @@ window.DT_STOCK = [
   "duda": null
  },
  {
-  "id": "t6",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero chocolate con V verde",
-  "fotos": [
-   6
-  ],
-  "portada": 6,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "t7",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero bronce metalizado con V negra",
-  "fotos": [
-   7
-  ],
-  "portada": 7,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "t8",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero azul con V plateada",
-  "fotos": [
-   8
-  ],
-  "portada": 8,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": "¿Es el mismo que T9 con otra luz?"
- },
- {
-  "id": "t9",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero azul con V dorada",
-  "fotos": [
-   10
-  ],
-  "portada": 10,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": "¿Es el mismo que T8 con otra luz?"
- },
- {
   "id": "t10",
   "cat": "tarjeteros",
   "sub": null,
   "name": "Tarjetero suela con franja azul",
   "fotos": [
+   12,
    9,
    13
-  ],
-  "portada": 9,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "t11",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero marrón con franja azul",
-  "fotos": [
-   12
   ],
   "portada": 12,
   "hover": null,
@@ -377,25 +302,10 @@ window.DT_STOCK = [
   "name": "Tarjetero chocolate con leopardo",
   "fotos": [
    11,
-   14
-  ],
-  "portada": 11,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "t13",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero leopardo",
-  "fotos": [
+   14,
    15
   ],
-  "portada": 15,
+  "portada": 11,
   "hover": null,
   "min": 650,
   "max": 650,
@@ -424,9 +334,11 @@ window.DT_STOCK = [
   "id": "t15",
   "cat": "tarjeteros",
   "sub": null,
-  "name": "Tarjetero croco bordó con franja bordó",
+  "name": "Tarjetero croco bordó con franja metalizada",
   "fotos": [
-   21
+   21,
+   26,
+   25
   ],
   "portada": 21,
   "hover": null,
@@ -435,23 +347,6 @@ window.DT_STOCK = [
   "desde": false,
   "confirmar": false,
   "duda": null
- },
- {
-  "id": "t16",
-  "cat": "tarjeteros",
-  "sub": null,
-  "name": "Tarjetero croco rojo con franja plateada",
-  "fotos": [
-   26,
-   25
-  ],
-  "portada": 26,
-  "hover": null,
-  "min": 650,
-  "max": 650,
-  "desde": false,
-  "confirmar": false,
-  "duda": "Las fotos 25 y 26 se ven de distinto rojo: ¿es uno solo o son dos?"
  },
  {
   "id": "p1",
@@ -595,28 +490,13 @@ window.DT_STOCK = [
   "id": "p9",
   "cat": "porta-lentes",
   "sub": null,
-  "name": "Estuche de lentes azul francia y plateado con tachas",
+  "name": "Estuche de lentes azul y plateado con tachas",
   "fotos": [
    60,
-   56
-  ],
-  "portada": 60,
-  "hover": null,
-  "min": 550,
-  "max": 650,
-  "desde": false,
-  "confirmar": true,
-  "duda": null
- },
- {
-  "id": "p10",
-  "cat": "porta-lentes",
-  "sub": null,
-  "name": "Estuche de lentes azul marino y plateado con tachas",
-  "fotos": [
+   56,
    61
   ],
-  "portada": 61,
+  "portada": 60,
   "hover": null,
   "min": 550,
   "max": 650,
@@ -1019,17 +899,20 @@ window.DT_STOCK = [
   "id": "pu7",
   "cat": "pulseras",
   "sub": "anchas",
-  "name": "Pulsera leopardo claro con broche",
+  "name": "Pulsera leopardo con broche",
   "fotos": [
-   1032
+   1036,
+   1037,
+   1032,
+   1035
   ],
-  "portada": 1032,
-  "hover": null,
+  "portada": 1036,
+  "hover": 1037,
   "min": 350,
   "max": 350,
   "desde": false,
   "confirmar": false,
-  "duda": "¿Es la misma que PU9 (leopardo)?"
+  "duda": null
  },
  {
   "id": "pu8",
@@ -1049,50 +932,17 @@ window.DT_STOCK = [
   "duda": null
  },
  {
-  "id": "pu9",
-  "cat": "pulseras",
-  "sub": "anchas",
-  "name": "Pulsera leopardo con broche",
-  "fotos": [
-   1036,
-   1037,
-   1035
-  ],
-  "portada": 1036,
-  "hover": 1037,
-  "min": 350,
-  "max": 350,
-  "desde": false,
-  "confirmar": false,
-  "duda": "¿Las 3 fotos son la misma pulsera?"
- },
- {
   "id": "pu10",
-  "cat": "pulseras",
-  "sub": "anchas",
-  "name": "Pulsera cebra con tres tachas",
-  "fotos": [
-   1038
-  ],
-  "portada": 1038,
-  "hover": null,
-  "min": 350,
-  "max": 350,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "pu11",
   "cat": "pulseras",
   "sub": "anchas",
   "name": "Pulsera cebra con tachas y broches",
   "fotos": [
+   1038,
    1039,
    1040
   ],
-  "portada": 1039,
-  "hover": null,
+  "portada": 1038,
+  "hover": 1039,
   "min": 350,
   "max": 350,
   "desde": false,
@@ -1139,26 +989,11 @@ window.DT_STOCK = [
   "id": "pu14",
   "cat": "pulseras",
   "sub": "anchas",
-  "name": "Pulsera azul francia de tiras con tachas",
-  "fotos": [
-   1047
-  ],
-  "portada": 1047,
-  "hover": null,
-  "min": 350,
-  "max": 350,
-  "desde": false,
-  "confirmar": false,
-  "duda": null
- },
- {
-  "id": "pu15",
-  "cat": "pulseras",
-  "sub": "anchas",
-  "name": "Pulsera azul marino de tiras con tachas",
+  "name": "Pulsera azul de tiras con tachas",
   "fotos": [
    1048,
-   1049
+   1049,
+   1047
   ],
   "portada": 1048,
   "hover": 1049,
@@ -1206,25 +1041,10 @@ window.DT_STOCK = [
   "id": "pu18",
   "cat": "pulseras",
   "sub": "finas",
-  "name": "Pulsera cebra fina con estrella",
-  "fotos": [
-   1053
-  ],
-  "portada": 1053,
-  "hover": null,
-  "min": 250,
-  "max": 300,
-  "desde": false,
-  "confirmar": true,
-  "duda": "¿Es la misma que PU19?"
- },
- {
-  "id": "pu19",
-  "cat": "pulseras",
-  "sub": "finas",
-  "name": "Pulsera cebra con estrellas cobre",
+  "name": "Pulsera cebra fina con estrellas cobre",
   "fotos": [
    1054,
+   1053,
    1058
   ],
   "portada": 1054,
@@ -1242,31 +1062,16 @@ window.DT_STOCK = [
   "name": "Pulsera plomo con tachas",
   "fotos": [
    1060,
+   1057,
    1056
   ],
   "portada": 1060,
-  "hover": null,
+  "hover": 1057,
   "min": 250,
   "max": 300,
   "desde": false,
   "confirmar": true,
   "duda": null
- },
- {
-  "id": "pu21",
-  "cat": "pulseras",
-  "sub": "finas",
-  "name": "Pulsera champagne con tachas",
-  "fotos": [
-   1057
-  ],
-  "portada": 1057,
-  "hover": null,
-  "min": 250,
-  "max": 300,
-  "desde": false,
-  "confirmar": true,
-  "duda": "¿Es la misma que PU20?"
  },
  {
   "id": "pu22",
@@ -1452,10 +1257,11 @@ window.DT_STOCK = [
   "sub": null,
   "name": "Collar croco plomo con costura bordó",
   "fotos": [
+   1016,
    1011,
    1012
   ],
-  "portada": 1011,
+  "portada": 1016,
   "hover": null,
   "min": 350,
   "max": 550,
@@ -1479,21 +1285,5 @@ window.DT_STOCK = [
   "desde": false,
   "confirmar": true,
   "duda": "¿Collar o pulsera?"
- },
- {
-  "id": "co13",
-  "cat": "collares",
-  "sub": null,
-  "name": "Collar croco bronce con costura bordó",
-  "fotos": [
-   1016
-  ],
-  "portada": 1016,
-  "hover": null,
-  "min": 350,
-  "max": 550,
-  "desde": false,
-  "confirmar": true,
-  "duda": "¿Es el mismo que CO11?"
  }
 ];

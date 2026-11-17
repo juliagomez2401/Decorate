@@ -256,7 +256,7 @@
     const words = q.split(/\s+/);
     const hits = INDEX.filter((it) => { const hay = norm(`${it.title} ${it.kind} ${it.extra || ''}`); return words.every((w) => hay.includes(w)); }).slice(0, 8);
     sResults.innerHTML = hits.length
-      ? `<ul class="search__list">${hits.map((h) => `<li><a href="${h.href}"><span class="search__thumb" style="${h.img ? `background-image:url(img/${h.img}-sm.jpg)` : h.swatch ? `background-image:url(img/cuero-${h.swatch}.jpg)` : ''}"></span><span><b>${esc(h.title)}</b><small>${esc(h.kind)}</small></span></a></li>`).join('')}</ul>`
+      ? `<ul class="search__list">${hits.map((h) => `<li><a href="${h.href}"><span class="search__thumb" style="${h.img ? `background-image:url(img/${h.img}-sm.jpg)` : h.swatch ? `background-image:url(img/cuero-${h.swatch}-sm.jpg)` : ''}"></span><span><b>${esc(h.title)}</b><small>${esc(h.kind)}</small></span></a></li>`).join('')}</ul>`
       : `<p class="search__hint">No encontramos "${esc(sInput.value.trim())}". Escribinos por <a href="${wa(`Hola Decora.te! Estoy buscando: ${sInput.value.trim()}`)}" target="_blank" rel="noopener">WhatsApp</a> y lo vemos.</p>`;
   }
   function openSearch() {
@@ -283,7 +283,7 @@
   const list = $('[data-drawer-list]');
   const foot = $('[data-drawer-foot]');
   function itemHTML(it, compact) {
-    const img = it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}.jpg)"></span>` : '<span class="ci__empty"></span>');
+    const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
     return `<li class="ci" data-uid="${it.uid}">
       <div class="ci__media">${img}</div>
       <div class="ci__body">

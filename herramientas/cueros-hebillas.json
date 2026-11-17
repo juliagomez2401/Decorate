@@ -1,0 +1,226 @@
+{
+ "cueros": {
+  "01": [
+   "suela",
+   "Suela"
+  ],
+  "02": [
+   "gamuza-verde",
+   "Gamuza verde"
+  ],
+  "03": [
+   "verde-petroleo",
+   "Verde petróleo"
+  ],
+  "04": [
+   "gamuza-turquesa",
+   "Gamuza turquesa"
+  ],
+  "05": [
+   "fucsia-metalizado",
+   "Fucsia metalizado"
+  ],
+  "06": [
+   "rojo-brillo",
+   "Rojo con brillo"
+  ],
+  "07": [
+   "croco-verde",
+   "Croco verde"
+  ],
+  "08": [
+   "gamuza-azul",
+   "Gamuza azul francia"
+  ],
+  "09": [
+   "gamuza-lila",
+   "Gamuza lila"
+  ],
+  "10": [
+   "celeste",
+   "Celeste"
+  ],
+  "11": [
+   "croco-turquesa",
+   "Croco turquesa"
+  ],
+  "12": [
+   "croco-verde-metalizado",
+   "Croco verde metalizado"
+  ],
+  "13": [
+   "leopardo",
+   "Leopardo"
+  ],
+  "14": [
+   "leopardo-oscuro",
+   "Leopardo oscuro"
+  ],
+  "15": [
+   "rojo",
+   "Rojo"
+  ],
+  "16": [
+   "jaguar",
+   "Jaguar"
+  ],
+  "17": [
+   "dorado",
+   "Dorado"
+  ],
+  "18": [
+   "azul",
+   "Azul"
+  ],
+  "19": [
+   "tigre",
+   "Tigre"
+  ],
+  "20": [
+   "rosado",
+   "Rosado"
+  ],
+  "21": [
+   "bordo",
+   "Bordó"
+  ],
+  "22": [
+   "vaca",
+   "Vaca"
+  ],
+  "23": [
+   "lagarto-plateado",
+   "Lagarto plateado"
+  ],
+  "24": [
+   "bronce",
+   "Bronce"
+  ],
+  "25": [
+   "verde",
+   "Verde"
+  ],
+  "26": [
+   "leopardo-claro",
+   "Leopardo claro"
+  ],
+  "27": [
+   "verde-oliva",
+   "Verde oliva"
+  ],
+  "28": [
+   "croco-suela",
+   "Croco suela"
+  ],
+  "29": [
+   "croco-chocolate",
+   "Croco chocolate"
+  ],
+  "30": [
+   "serpiente",
+   "Serpiente"
+  ],
+  "31": [
+   "croco-bordo",
+   "Croco bordó"
+  ],
+  "32": [
+   "rosa",
+   "Rosa"
+  ],
+  "33": [
+   "blanco",
+   "Blanco"
+  ],
+  "34": [
+   "negro-envejecido",
+   "Negro envejecido"
+  ],
+  "35": [
+   "azul-charol",
+   "Azul charol"
+  ],
+  "36": [
+   "croco-rojo",
+   "Croco rojo"
+  ],
+  "37": [
+   "bordo-lavado",
+   "Bordó lavado"
+  ],
+  "38": [
+   "coral",
+   "Coral"
+  ],
+  "39": [
+   "cebra",
+   "Cebra"
+  ],
+  "40": [
+   "negro",
+   "Negro"
+  ],
+  "41": [
+   "plateado",
+   "Plateado"
+  ],
+  "42": [
+   "croco-crema",
+   "Croco crema"
+  ],
+  "43": [
+   "azul-marino",
+   "Azul marino"
+  ]
+ },
+ "hebillas": {
+  "44": [
+   "oval-bronce",
+   "Ovalada bronce"
+  ],
+  "45": [
+   "rectangular-dorada",
+   "Rectangular dorada"
+  ],
+  "46": [
+   "doble-plateada",
+   "Doble púa plateada"
+  ],
+  "47": [
+   "redonda-plateada-ancha",
+   "Redonda plateada ancha"
+  ],
+  "48": [
+   "redonda-bronce",
+   "Redonda bronce"
+  ],
+  "49": [
+   "flor-bronce",
+   "Flor bronce"
+  ],
+  "50": [
+   "oval-labrada",
+   "Ovalada labrada plateada"
+  ],
+  "51": [
+   "cuadrada-remaches",
+   "Cuadrada con remaches"
+  ],
+  "52": [
+   "redonda-guarda",
+   "Redonda con guarda"
+  ],
+  "53": [
+   "rosa-bronce",
+   "Rosa bronce"
+  ],
+  "54": [
+   "redonda-plateada-fina",
+   "Redonda plateada fina"
+  ],
+  "55": [
+   "oval-repujada",
+   "Ovalada repujada"
+  ]
+ }
+}

@@ -39,7 +39,7 @@
           { id: 'detalle', name: 'Costados y un detalle', desc: 'Además, una franja cruzada al lado de la hebilla en un tercer cuero.' }] },
         { key: 'cuero2', label: 'Costados', tipo: 'cuero', titulo: 'El cuero de los costados', hint: 'Elegí uno que contraste con el principal.', si: (st) => st.combo === 'costados' || st.combo === 'detalle', excluir: 'cuero' },
         { key: 'cuero3', label: 'Detalle', tipo: 'cuero', titulo: 'El cuero del detalle', hint: 'La franja cruzada al lado de la hebilla.', si: (st) => st.combo === 'detalle', excluir: 'cuero' },
-        { key: 'hebilla', label: 'Hebilla', titulo: 'La hebilla', hint: 'Se suma al precio base.', opciones: () => D.hebillas.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
+        { key: 'hebilla', label: 'Hebilla', titulo: 'La hebilla', hint: 'Las que tenemos en el taller. Las de marco suman $50 y las rellenas $150.', fotos: true, opciones: () => D.hebillas.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
         { key: 'union', label: 'Unión', titulo: 'La unión', hint: 'Cómo se unen los cueros en los cortes.', si: (st) => st.combo === 'costados' || st.combo === 'detalle', opciones: () => D.uniones.filter((o) => !o.onlySingle).map((o) => ({ ...o, etiqueta: plus(o.price) })) },
         { key: 'deco', label: 'Terminación', titulo: 'El detalle final', hint: 'Opcional.', opciones: () => D.deco.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
       ],
@@ -162,10 +162,13 @@
       <span class="opt__name">${esc(o.name)}${o.desc ? `<span class="opt__desc">${esc(o.desc)}</span>` : ''}</span>
       <span class="opt__price">${o.etiqueta || 'Incluido'}</span>
     </button>`;
-  const swatch = (key, c, sel, badge) => `<button type="button" class="swatch" data-group="${key}" data-id="${c.id}" aria-pressed="${sel}"><span class="swatch__img"><img src="img/cuero-${c.id}.jpg" alt="" loading="lazy"><span class="swatch__badge">${badge}</span></span><span class="swatch__name">${c.name}</span></button>`;
+  const swatch = (key, c, sel, badge) => `<button type="button" class="swatch" data-group="${key}" data-id="${c.id}" aria-pressed="${sel}" title="${esc(c.name)}" aria-label="${esc(c.name)}"><span class="swatch__img"><img src="img/cuero-${c.id}-sm.jpg" alt="" loading="lazy" width="160" height="160"><span class="swatch__badge">${badge}</span></span></button>`;
+  const hebillaCard = (key, o) => `<button type="button" class="hcard" data-group="${key}" data-id="${o.id}" aria-pressed="${state[key] === o.id}"><span class="hcard__img"><img src="img/hebilla-${o.id}.jpg" alt="" loading="lazy" width="400" height="400"></span><span class="hcard__name">${esc(o.name)}</span><span class="hcard__price">${o.etiqueta}</span></button>`;
+  const elegido = () => { const p = pasos()[state.step]; if (!p) return ''; if (p.tipo === 'cueros') return state.cueros.map(cueroName).join(' + '); if (p.tipo === 'cuero') return cueroName(state[p.key]); return ''; };
+  const selLine = () => `<p class="step__sel" data-sel>${elegido() ? 'Elegiste: <b>' + esc(elegido()) + '</b>' : 'Tocá una muestra para verla en la pieza.'}</p>`;
 
   const detailList = () => P.describir(state).concat(state.nota.trim() ? [`Nota: ${state.nota.trim()}`] : []);
-  const waText = () => [`Hola Decora.te! Quiero encargar este ${P.nombre.toLowerCase()}:`, '', ...detailList().map((x) => '• ' + x), '', `Total estimado: ${priceText()}`].join('\n');
+  const waText = () => [`*Pedido a medida: ${P.nombre.toLowerCase()}*`, '', ...detailList().map((x) => '- ' + x), '', `*Total estimado: ${priceText()}*`].join('\n');
 
   function renderBody() {
     const p = pasos()[state.step];
@@ -173,13 +176,15 @@
     if (p.tipo === 'cueros') {
       h = `<h2 class="step__title">${p.titulo}</h2><p class="step__hint">${p.hint}</p>
         <div class="swatches">${D.cueros.map((c) => { const k = state.cueros.indexOf(c.id); return swatch('cueros', c, k > -1, k > -1 ? k + 1 : ''); }).join('')}</div>
-        <p class="step__msg" data-msg aria-live="polite"></p>
-        <p class="step__note"><span class="placeholder">[PLACEHOLDER] Confirmar qué cueros hay disponibles. Las muestras son recortes de piezas reales de Decora.te.</span></p>`;
+        ${selLine()}<p class="step__msg" data-msg aria-live="polite"></p>`;
     } else if (p.tipo === 'cuero') {
       const lista = D.cueros.filter((c) => !p.excluir || c.id !== state[p.excluir]);
       h = `<h2 class="step__title">${p.titulo}</h2><p class="step__hint">${p.hint}</p>
         <div class="swatches">${lista.map((c) => swatch(p.key, c, state[p.key] === c.id, state[p.key] === c.id ? '✓' : '')).join('')}</div>
-        <p class="step__note"><span class="placeholder">[PLACEHOLDER] Confirmar qué cueros hay disponibles. Las muestras son recortes de piezas reales de Decora.te.</span></p>`;
+        ${selLine()}`;
+    } else if (p.fotos) {
+      h = `<h2 class="step__title">${p.titulo}</h2><p class="step__hint">${p.hint}</p>
+        <div class="hcards">${p.opciones(state).map((o) => hebillaCard(p.key, o)).join('')}</div>`;
     } else if (p.opciones) {
       h = `<h2 class="step__title">${p.titulo}</h2><p class="step__hint">${p.hint}</p>
         <div class="opts">${p.opciones(state).map((o) => optRow(p.key, o)).join('')}</div>`;
@@ -240,7 +245,7 @@
     S.Cart.add({
       key: pid + '|' + JSON.stringify(state),
       kind: pid === 'cinto' ? 'cinto' : 'pieza', name: pid === 'cinto' ? (state.tipo === 'decorativo' ? 'Faja a medida' : 'Cinto funcional a medida') : `${P.nombre} a medida`,
-      detail: detailList(), min: p.min, max: p.max, swatch: state.cuero || (state.cueros || [])[0], foto: null,
+      detail: detailList(), min: p.min, max: p.max, swatch: state.cuero || (state.cueros || [])[0], foto: null, img3d: view && view.snapshot ? view.snapshot(400) : null,
     });
     const msg = $('[data-added]');
     if (msg) msg.textContent = 'Agregado al carrito.';
@@ -262,6 +267,7 @@
       if (msg) msg.textContent = '';
       if (state.union === 'ninguna' && state.cueros.length > 1) state.union = null;
       $$('.swatch').forEach((s) => { const p = state.cueros.indexOf(s.dataset.id); s.setAttribute('aria-pressed', p > -1); $('.swatch__badge', s).textContent = p > -1 ? p + 1 : ''; });
+      const sl = $('[data-sel]'); if (sl) sl.outerHTML = selLine();
       render(false);
       return;
     }
@@ -269,6 +275,7 @@
     if (group === 'detalle' && id === 'no') state.cuero2 = null;
     if (group === 'cuero' && state.cuero2 === id) state.cuero2 = null;
     $$(`[data-group="${group}"]`).forEach((o) => { o.setAttribute('aria-pressed', o.dataset.id === id); const b = o.querySelector('.swatch__badge'); if (b) b.textContent = o.dataset.id === id ? '✓' : ''; });
+    const sl = $('[data-sel]'); if (sl) sl.outerHTML = selLine();
     // si cambia algo que muestra u oculta pasos (tipo, combinación), se limpian los de adelante
     if (['tipo', 'combo', 'detalle'].includes(group)) limpiarDesde(state.step);
     render(false);

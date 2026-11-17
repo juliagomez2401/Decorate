@@ -40,9 +40,9 @@
     </article>`;
   }
   const beltCard = () => `<article class="card card--wide">
-      <a class="card__media" href="arma-tu-cinto.html" data-cursor="Armar"><img src="img/cinto-cebra-bordo-sm.jpg" srcset="img/cinto-cebra-bordo-sm.jpg 800w, img/cinto-cebra-bordo.jpg 1600w" sizes="100vw" alt="Cinto ancho de cebra y bordó con hebilla trabajada" loading="lazy" style="object-position:50% 40%"><img class="card__alt" src="img/cinto-turquesa-sm.jpg" alt="" loading="lazy"></a>
+      <a class="card__media" href="arma.html?p=cinto" data-cursor="Armar"><img src="img/cinto-cebra-bordo-sm.jpg" srcset="img/cinto-cebra-bordo-sm.jpg 800w, img/cinto-cebra-bordo.jpg 1600w" sizes="100vw" alt="Cinto ancho de cebra y bordó con hebilla trabajada" loading="lazy" style="object-position:50% 40%"><img class="card__alt" src="img/cinto-turquesa-sm.jpg" alt="" loading="lazy"></a>
       <div>
-        <h3 class="card__name"><a href="arma-tu-cinto.html">Cinto a medida</a></h3>
+        <h3 class="card__name"><a href="arma.html?p=cinto">Cinto a medida</a></h3>
         <p class="card__meta"><span>Elegís cueros, hebilla y unión</span><b>Desde ${money(D.tipos[0].min)}</b></p>
       </div>
     </article>`;
@@ -54,8 +54,8 @@
   if (home) {
     const isFour = home.classList.contains('cards--four');
     const belt = `<article class="card">
-      <a class="card__media" href="arma-tu-cinto.html" data-cursor="Armar"><img src="img/cinto-blanco-sm.jpg" alt="Cinto blanco con tachas y hebilla dorada" loading="lazy" style="object-position:50% 45%"><img class="card__alt" src="img/cinto-turquesa-sm.jpg" alt="" loading="lazy"></a>
-      <div><h3 class="card__name"><a href="arma-tu-cinto.html">Cinto a medida</a></h3><p class="card__meta"><span>Para usar</span><b>Desde ${money(D.tipos[0].min)}</b></p></div>
+      <a class="card__media" href="arma.html?p=cinto" data-cursor="Armar"><img src="img/cinto-blanco-sm.jpg" alt="Cinto blanco con tachas y hebilla dorada" loading="lazy" style="object-position:50% 45%"><img class="card__alt" src="img/cinto-turquesa-sm.jpg" alt="" loading="lazy"></a>
+      <div><h3 class="card__name"><a href="arma.html?p=cinto">Cinto a medida</a></h3><p class="card__meta"><span>Para usar</span><b>Desde ${money(D.tipos[0].min)}</b></p></div>
     </article>`;
     home.innerHTML = (isFour ? belt : '') + ['porta-lentes', 'tarjetero', 'pulsera'].map((id) => card(prod(id))).join('');
   }
@@ -69,8 +69,8 @@
         <span class="tile__name">${esc(c.name)}</span>
         <span class="tile__price">Desde ${money(c.desde)}</span>
       </a>`).join('') + `
-      <a class="tile tile--make" href="arma-tu-cinto.html">
-        <span class="tile__img"><span class="tile__swatches">${D.cueros.slice(0, 4).map((c) => `<i style="background-image:url(img/cuero-${c.id}.jpg)"></i>`).join('')}</span></span>
+      <a class="tile tile--make" href="arma.html?p=cinto">
+        <span class="tile__img"><span class="tile__swatches">${D.cueros.slice(0, 4).map((c) => `<i style="background-image:url(img/cuero-${c.id}-sm.jpg)"></i>`).join('')}</span></span>
         <span class="tile__name">Armá el tuyo</span>
         <span class="tile__price">A tu medida</span>
       </a>`;
@@ -85,14 +85,14 @@
         <span class="cat__txt"><b>${esc(c.name)}</b><small>Desde ${money(c.desde)}</small></span>
       </a>`).join('') + `
       <a class="cat cat--make" href="#armar">
-        <span class="cat__txt"><small>Personalizá</small><b>Armá el tuyo</b><span class="cat__swatches">${D.cueros.slice(0, 6).map((c) => `<i style="background-image:url(img/cuero-${c.id}.jpg)"></i>`).join('')}</span></span>
+        <span class="cat__txt"><small>Personalizá</small><b>Armá el tuyo</b><span class="cat__swatches">${D.cueros.slice(0, 6).map((c) => `<i style="background-image:url(img/cuero-${c.id}-sm.jpg)"></i>`).join('')}</span></span>
       </a>`;
   }
 
   /* ---------------- tira de cueros ---------------- */
   const strip = $('[data-leathers-strip]');
   if (strip) {
-    const item = (c) => `<figure class="lstrip__item"><span style="background-image:url(img/cuero-${c.id}.jpg)"></span><figcaption>${esc(c.name)}</figcaption></figure>`;
+    const item = (c) => `<figure class="lstrip__item"><span style="background-image:url(img/cuero-${c.id}-sm.jpg)"></span><figcaption>${esc(c.name)}</figcaption></figure>`;
     strip.innerHTML = `<div class="lstrip"><div class="lstrip__track">${D.cueros.map(item).join('')}${D.cueros.map(item).join('')}</div></div>`;
   }
 
@@ -126,7 +126,7 @@
         <small class="mk__tag">A medida</small>
         <b class="mk__title">${esc(c.custom.label)}</b>
         <span class="mk__txt">${esc(c.custom.txt)} Desde ${money(c.desde)}.</span>
-        <span class="mk__foot"><i class="mk__sw">${D.cueros.slice(0, 5).map((x) => `<em style="background-image:url(img/cuero-${x.id}.jpg)"></em>`).join('')}</i><span class="mk__go">Personalizar</span></span>
+        <span class="mk__foot"><i class="mk__sw">${D.cueros.slice(0, 5).map((x) => `<em style="background-image:url(img/cuero-${x.id}-sm.jpg)"></em>`).join('')}</i><span class="mk__go">Personalizar</span></span>
       </span>
     </a>`;
   }
@@ -155,8 +155,8 @@
         <span class="sc__txt"><b>${esc(c.name)}</b><small>Desde ${money(c.desde)}</small></span>
       </a>`;
     const make = `
-      <a class="sc sc--make" href="arma-tu-cinto.html" draggable="false">
-        <span class="sc__img sc__img--make"><span>${D.cueros.slice(0, 9).map((x) => `<i style="background-image:url(img/cuero-${x.id}.jpg)"></i>`).join('')}</span></span>
+      <a class="sc sc--make" href="arma.html?p=cinto" draggable="false">
+        <span class="sc__img sc__img--make"><span>${D.cueros.slice(0, 9).map((x) => `<i style="background-image:url(img/cuero-${x.id}-sm.jpg)"></i>`).join('')}</span></span>
         <span class="sc__txt"><b>Armá el tuyo</b><small>A tu medida</small></span>
       </a>`;
     const set = D.categorias.map(card).join('') + make;
@@ -199,7 +199,7 @@
   const mtoGrid = $('[data-mto-grid]');
   if (mtoGrid) {
     const sw = $('[data-mto-cueros]');
-    if (sw) sw.innerHTML = D.cueros.map((c) => `<li><img src="img/cuero-${c.id}.jpg" alt="" loading="lazy" width="600" height="600"><span>${esc(c.name)}</span></li>`).join('');
+    if (sw) sw.innerHTML = D.cueros.map((c) => `<li><img src="img/cuero-${c.id}-sm.jpg" alt="" loading="lazy" width="600" height="600"><span>${esc(c.name)}</span></li>`).join('');
     // fotos apaisadas para que todas las tarjetas tengan la misma forma
     const fotos = { cintos: 'stock/44', tarjeteros: 'stock/26', 'porta-lentes': 'inicio-portalentes', portafuegos: 'inicio-portafuego', llaveros: 'inicio-llavero', pulseras: 'stock/1044', collares: 'stock/1005' };
     mtoGrid.innerHTML = D.categorias.map((c, i) => {
@@ -449,7 +449,7 @@
             ${p.cuero ? `<fieldset class="pdp__group"><legend>Cuero</legend>
               <div class="leathers">
                 <button type="button" class="leather leather--none" data-leather="" aria-pressed="true">Lo<br>charlamos</button>
-                ${D.cueros.map((c) => `<button type="button" class="leather" data-leather="${c.id}" aria-pressed="false" aria-label="${esc(c.name)}" title="${esc(c.name)}" style="background-image:url(img/cuero-${c.id}.jpg)"></button>`).join('')}
+                ${D.cueros.map((c) => `<button type="button" class="leather" data-leather="${c.id}" aria-pressed="false" aria-label="${esc(c.name)}" title="${esc(c.name)}" style="background-image:url(img/cuero-${c.id}-sm.jpg)"></button>`).join('')}
               </div>
               <p class="pdp__leather-name" data-leather-name>Elegí uno o lo definimos por WhatsApp.</p>
             </fieldset>` : ''}
@@ -529,49 +529,78 @@
       const d = new Date();
       return `DT-${String(d.getDate()).padStart(2, '0')}${String(d.getMonth() + 1).padStart(2, '0')}-${Math.floor(100 + Math.random() * 900)}`;
     };
+    // el mensaje que le llega a Decora.te por WhatsApp: ordenado para leerlo de un vistazo
+    // (en WhatsApp, *texto* sale en negrita)
     function msg(code) {
       const t = Cart.total();
-      const lines = [`Hola Decora.te! Quiero hacer este pedido (${code}):`, ''];
-      Cart.items.forEach((it) => {
-        lines.push(`• ${it.qty} x ${it.name} — ${range(it.min * it.qty, it.max * it.qty)}`);
-        if (it.detail.length) lines.push(`   ${it.detail.join(' · ')}`);
+      const link = (id) => new URL(`producto.html?id=${id}`, location.href).href;
+      const lines = [`*Pedido ${code}*`, `Nombre: ${st.nombre.trim()}`, `Pago: ${PAGO[st.pago]}`, ''];
+      Cart.items.forEach((it, i) => {
+        const precio = range(it.min * it.qty, it.max * it.qty);
+        if (it.kind === 'stock') {
+          lines.push(`*${i + 1}. ${it.name}*`, `Pieza en stock · código ${String(it.id).toUpperCase()} · ${precio}`, link(it.id));
+        } else {
+          lines.push(`*${i + 1}. ${it.qty > 1 ? it.qty + ' x ' : ''}${it.name}*`);
+          it.detail.forEach((d) => lines.push(`- ${d}`));
+          lines.push(precio);
+        }
+        lines.push('');
       });
-      lines.push('', `Total estimado: ${range(t.min, t.max)}`);
-      if (Cart.items.some((i) => i.min !== i.max || i.confirmar)) lines.push('(sé que algunos precios se confirman al hablar)');
-      lines.push('', `Nombre: ${st.nombre.trim()}`, `Pago: ${PAGO[st.pago]}`);
-      if (st.nota.trim()) lines.push(`Comentarios: ${st.nota.trim()}`);
+      lines.push(`*Total estimado: ${range(t.min, t.max)}*`);
+      if (Cart.items.some((i) => i.min !== i.max || i.confirmar)) lines.push('Hay precios a confirmar.');
+      if (st.nota.trim()) lines.push('', `Comentarios: ${st.nota.trim()}`);
       return lines.join('\n');
     }
 
     function renderItems() {
+      const n = Cart.count();
+      const cnt = $('[data-co-count]', co);
+      if (cnt) cnt.textContent = n ? `${n} ${n === 1 ? 'pieza' : 'piezas'}` : '';
       if (!Cart.items.length) {
-        itemsBox.innerHTML = `<div class="checkout__empty"><p>Tu carrito está vacío.</p><div style="display:flex;gap:24px;flex-wrap:wrap"><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma-tu-cinto.html">Armar un cinto</a></div></div>`;
+        itemsBox.innerHTML = `<div class="co__empty"><p>Tu carrito está vacío.</p><div><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html?p=cinto">Armá el tuyo</a></div></div>`;
         formBox.hidden = true;
         return;
       }
       formBox.hidden = false;
-      itemsBox.innerHTML = `<ul>${Cart.items.map((it) => {
-        const img = it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}.jpg)"></span>` : '<span class="ci__empty"></span>');
-        return `<li class="ci" data-uid="${it.uid}"><div class="ci__media">${img}</div><div class="ci__body"><p class="ci__name">${esc(it.name)}</p><p class="ci__detail">${it.detail.map(esc).join(' · ')}</p><div class="ci__row"><div class="qty" aria-label="Cantidad"><button type="button" data-qty="-1" aria-label="Restar uno">–</button><span>${it.qty}</span><button type="button" data-qty="1" aria-label="Sumar uno">+</button></div><span class="ci__price">${range(it.min * it.qty, it.max * it.qty)}</span></div><button type="button" class="ci__remove" data-remove>Quitar</button></div></li>`;
+      itemsBox.innerHTML = `<h2 class="co__h">Tu pedido</h2><ul class="co__list">${Cart.items.map((it) => {
+        const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
+        return `<li class="coi" data-uid="${it.uid}">
+          <div class="coi__media">${img}</div>
+          <div class="coi__body">
+            <p class="coi__name">${esc(it.name)}</p>
+            ${it.detail.length ? `<p class="coi__detail">${it.detail.map(esc).join(' · ')}</p>` : ''}
+            <div class="coi__row">
+              <div class="qty" aria-label="Cantidad"><button type="button" data-qty="-1" aria-label="Restar uno">–</button><span>${it.qty}</span><button type="button" data-qty="1" aria-label="Sumar uno">+</button></div>
+              <button type="button" class="coi__remove" data-remove>Quitar</button>
+            </div>
+          </div>
+          <span class="coi__price">${range(it.min * it.qty, it.max * it.qty)}</span>
+        </li>`;
       }).join('')}</ul>`;
       const t = Cart.total();
       $('[data-co-sub]', co).textContent = range(t.min, t.max);
+      $('[data-co-var]', co).hidden = !Cart.items.some((x) => x.min !== x.max);
     }
 
     formBox.innerHTML = `
-      <h2>Tus datos</h2>
+      <h2 class="co__h">Tus datos</h2>
       <div class="field"><label for="c-nombre">Nombre</label><input id="c-nombre" data-f="nombre" autocomplete="name" required><p class="field__err" data-err="nombre"></p></div>
-      <fieldset class="field" style="border:0;margin:0;padding:0"><legend>Pago</legend>
-        <div class="radio-rows">
-          <label class="radio-row"><input type="radio" name="pago" value="efectivo" data-f="pago"><span><b>Efectivo</b></span></label>
-          <label class="radio-row"><input type="radio" name="pago" value="transferencia" data-f="pago"><span><b>Transferencia bancaria</b><small>Te pasamos los datos al confirmar.</small></span></label>
+      <fieldset class="field co__pay"><legend>¿Cómo pagás?</legend>
+        <div class="co__opts">
+          <label class="co__opt"><input type="radio" name="pago" value="efectivo" data-f="pago"><span>Efectivo</span></label>
+          <label class="co__opt"><input type="radio" name="pago" value="transferencia" data-f="pago"><span>Transferencia</span></label>
         </div>
         <p class="field__err" data-err="pago"></p>
       </fieldset>
-      <div class="field"><label for="c-nota">Comentarios (opcional)</label><textarea id="c-nota" data-f="nota" rows="2"></textarea></div>
-      <ul class="totals"><li><span>Total estimado</span><strong data-co-sub></strong></li></ul>
-      <button type="button" class="btn btn--wide" data-co-send>Enviar pedido por WhatsApp</button>
-      <p class="send-note">No se cobra nada en la web. Te respondemos por WhatsApp para confirmar el pedido y el pago. Trabajamos con 72 horas de anticipación.</p>`;
+      <div class="field"><label for="c-nota">Comentarios (opcional)</label><textarea id="c-nota" data-f="nota" rows="2" placeholder="Medidas, para cuándo lo necesitás…"></textarea></div>
+      <div class="co__total"><span>Total estimado</span><strong data-co-sub></strong></div>
+      <p class="co__var" data-co-var hidden>Las piezas a medida tienen precio en rango: el final te lo confirmamos por WhatsApp.</p>
+      <button type="button" class="btn btn--wide co__send" data-co-send>Enviar pedido por WhatsApp</button>
+      <ol class="co__steps">
+        <li>Se abre WhatsApp con tu pedido ya escrito.</li>
+        <li>Te confirmamos precio y fecha. Trabajamos con 72 horas de anticipación.</li>
+        <li>Pagás en efectivo o por transferencia. No se cobra nada en la web.</li>
+      </ol>`;
 
     co.addEventListener('input', (e) => {
       const f = e.target.dataset.f;
@@ -582,7 +611,7 @@
       e.target.removeAttribute('aria-invalid');
     });
     co.addEventListener('click', (e) => {
-      const row = e.target.closest('.ci');
+      const row = e.target.closest('.coi');
       if (row && e.target.closest('[data-qty]')) { const it = Cart.items.find((i) => i.uid === row.dataset.uid); if (it) Cart.setQty(it.uid, it.qty + Number(e.target.closest('[data-qty]').dataset.qty)); return; }
       if (row && e.target.closest('[data-remove]')) { Cart.remove(row.dataset.uid); return; }
       if (e.target.closest('[data-co-send]')) {
@@ -595,14 +624,14 @@
         const code = orderCode();
         const url = S.wa(msg(code));
         window.open(url, '_blank', 'noopener');
-        co.innerHTML = `<div class="done wrap" style="padding-bottom:120px">
-          <p class="eyebrow">Pedido ${code}</p>
+        co.querySelector('.co__grid').innerHTML = `<div class="co__done">
+          <p class="co__code">Pedido ${code}</p>
           <h2>Tu pedido se abrió en WhatsApp</h2>
-          <p>Envialo desde ahí y te respondemos para confirmar. Si no se abrió, tocá el botón de abajo.</p>
-          <div class="actions" style="width:min(100%,420px)">
-            <a class="btn" href="${url}" target="_blank" rel="noopener">Abrir WhatsApp de nuevo</a>
-            <button type="button" class="btn btn--ghost" data-co-clear>Ya lo envié, vaciar carrito</button>
-          </div></div>`;
+          <p>Envialo desde ahí y te respondemos para confirmar. Si no se abrió, tocá el botón.</p>
+          <a class="btn btn--wide" href="${url}" target="_blank" rel="noopener">Abrir WhatsApp de nuevo</a>
+          <button type="button" class="btn btn--ghost btn--wide" data-co-clear>Ya lo envié, vaciar carrito</button>
+        </div>`;
+        window.scrollTo(0, 0);
       }
       if (e.target.closest('[data-co-clear]')) { Cart.clear(); location.href = 'index.html'; }
     });
@@ -626,7 +655,7 @@
     const show = (k, redraw) => {
       const c = COMBOS[k];
       belt.update(c, { redraw });
-      if (chips) chips.innerHTML = c.cueros.map((id) => `<span class="is-on" style="background-image:url(img/cuero-${id}.jpg)" title="${esc(D.cueros.find((x) => x.id === id).name)}"></span>`).join('');
+      if (chips) chips.innerHTML = c.cueros.map((id) => `<span class="is-on" style="background-image:url(img/cuero-${id}-sm.jpg)" title="${esc(D.cueros.find((x) => x.id === id).name)}"></span>`).join('');
       if (cap) {
         const t = D.tipos.find((x) => x.id === c.tipo);
         cap.textContent = `${t.name} · ${c.cueros.map((id) => D.cueros.find((x) => x.id === id).name).join(' + ')}`;
