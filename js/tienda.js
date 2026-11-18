@@ -206,7 +206,7 @@
       const f = fotos[c.id] || c.foto;
       const main = i === 0;
       return `<a class="mto__card${main ? ' mto__card--main' : ''} mto__card--${c.id}" href="${c.custom.href}" data-fade>
-        <span class="mto__img"><img src="img/${f}${main ? '' : '-sm'}.jpg" alt="${esc(c.name)} hechos a mano" loading="lazy"></span>
+        <span class="mto__img"><img src="img/${f}${main ? '' : '-sm'}.jpg?v=3" alt="${esc(c.name)} hechos a mano" loading="lazy"></span>
         <span class="mto__info">
           <span class="mto__tag">A medida</span>
           <b class="mto__name">${esc(c.custom.label)}</b>
