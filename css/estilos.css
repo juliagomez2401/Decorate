@@ -1900,3 +1900,11 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .nf__txt { max-width: 30em; margin: 14px 0 26px; color: rgba(241, 230, 212, .8); }
 .nf__links { display: flex; flex-wrap: wrap; gap: 10px; }
 .nf__links .btn { margin-top: 0; }
+
+/* v34 · pedido enviado a la base */
+.co__senderr { text-align: center; margin-top: -6px; }
+.co__senderr:empty { display: none; }
+.co__senderr .link { color: inherit; text-decoration: underline; }
+.co__send:disabled { opacity: .7; cursor: progress; }
+/* hebillas recortadas (png sin fondo) */
+.hcard__img img { object-fit: contain; padding: 8%; }

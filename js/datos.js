@@ -105,14 +105,21 @@ window.DT = {
     { id: 'oval-repujada', name: 'Ovalada repujada', tipo: 'rellena', forma: 'oval', metal: 'bronce', price: 150 },
   ],
   uniones: [
-    { id: 'ninguna', name: 'Sin unión', desc: 'Un solo cuero, de punta a punta.', price: 0, onlySingle: true },
+    { id: 'ninguna', name: 'De una sola pieza', desc: 'Sin cortes, de punta a punta.', price: 0, onlySingle: true },
     { id: 'remaches', name: 'Remaches', desc: 'Los cueros se unen con remaches de metal.', price: 50 },
     { id: 'argollas', name: 'Argollas', desc: 'Una argolla entre cuero y cuero.', price: 100 },
     { id: 'trenzado', name: 'Trenzado', desc: 'Unión cosida y trenzada a mano.', price: 150 },
   ],
   deco: [
     { id: 'no', name: 'Sin decoración', desc: 'El cuero solo.', price: 0 },
-    { id: 'si', name: 'Con decoración', desc: 'Tachas y detalles de metal.', price: 100 },
+    { id: 'si', name: 'Con tachas', desc: 'Tachas de metal arriba y abajo.', price: 100 },
+    { id: 'flecos', name: 'Con flecos', desc: 'Flecos de cuero de 40 cm a los costados.', price: 200 },
+  ],
+  // color del metal de remaches, argollas y tachas
+  metales: [
+    { id: 'oro-viejo', name: 'Oro viejo', desc: 'Dorado apagado, como bronce.' },
+    { id: 'plata', name: 'Plata', desc: 'Plateado.' },
+    { id: 'dorado', name: 'Dorado', desc: 'Dorado brillante.' },
   ],
   maxCueros: 3,
 

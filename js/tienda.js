@@ -522,7 +522,7 @@
   if (co) {
     const itemsBox = $('[data-co-items]', co);
     const formBox = $('[data-co-form]', co);
-    const st = { nombre: '', pago: '', nota: '' };
+    const st = { nombre: '', telefono: '', pago: '', nota: '' };
     const PAGO = { efectivo: 'Efectivo', transferencia: 'Transferencia bancaria' };
 
     const orderCode = () => {
@@ -534,7 +534,7 @@
     function msg(code) {
       const t = Cart.total();
       const link = (id) => new URL(`producto.html?id=${id}`, location.href).href;
-      const lines = [`*Pedido ${code}*`, `Nombre: ${st.nombre.trim()}`, `Pago: ${PAGO[st.pago]}`, ''];
+      const lines = [`*Pedido ${code}*`, `Nombre: ${st.nombre.trim()}`, `Celular: ${st.telefono.trim()}`, `Pago: ${PAGO[st.pago]}`, ''];
       Cart.items.forEach((it, i) => {
         const precio = range(it.min * it.qty, it.max * it.qty);
         if (it.kind === 'stock') {
@@ -585,6 +585,7 @@
     formBox.innerHTML = `
       <h2 class="co__h">Tus datos</h2>
       <div class="field"><label for="c-nombre">Nombre</label><input id="c-nombre" data-f="nombre" autocomplete="name" required><p class="field__err" data-err="nombre"></p></div>
+      <div class="field"><label for="c-tel">Celular (te escribimos por WhatsApp)</label><input id="c-tel" data-f="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="09X XXX XXX" required><p class="field__err" data-err="telefono"></p></div>
       <fieldset class="field co__pay"><legend>¿Cómo pagás?</legend>
         <div class="co__opts">
           <label class="co__opt"><input type="radio" name="pago" value="efectivo" data-f="pago"><span>Efectivo</span></label>
@@ -595,12 +596,56 @@
       <div class="field"><label for="c-nota">Comentarios (opcional)</label><textarea id="c-nota" data-f="nota" rows="2" placeholder="Medidas, para cuándo lo necesitás…"></textarea></div>
       <div class="co__total"><span>Total estimado</span><strong data-co-sub></strong></div>
       <p class="co__var" data-co-var hidden>Las piezas a medida tienen precio en rango: el final te lo confirmamos por WhatsApp.</p>
-      <button type="button" class="btn btn--wide co__send" data-co-send>Enviar pedido por WhatsApp</button>
+      <button type="button" class="btn btn--wide co__send" data-co-send>Enviar pedido</button>
+      <p class="field__err co__senderr" data-co-err></p>
       <ol class="co__steps">
-        <li>Se abre WhatsApp con tu pedido ya escrito.</li>
-        <li>Te confirmamos precio y fecha. Trabajamos con 72 horas de anticipación.</li>
+        <li>Tu pedido nos llega al instante, con la foto de lo que armaste.</li>
+        <li>Te escribimos por WhatsApp para confirmar precio y fecha. Trabajamos con 72 horas de anticipación.</li>
         <li>Pagás en efectivo o por transferencia. No se cobra nada en la web.</li>
       </ol>`;
+
+    // guarda el pedido en la base (con las fotos 3D) y muestra la confirmación;
+    // si falla la conexión, ofrece mandarlo por WhatsApp como antes
+    async function enviar(btn) {
+      if (btn.disabled) return;
+      const errBox = $('[data-co-err]', co);
+      errBox.textContent = '';
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      const abs = (u) => new URL(u, location.href).href;
+      try {
+        if (!window.DTNube) throw new Error('sin conexión');
+        const items = [];
+        for (const it of Cart.items) {
+          let foto = null;
+          if (it.img3d) foto = await DTNube.subirFoto(it.img3d);
+          else if (it.foto) foto = abs(`img/${it.foto}-sm.jpg`);
+          items.push({
+            tipo: it.kind, id: it.id || null, nombre: it.name, detalle: it.detail || [], cantidad: it.qty,
+            min: it.min * it.qty, max: it.max * it.qty, foto,
+            link: it.kind === 'stock' ? abs(`producto.html?id=${it.id}`) : null,
+          });
+        }
+        const t = Cart.total();
+        const code = await DTNube.crearPedido({
+          nombre: st.nombre.trim(), telefono: st.telefono.trim(), pago: st.pago, comentarios: st.nota.trim(),
+          items, total_min: t.min, total_max: t.max,
+        });
+        const nombre = esc(st.nombre.trim().split(' ')[0]);
+        Cart.clear();
+        co.querySelector('.co__grid').innerHTML = `<div class="co__done">
+          <p class="co__code">Pedido ${esc(code)}</p>
+          <h2>Gracias, ${nombre}. Recibimos tu pedido.</h2>
+          <p>Te escribimos por WhatsApp al ${esc(st.telefono.trim())} para confirmar precio y fecha. No tenés que mandar nada más.</p>
+          <a class="btn btn--wide" href="tienda.html">Seguir mirando</a>
+        </div>`;
+        window.scrollTo(0, 0);
+      } catch (err) {
+        console.error('[pedido]', err);
+        btn.disabled = false; btn.textContent = 'Enviar pedido';
+        const url = S.wa(msg(orderCode()));
+        errBox.innerHTML = `No pudimos enviar el pedido. Probá de nuevo o <a class="link" href="${url}" target="_blank" rel="noopener">mandalo por WhatsApp</a>.`;
+      }
+    }
 
     co.addEventListener('input', (e) => {
       const f = e.target.dataset.f;
@@ -618,20 +663,12 @@
         const errs = {};
         if (!st.nombre.trim()) errs.nombre = 'Contanos tu nombre.';
         if (!st.pago) errs.pago = 'Elegí cómo pagás.';
+        if (st.telefono.replace(/\D/g, '').length < 8) errs.telefono = 'Dejanos un celular para escribirte.';
         Object.entries(errs).forEach(([k, v]) => { $(`[data-err="${k}"]`, co).textContent = v; });
         if (errs.nombre) $('#c-nombre').setAttribute('aria-invalid', 'true');
+        if (errs.telefono) $('#c-tel').setAttribute('aria-invalid', 'true');
         if (Object.keys(errs).length) { S.scrollToEl(formBox, -100); return; }
-        const code = orderCode();
-        const url = S.wa(msg(code));
-        window.open(url, '_blank', 'noopener');
-        co.querySelector('.co__grid').innerHTML = `<div class="co__done">
-          <p class="co__code">Pedido ${code}</p>
-          <h2>Tu pedido se abrió en WhatsApp</h2>
-          <p>Envialo desde ahí y te respondemos para confirmar. Si no se abrió, tocá el botón.</p>
-          <a class="btn btn--wide" href="${url}" target="_blank" rel="noopener">Abrir WhatsApp de nuevo</a>
-          <button type="button" class="btn btn--ghost btn--wide" data-co-clear>Ya lo envié, vaciar carrito</button>
-        </div>`;
-        window.scrollTo(0, 0);
+        enviar(e.target.closest('[data-co-send]'));
       }
       if (e.target.closest('[data-co-clear]')) { Cart.clear(); location.href = 'index.html'; }
     });

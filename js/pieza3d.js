@@ -71,6 +71,7 @@ window.DT3D = (() => {
     oro: new T.MeshStandardMaterial({ color: 0xe0b84e, metalness: 1, roughness: 0.2 }),
     hilo: new T.MeshStandardMaterial({ color: 0xefe2c6, roughness: 0.9 }),
     hiloOscuro: new T.MeshStandardMaterial({ color: 0x2b1d15, roughness: 0.9 }),
+    tiento: new T.MeshStandardMaterial({ color: 0x7a4f2e, roughness: 0.7 }),
     piedra: new T.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.1, clearcoat: 1, reflectivity: 1 }),
     maniqui: new T.MeshStandardMaterial({ color: 0x8a6f55, roughness: 0.97 }),
     tarjeta: new T.MeshStandardMaterial({ color: 0xf3ecdf, roughness: 0.6 }),
@@ -213,6 +214,48 @@ window.DT3D = (() => {
   }
   function eyelet(r, mat) { const m = torus(r, r * 0.32, mat); return m; }
 
+  // metal elegido para remaches, argollas y tachas
+  const metalDe = (id, def = MAT.bronce) => (id === 'plata' ? MAT.plata : id === 'dorado' ? MAT.oro : id === 'oro-viejo' ? MAT.bronce : def);
+  // estrella de metal de cinco puntas, con volumen, mirando a +z
+  const starGeo = (r) => {
+    const s = new T.Shape();
+    for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r * 0.45 : r; if (i) s.lineTo(Math.cos(a) * q, Math.sin(a) * q); else s.moveTo(Math.cos(a) * q, Math.sin(a) * q); }
+    s.closePath();
+    return new T.ExtrudeGeometry(s, { depth: r * 0.1, bevelEnabled: true, bevelThickness: r * 0.14, bevelSize: r * 0.07, bevelSegments: 2 });
+  };
+  // la textura del cuero sigue al tamaño real de la pieza (1 muestra = TILE cm)
+  const uvPos = (geo) => { const q = geo.attributes.position, uv = geo.attributes.uv; for (let i = 0; i < q.count; i++) uv.setXY(i, (q.getX(i) + q.getZ(i)) / TILE, q.getY(i) / TILE); uv.needsUpdate = true; return geo; };
+  // flecos: tiras finas de cuero que cuelgan desde cada punto {p, n}
+  function flecos(puntos, largo, ancho, mat) {
+    const g = new T.Group(), geo = uvPos((() => { const b = new T.BoxGeometry(ancho, largo, 0.07, 1, 6, 1); b.translate(0, -largo / 2, 0); return b; })());
+    puntos.forEach(({ p, n }, k) => { const f = new T.Mesh(geo, mat); f.position.copy(p); f.lookAt(p.clone().add(V(n.x, 0, n.z))); f.rotateZ((((k * 37) % 11) - 5) * 0.01); g.add(f); });
+    return g;
+  }
+  // trenza de tres tientos planos a lo largo de un recorrido (center(u), normal(u)), de ancho "ancho"
+  function trenza(center, normal, u0, u1, ancho, mat, largo) {
+    const g = new T.Group(), cruces = Math.max(3, Math.round(largo / (ancho * 0.75))), N = cruces * 14;
+    const w = ancho * 0.42, t = Math.min(0.14, ancho * 0.06), amp = ancho * 0.3, prof = Math.min(0.22, ancho * 0.07);
+    for (let k = 0; k < 3; k++) {
+      const P = [], Nn = [];
+      for (let i = 0; i <= N; i++) {
+        const tt = i / N, u = u0 + (u1 - u0) * tt, ph = tt * cruces * Math.PI + k * Math.PI * 2 / 3;
+        P.push(center(u).add(V(0, Math.sin(ph) * amp, 0)).addScaledVector(normal(u), Math.sin(2 * ph) * prof)); Nn.push(normal(u));
+      }
+      // cinta plana: ancho w sobre la superficie, espesor t
+      const pos = [], uv = [], idx = []; let L = 0;
+      for (let i = 0; i <= N; i++) {
+        const tg = P[Math.min(N, i + 1)].clone().sub(P[Math.max(0, i - 1)]).normalize(), side = tg.clone().cross(Nn[i]).normalize();
+        if (i) L += P[i].distanceTo(P[i - 1]);
+        [[-1, 1], [1, 1], [1, -1], [-1, -1]].forEach(([a1, b1]) => { const q = P[i].clone().addScaledVector(side, a1 * w / 2).addScaledVector(Nn[i], b1 * t / 2); pos.push(q.x, q.y, q.z); uv.push(L / TILE, (a1 + 1) * w / 2 / TILE); });
+        if (i) for (let f = 0; f < 4; f++) { const a0 = (i - 1) * 4 + f, a1 = (i - 1) * 4 + ((f + 1) % 4), b0 = a0 + 4, b2 = a1 + 4; idx.push(a0, b0, a1, a1, b0, b2); }
+      }
+      const geo = new T.BufferGeometry();
+      geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); geo.setIndex(idx); geo.computeVertexNormals();
+      g.add(new T.Mesh(geo, mat));
+    }
+    return g;
+  }
+
   /* ---------------- modelos ---------------- */
   const M = {};
 
@@ -249,6 +292,9 @@ window.DT3D = (() => {
   const CORTE = { recta: 12, asimetrica: 10, mono: 8.5, funcional: 12 };
   const PEND = 0.42;
 
+  // tamaño de la argolla según el alto del cinto en ese corte; gw: medio ancho del hueco; th: media altura de la lengüeta
+  function argollaMedidas(F, xc) { const [t, b] = F(xc(0)), half = (t - b) / 2, R = Math.min(2.6, half * 0.6); return { R, gw: R + 1.1, th: Math.min(1.1, half * 0.32) }; }
+
   function fajaMolde(st, L) {
     const forma = st.tipo === 'funcional' ? 'funcional' : (st.forma || 'recta');
     const F = FORMAS_FAJA[forma];
@@ -270,7 +316,7 @@ window.DT3D = (() => {
     const xL = (y) => -a + PEND * y, xR = (y) => a + PEND * y, xD = (y) => a + 4.6 + PEND * y;
     const zona = (x0, x1) => { const p = new Path2D(); p.moveTo(px(x0(HM / 2)), 0); p.lineTo(px(x1(HM / 2)), 0); p.lineTo(px(x1(-HM / 2)), H); p.lineTo(px(x0(-HM / 2)), H); p.closePath(); return p; };
     const lejos = (k) => () => k;
-    const combo = forma === 'funcional' ? 'solo' : (st.combo || 'solo');
+    const combo = st.combo || 'solo';
     const zonas = [];
     if (combo === 'solo') zonas.push([lejos(-L), lejos(L), st.cuero]);
     else {
@@ -292,7 +338,9 @@ window.DT3D = (() => {
       if (c.metal) { gm.fillStyle = `rgb(${Math.round(255 * c.metal)},0,0)`; gm.fill(p); }
     });
     // uniones dibujadas: trenzado cruzado a lo largo de cada corte
-    const cortes = combo === 'solo' ? [] : (combo === 'detalle' ? [xL, xR, xD] : [xL, xR]);
+    // con un solo cuero también se puede cortar y unir (para que se vea la unión)
+    const unido = st.union && st.union !== 'ninguna';
+    const cortes = combo === 'solo' ? (unido ? [xL, xR] : []) : (combo === 'detalle' ? [xL, xR, xD] : [xL, xR]);
     if (st.union === 'trenzado') {
       cortes.forEach((xc) => {
         for (let y = -HM / 2; y <= HM / 2; y += 1.1) {
@@ -313,6 +361,20 @@ window.DT3D = (() => {
     g.restore(); gr.restore(); gm.restore();
     // canto: borde oscuro fino
     g.save(); g.clip(sil); g.strokeStyle = 'rgba(35,22,15,.9)'; g.lineWidth = 0.5 * K; g.stroke(sil); g.restore();
+    // argollas: en cada corte el cuero se abre y cada lado termina en una lengüeta que abraza la argolla
+    if (st.union === 'argollas') {
+      cortes.forEach((xc) => {
+        const a = argollaMedidas(F, xc), x0 = xc(0);
+        const hueco = new Path2D();
+        hueco.moveTo(px(xc(HM / 2) - a.gw), 0); hueco.lineTo(px(xc(HM / 2) + a.gw), 0); hueco.lineTo(px(xc(-HM / 2) + a.gw), H); hueco.lineTo(px(xc(-HM / 2) - a.gw), H); hueco.closePath();
+        const resto = new Path2D(); resto.rect(0, 0, W, H);
+        [[x0 - a.gw - 1, x0 - a.R + 0.1], [x0 + a.R - 0.1, x0 + a.gw + 1]].forEach(([u0, u1]) => resto.rect(px(u0), py(a.th), (u1 - u0) * K, 2 * a.th * K));
+        g.save(); g.clip(resto, 'evenodd');
+        g.save(); g.clip(sil); g.strokeStyle = 'rgba(35,22,15,.9)'; g.lineWidth = 0.5 * K; g.stroke(hueco); g.restore();
+        g.globalCompositeOperation = 'destination-out'; g.fill(hueco);
+        g.restore();
+      });
+    }
     return { color, rough, metal, HM, F, cortes, combo, forma };
   }
 
@@ -350,11 +412,17 @@ window.DT3D = (() => {
     // de (dx, y) del molde a un punto 3D sobre la faja
     const at = (dx, y, out = 0) => { const u = 0.5 + dx / L; return center(u).add(V(0, y, 0)).addScaledVector(normal(u), thick / 2 + out); };
     const nrm = (dx) => normal(0.5 + dx / L);
-    // uniones en 3D: remaches y argollas sobre cada corte
+    // uniones en 3D: remaches y argollas sobre cada corte (en el metal elegido)
+    const mt = metalDe(st.metal);
     m.cortes.forEach((xc) => {
       const [t, b] = m.F(xc(0));
-      if (st.union === 'remaches') g.add(many(studGeo(0.4), MAT.bronce, [t * 0.45, b * 0.45].map((y) => ({ p: at(xc(y), y, 0.02), n: nrm(xc(y)) }))));
-      if (st.union === 'argollas') { const ring = torus(Math.min(1.5, (t - b) * 0.2), 0.22, MAT.bronce); ring.position.copy(at(xc(0), 0, 0.25)); ring.lookAt(ring.position.clone().add(nrm(xc(0)))); g.add(ring); }
+      if (st.union === 'remaches') g.add(many(studGeo(0.4), mt, [t * 0.45, b * 0.45].map((y) => ({ p: at(xc(y), y, 0.02), n: nrm(xc(y)) }))));
+      if (st.union === 'argollas') {
+        const a = argollaMedidas(m.F, xc), x0 = xc(0);
+        const ring = torus(a.R, Math.max(0.2, a.R * 0.11), mt); ring.position.copy(at(x0, 0, 0.05)); ring.lookAt(ring.position.clone().add(nrm(x0))); g.add(ring);
+        // remache que cierra cada lengüeta
+        g.add(many(studGeo(0.3), mt, [-1, 1].map((k) => ({ p: at(x0 + k * (a.R + 0.45), 0, 0.02), n: nrm(x0 + k * (a.R + 0.45)) }))));
+      }
     });
     // decoración: tachas por arriba y abajo de la zona del centro
     if (st.deco === 'si') {
@@ -363,7 +431,13 @@ window.DT3D = (() => {
         if (Math.abs(dx) < 3.8) continue;
         const [t, b] = m.F(dx); list.push({ p: at(dx, t - 1.15), n: nrm(dx) }, { p: at(dx, b + 1.15), n: nrm(dx) });
       }
-      g.add(many(studGeo(deco ? 0.4 : 0.28), MAT.bronce, list));
+      g.add(many(studGeo(deco ? 0.4 : 0.28), mt, list));
+    }
+    // flecos de 40 cm de un solo costado (izquierda de quien lo usa: +x), en el cuero de los costados
+    if (st.deco === 'flecos' && st.cuero) {
+      const pts = [], a = CORTE[m.forma] + 3;
+      [st.lado === 'derecha' ? -1 : 1].forEach((k) => { for (let i = 0; i < 12; i++) { const dx = k * (a + i * 0.75), [, b] = m.F(dx); pts.push({ p: at(dx, b + 0.35, 0.05), n: nrm(dx) }); } });
+      g.add(flecos(pts, 40, 0.7, leather(st.cuero2 || st.cuero)));
     }
     // funcional: pasador
     if (!deco && st.cuero) {
@@ -417,57 +491,84 @@ window.DT3D = (() => {
     return g;
   }
 
+  // tarjetero de tres compartimientos escalonados: atrás el más alto, el del medio (franja o V,
+  // a veces en otro cuero) y adelante el más bajo; como los que hace Decora.te
   M.tarjetero = (st) => {
-    const g = new T.Group(), W = 10, HB = 7, HF = 5.6, d = 0.2;
-    const m1 = leather(st.cuero), m2 = st.cuero2 ? leather(st.cuero2) : (st.detalle && st.detalle !== 'no' ? MAT.vacio : null);
-    const back = slab(roundedRect(W, HB, 0.7), d, m1); g.add(back);
-    const card = new T.Mesh(new T.BoxGeometry(8.4, 5.4, 0.06), MAT.tarjeta); card.position.set(0, HB / 2 - 2.7 - 0.3, 0.2); g.add(card);
-    const stripe = new T.Mesh(new T.BoxGeometry(8.4, 0.9, 0.065), (() => { const m = new T.MeshStandardMaterial({ color: 0x8f6440, roughness: 0.5 }); m.color.convertSRGBToLinear(); return m; })()); stripe.position.copy(card.position).add(V(0, 1.4, 0.001)); g.add(stripe);
-    const topF = -HB / 2 + HF;
-    const front = new T.Shape(), x0 = -W / 2, x1 = W / 2, yb = -HB / 2, r = 0.7;
-    front.moveTo(x0 + r, yb); front.lineTo(x1 - r, yb); front.quadraticCurveTo(x1, yb, x1, yb + r); front.lineTo(x1, topF);
-    if (st.detalle === 'v') front.lineTo(x0, topF);
-    else { front.lineTo(1.9, topF); front.absarc(0, topF, 1.9, 0, Math.PI, true); front.lineTo(x0, topF); }
-    front.lineTo(x0, yb + r); front.quadraticCurveTo(x0, yb, x0 + r, yb);
-    const fr = slab(front, d, m1); fr.position.z = 0.42; g.add(fr);
-    const fz = 0.42 + d / 2 + 0.06;
-    if (m2 && st.detalle === 'franja') { const f = slab(roundedRect(W, 1.3, 0.01, 0, topF - 1.75), 0.05, m2, 0.01); f.position.z = fz + 0.03; g.add(f); }
-    if (m2 && st.detalle === 'v') {
-      const s = new T.Shape(); s.moveTo(-4, topF); s.lineTo(0, topF - 3.2); s.lineTo(4, topF); s.lineTo(2.6, topF); s.lineTo(0, topF - 2.05); s.lineTo(-2.6, topF); s.lineTo(-4, topF);
-      const v = slab(s, 0.05, m2, 0.01); v.position.z = fz + 0.03; g.add(v);
+    const g = new T.Group(), W = 10, HB = 7.2, d = 0.16, yb = -HB / 2, x0 = -W / 2, x1 = W / 2, r = 0.6;
+    const m1 = leather(st.cuero), m2 = st.cuero2 ? leather(st.cuero2) : (st.detalle && st.detalle !== 'no' ? MAT.vacio : m1);
+    const yM = yb + 5.7, yF = yb + 4.4, vh = 1.8; // borde de arriba del medio y del de adelante; hondo de la V
+    const v = st.detalle === 'v';
+    const pieza = (top, tipo) => {
+      const s = new T.Shape(); s.moveTo(x0 + r, yb); s.lineTo(x1 - r, yb); s.quadraticCurveTo(x1, yb, x1, yb + r); s.lineTo(x1, top);
+      if (tipo === 'v') { s.lineTo(2.6, top); s.lineTo(0, top - vh); s.lineTo(-2.6, top); } else if (tipo === 'luna') { s.lineTo(1.9, top); s.absarc(0, top, 1.9, 0, Math.PI, true); }
+      s.lineTo(x0, top); s.lineTo(x0, yb + r); s.quadraticCurveTo(x0, yb, x0 + r, yb); return s;
+    };
+    const zM = 0.24, zF = 0.48;
+    g.add(slab(roundedRect(W, HB, r), d, m1));
+    const mid = slab(pieza(yM, v ? 'v' : 'recto'), d, m2); mid.position.z = zM; g.add(mid);
+    const fr = slab(pieza(yF, v ? 'v' : st.detalle === 'franja' ? 'recto' : 'luna'), d, m1); fr.position.z = zF; g.add(fr);
+    const cara = (z) => z + d / 2 + 0.065;
+    if (st.cuero && st.union !== 'remaches') {
+      // costura a mano: costados y abajo de cada escalón
+      const hilo = hiloPara(st.cuero), q = (x, y, z) => ({ p: V(x, y, cara(z)), n: V(0, 0, 1) });
+      g.add(stitchesAlong([q(x0 + 0.42, yF - 0.3, zF), q(x0 + 0.42, yb + 0.42, zF), q(x1 - 0.42, yb + 0.42, zF), q(x1 - 0.42, yF - 0.3, zF)], hilo, 0.5));
+      [x0 + 0.42, x1 - 0.42].forEach((x) => {
+        g.add(stitchesAlong([q(x, yM - 0.3, zM), q(x, yF + 0.05, zM)], hilo, 0.5));
+        g.add(stitchesAlong([q(x, HB / 2 - 0.5, 0), q(x, yM + 0.05, 0)], hilo, 0.5));
+      });
     }
-    if (st.cuero) {
-      const pts = [[x0 + 0.45, topF - 0.3], [x0 + 0.45, yb + 0.45], [x1 - 0.45, yb + 0.45], [x1 - 0.45, topF - 0.3]].map(([x, y]) => ({ p: V(x, y, fz + 0.05), n: V(0, 0, 1) }));
-      g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.5));
-    }
-    if (st.tachas === 'si') {
-      const list = [];
-      for (let y = yb + 0.95; y <= topF - 0.6; y += 1.0) list.push({ p: V(x0 + 0.95, y, fz), n: V(0, 0, 1) }, { p: V(x1 - 0.95, y, fz), n: V(0, 0, 1) });
-      for (let x = x0 + 1.95; x <= x1 - 1.9; x += 1.0) list.push({ p: V(x, yb + 0.95, fz), n: V(0, 0, 1) });
-      g.add(many(studGeo(0.3), MAT.bronce, list));
+    if (st.union === 'remaches') {
+      const list = [], mt = metalDe(st.metal), q = (x, y, z) => ({ p: V(x, y, cara(z) - 0.05), n: V(0, 0, 1) });
+      [x0 + 0.6, x1 - 0.6].forEach((x) => {
+        for (let y = yb + 0.6; y <= yF - 0.45; y += 1.15) list.push(q(x, y, zF));
+        list.push(q(x, (yM + yF) / 2, zM), q(x, (HB / 2 + yM) / 2, 0));
+      });
+      for (let x = x0 + 1.75; x <= x1 - 1.7; x += 1.15) list.push(q(x, yb + 0.6, zF));
+      g.add(many(studGeo(0.26), mt, list));
     }
     return { group: g, pitch: 0.18, yaw: -0.45 };
   };
 
   M['porta-lentes'] = (st) => {
-    const g = new T.Group(), W = 8, H = 17, m = leather(st.cuero);
-    const body = slab(roundedRect(W, H, 1.6), 1.1, m, 0.38); g.add(body);
-    const z = 0.55 + 0.38;
+    const g = new T.Group(), W = 8, H = 17, R = 1.6, B = 0.38, m = leather(st.cuero);
+    const body = slab(roundedRect(W, H, R), 1.1, m, B); g.add(body);
+    const z = 0.55 + B;
     const slot = new T.Mesh(new T.BoxGeometry(W - 1.6, 0.28, 1.2), MAT.oscuro); slot.position.set(0, H / 2 - 0.05, 0); g.add(slot);
+    // dos cueros: abajo de un corte en diagonal, el segundo cuero (adelante y atrás)
+    if (st.combo === 'diagonal') {
+      const w = W / 2 - B * 0.6, h = H / 2 - B * 0.6, r = R - B * 0.6, yl = -3.2, yr = 0.6;
+      const s = new T.Shape(); s.moveTo(-w, yl); s.lineTo(w, yr); s.lineTo(w, -h + r); s.quadraticCurveTo(w, -h, w - r, -h); s.lineTo(-w + r, -h); s.quadraticCurveTo(-w, -h, -w, -h + r); s.closePath();
+      const m2 = st.cuero2 ? leather(st.cuero2) : MAT.vacio;
+      [1, -1].forEach((k) => { const p = slab(s, 0.05, m2, 0.01); p.position.z = k * (z + 0.02); if (k < 0) p.rotation.y = Math.PI; if (k < 0) p.scale.x = -1; g.add(p); });
+      const linea = stitchesAlong([{ p: V(-w + 0.1, yl + 0.35, z + 0.07), n: V(0, 0, 1) }, { p: V(w - 0.1, yr + 0.35, z + 0.07), n: V(0, 0, 1) }], hiloPara(st.cuero), 0.5);
+      if (st.union !== 'tachas') g.add(linea);
+    }
     if (st.modelo === 'con-tapa') {
       const s = new T.Shape(); s.moveTo(-W / 2, H / 2); s.lineTo(W / 2, H / 2); s.lineTo(W / 2, H / 2 - 3.6); s.quadraticCurveTo(W / 2, H / 2 - 5.6, 0, H / 2 - 6.4); s.quadraticCurveTo(-W / 2, H / 2 - 5.6, -W / 2, H / 2 - 3.6); s.lineTo(-W / 2, H / 2);
       const flap = slab(s, 0.18, m, 0.05); flap.position.z = z + 0.12; g.add(flap);
       const snap = new T.Mesh(studGeo(0.55), MAT.plata); snap.position.set(0, H / 2 - 5.5, z + 0.3); g.add(snap);
     }
-    if (st.cuero) {
-      const pts = [[-W / 2 + 0.5, H / 2 - 0.6], [-W / 2 + 0.5, -H / 2 + 0.5], [W / 2 - 0.5, -H / 2 + 0.5], [W / 2 - 0.5, H / 2 - 0.6]].map(([x, y]) => ({ p: V(x, y, z + 0.02), n: V(0, 0, 1) }));
+    const top = st.modelo === 'con-tapa' ? H / 2 - 6.6 : H / 2 - 1.1;
+    const borde = []; // recorrido por los costados y abajo, a 0,5 cm del canto
+    for (let y = top; y >= -H / 2 + 0.6; y -= 0.25) borde.push([-W / 2 + 0.55, y]);
+    for (let x = -W / 2 + 0.55; x <= W / 2 - 0.55; x += 0.25) borde.push([x, -H / 2 + 0.55]);
+    for (let y = -H / 2 + 0.6; y <= top; y += 0.25) borde.push([W / 2 - 0.55, y]);
+    if (st.cuero && (st.union === 'hilo' || !st.union)) {
+      const pts = [[-W / 2 + 0.5, top + 0.5], [-W / 2 + 0.5, -H / 2 + 0.5], [W / 2 - 0.5, -H / 2 + 0.5], [W / 2 - 0.5, top + 0.5]].map(([x, y]) => ({ p: V(x, y, z + 0.02), n: V(0, 0, 1) }));
       g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.5));
     }
-    if (st.tachas === 'si') {
-      const list = []; const top = st.modelo === 'con-tapa' ? H / 2 - 6.6 : H / 2 - 1.1;
+    if (st.union === 'tiento') {
+      // tiento de cuero pasado por el borde: puntadas anchas y en diagonal que abrazan el canto
+      const geo = new T.BoxGeometry(0.32, 1.25, 0.09); const list = [];
+      for (let y = top; y >= -H / 2 + 1.2; y -= 0.9) [-1, 1].forEach((k) => list.push({ p: V(k * (W / 2 - 0.3), y, z + 0.02), n: V(0, 0, 1), spin: k * 0.75 }));
+      for (let x = -W / 2 + 1.3; x <= W / 2 - 1.2; x += 0.9) list.push({ p: V(x, -H / 2 + 0.3, z + 0.02), n: V(0, 0, 1), spin: Math.PI / 2 + 0.75 });
+      g.add(many(geo, MAT.tiento, list));
+    }
+    if (st.union === 'tachas') {
+      const list = [];
       for (let y = -H / 2 + 1.1; y <= top; y += 1.15) list.push({ p: V(-W / 2 + 1.05, y, z), n: V(0, 0, 1) }, { p: V(W / 2 - 1.05, y, z), n: V(0, 0, 1) });
       for (let x = -W / 2 + 2.2; x <= W / 2 - 2.1; x += 1.15) list.push({ p: V(x, -H / 2 + 1.1, z), n: V(0, 0, 1) });
-      g.add(many(studGeo(0.3), MAT.bronce, list));
+      g.add(many(studGeo(0.3), metalDe(st.metal, MAT.bronce), list));
     }
     // tira con argolla y mosquetón arriba a la izquierda
     const tab = slab(roundedRect(1.4, 3.2, 0.6), 0.16, m, 0.04); tab.position.set(-W / 2 + 1.2, H / 2 + 0.9, 0.2); g.add(tab);
@@ -484,22 +585,28 @@ window.DT3D = (() => {
     const cap = new T.Mesh(new T.BoxGeometry(2.45, 1.3, 1.3), MAT.plata); cap.position.y = 0.8 + lh / 2 + 0.55; g.add(cap);
     const wheel = new T.Mesh(new T.CylinderGeometry(0.42, 0.42, 0.5, 20), MAT.plata); wheel.rotation.z = Math.PI / 2; wheel.position.set(0.55, cap.position.y + 0.75, 0); g.add(wheel);
     const sleeve = slab(roundedRect(W, H, 0.5), 1.45, m, 0.12); g.add(sleeve);
-    const z = 0.73 + 0.12;
-    if (st.cuero) {
-      const pts = [[-W / 2 + 0.35, H / 2 - 0.35], [-W / 2 + 0.35, -H / 2 + 0.35], [W / 2 - 0.35, -H / 2 + 0.35]].map(([x, y]) => ({ p: V(x, y, z + 0.02), n: V(0, 0, 1) }));
-      g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.42));
-    }
-    if (st.tachas === 'si') {
+    const z = 0.73 + 0.12, f = (x, y) => ({ p: V(x, y, z), n: V(0, 0, 1) });
+    if (st.cuero) g.add(stitchesAlong([[-W / 2 + 0.35, H / 2 - 0.35], [-W / 2 + 0.35, -H / 2 + 0.35], [W / 2 - 0.35, -H / 2 + 0.35]].map(([x, y]) => ({ p: V(x, y, z + 0.02), n: V(0, 0, 1) })), hiloPara(st.cuero), 0.42));
+    if (st.deco === 'remaches') {
       const list = [];
-      for (let y = H / 2 - 0.75; y >= -H / 2 + 0.7; y -= 0.85) list.push({ p: V(W / 2 - 0.65, y, z), n: V(0, 0, 1) });
-      for (let x = W / 2 - 1.5; x >= -W / 2 + 0.65; x -= 0.85) list.push({ p: V(x, -H / 2 + 0.65, z), n: V(0, 0, 1) });
-      g.add(many(studGeo(0.24), MAT.bronce, list));
+      for (let y = H / 2 - 0.75; y >= -H / 2 + 0.7; y -= 0.85) list.push(f(W / 2 - 0.65, y));
+      for (let x = W / 2 - 1.5; x >= -W / 2 + 0.65; x -= 0.85) list.push(f(x, -H / 2 + 0.65));
+      g.add(many(studGeo(0.24), metalDe(st.metal, MAT.bronce), list));
     }
+    if (st.deco === 'estrellas') { const n = grande ? 3 : 2, list = []; for (let i = 0; i < n; i++) list.push(f(-0.1, H / 2 - 1.5 - i * 1.9)); g.add(many(starGeo(0.62), metalDe(st.metal, MAT.bronce), list)); }
+    if (st.deco === 'ojalillos') { const list = []; for (let y = H / 2 - 0.9; y >= -H / 2 + 0.8; y -= 0.95) list.push(f(-W / 2 + 0.85, y)); g.add(many(new T.TorusGeometry(0.22, 0.08, 10, 24), metalDe(st.metal, MAT.plata), list)); }
     const ey = eyelet(0.3, MAT.bronce); ey.position.set(W / 2 - 0.55, H / 2 - 0.55, z); g.add(ey);
     const ch = chain(3, 0.45, MAT.bronce); ch.position.set(W / 2 - 0.55, H / 2 + 0.55, z - 0.1); g.add(ch);
     const cl = clasp(1.0, MAT.bronce); cl.position.set(W / 2 - 0.55, H / 2 + 1.8 + 0.45 * 3, z - 0.1); g.add(cl);
-    // el portafuego sube un poco para que el encendedor asome arriba
-    g.children.forEach((c) => { if (c !== lighter && c !== cap && c !== wheel) c.position.y += 0; });
+    if (st.deco === 'dije') {
+      // un dije de estrella colgando de un mosquetón chico, al lado de la cadena
+      const c2 = clasp(0.6, metalDe(st.metal, MAT.bronce)); c2.position.set(W / 2 + 0.25, H / 2 + 0.35, z); c2.rotation.z = Math.PI; g.add(c2);
+      const st1 = new T.Mesh(starGeo(0.85), metalDe(st.metal, MAT.bronce)); st1.position.set(W / 2 + 0.25, H / 2 - 1.15, z + 0.05); g.add(st1);
+    }
+    if (st.flecos === 'si') {
+      const pts = []; for (let x = -W / 2 + 0.3; x <= W / 2 - 0.25; x += 0.42) pts.push({ p: V(x, -H / 2 + 0.25, z - 0.05), n: V(0, 0, 1) });
+      g.add(flecos(pts, 15, 0.3, m));
+    }
     return { group: g, pitch: 0.1, yaw: -0.5 };
   };
 
@@ -525,39 +632,71 @@ window.DT3D = (() => {
     rayo: () => { const s = new T.Shape(); [[-0.6, 3.4], [1.9, 3.4], [0.6, 0.6], [2.2, 0.6], [-1.4, -3.6], [-0.3, -0.4], [-1.9, -0.4]].forEach(([x, y], i) => (i ? s.lineTo(x, y) : s.moveTo(x, y))); s.closePath(); return { s, top: [0.65, 2.75] }; },
     gota: () => { const s = new T.Shape(); s.moveTo(0, 3.6); s.bezierCurveTo(0.6, 2.2, 2.4, 0.4, 2.4, -1.2); s.bezierCurveTo(2.4, -2.7, 1.3, -3.6, 0, -3.6); s.bezierCurveTo(-1.3, -3.6, -2.4, -2.7, -2.4, -1.2); s.bezierCurveTo(-2.4, 0.4, -0.6, 2.2, 0, 3.6); return { s, top: [0, 2.5] }; },
   };
-  M.llavero = (st) => {
-    const g = new T.Group(), f = (FORMAS[st.forma] || FORMAS.estrella)(), m = leather(st.cuero), d = 0.36;
-    const body = slab(f.s, d, m, 0.07); g.add(body);
+  // una forma del llavero (cuero, tachas y ojalillo), con su ojalillo en (0,0) si se pide
+  function formaLlavero(f, st, d) {
+    const g = new T.Group(), m = leather(st.cuero);
+    g.add(slab(f.s, d, m, 0.07));
     const z = d / 2 + 0.07;
     if (st.tachas === 'si') {
       // separadas de a ~1 cm y lejos del ojalillo
       const pts = f.studs || insetPoints(f.s, 0.62, 0.55).reduce((acc, q) => (acc.every((o) => Math.hypot(o[0] - q[0], o[1] - q[1]) > 1.0) ? acc.concat([q]) : acc), []);
-      const list = pts.filter(([x, y]) => Math.hypot(x - f.top[0], y - f.top[1]) > 0.8).map(([x, y]) => ({ p: V(x, y, z), n: V(0, 0, 1) }));
-      g.add(many(studGeo(0.26), MAT.bronce, list));
+      g.add(many(studGeo(0.26), metalDe(st.metal, MAT.bronce), pts.filter(([x, y]) => Math.hypot(x - f.top[0], y - f.top[1]) > 0.8).map(([x, y]) => ({ p: V(x, y, z), n: V(0, 0, 1) }))));
     }
+    const ey = eyelet(0.3, MAT.plata); ey.position.set(f.top[0], f.top[1], z); g.add(ey);
+    return g;
+  }
+  M.llavero = (st) => {
+    const g = new T.Group(), d = 0.36;
+    if (st.forma === 'estrellas') {
+      // tres estrellas de distintos tamaños, cada una con su cadena, a la misma argolla
+      const P0 = V(0, 7.6, 0);
+      [[0, 0, 1], [3.9, 2.6, 0.62], [-3.5, 3.2, 0.46]].forEach(([x, y, k]) => {
+        const f = FORMAS.estrella(), e = formaLlavero(f, st, d / Math.max(0.7, k)); e.scale.setScalar(k); e.position.set(x, y, 0); g.add(e);
+        const tp = V(x + f.top[0] * k, y + f.top[1] * k, 0), dir = tp.clone().sub(P0), size = 0.36, n = Math.max(2, Math.round(dir.length() / (size * 1.45)));
+        const ch = chain(n, size, MAT.plata); ch.position.copy(P0); ch.rotation.z = Math.atan2(dir.x, -dir.y); g.add(ch);
+      });
+      const cl = clasp(1.1, MAT.plata); cl.position.set(0, P0.y + 0.9, 0); g.add(cl);
+      return { group: g, pitch: 0.08, yaw: -0.4 };
+    }
+    const f = (FORMAS[st.forma] || FORMAS.estrella)();
+    g.add(formaLlavero(f, st, d));
     const [tx, ty] = f.top;
-    const ey = eyelet(0.3, MAT.plata); ey.position.set(tx, ty, z); g.add(ey);
     const ch = chain(4, 0.42, MAT.plata); ch.position.set(tx, ty + 0.75 + 0.42 * 4.4, 0); g.add(ch);
     const cl = clasp(1.1, MAT.plata); cl.position.set(tx, ty + 0.75 + 0.42 * 6 + 0.6, 0); g.add(cl);
     return { group: g, pitch: 0.08, yaw: -0.5 };
   };
 
+  // dónde van las decoraciones según cuántas se piden (u: posición a lo largo de la pieza)
+  // mid: el punto que queda de frente a la cámara. 1: al medio; 3: juntas al centro con poca separación;
+  // 5: repartidas parejo en todo el largo; toda: una fila de punta a punta
+  const repartir = (cant, u0, u1, paso, mid = (u0 + u1) / 2) => {
+    if (cant === 'toda') { const out = []; for (let u = u0; u <= u1 + 1e-6; u += paso) out.push(u); return out; }
+    const n = +cant || 1; if (n === 1) return [mid];
+    if (n === 3) return [mid - paso * 1.25, mid, mid + paso * 1.25];
+    return Array.from({ length: n }, (_, i) => mid + (u1 - u0) * (i / n - 0.5 + 0.5 / n));
+  };
   M.pulsera = (st) => {
-    const g = new T.Group(), H = { '1-3': 1.3, intermedia: 3, 5: 5 }[st.ancho] || 3, m = leather(st.cuero), R = 3.05, thick = 0.26;
-    const turns = 1.12;
-    const center = (u) => { const a = u * Math.PI * 2 * turns, r = R + 0.3 * u; return V(r * Math.sin(a), 0, r * Math.cos(a)); };
+    const g = new T.Group(), trenzada = st.modelo === 'trenzada', H = ({ '1-3': 1.3, intermedia: 3, 5: 5 }[st.ancho] || 3), m = leather(st.cuero), R = 3.05, thick = 0.26;
+    const turns = trenzada ? 1.0 : 1.12;
+    const center = (u) => { const a = u * Math.PI * 2 * turns, r = R + (trenzada ? 0 : 0.3 * u); return V(r * Math.sin(a), 0, r * Math.cos(a)); };
     const normal = (u) => { const a = u * Math.PI * 2 * turns; return V(Math.sin(a), 0, Math.cos(a)); };
-    g.add(band({ u0: 0, u1: 1, center, normal, height: () => H, thick, mat: m, closed: false, n: 260 }));
-    // broche donde se superponen las puntas
-    const uS = 0.965, ps = center(uS).addScaledVector(normal(uS), thick / 2 + 0.05);
-    const snap = new T.Mesh(new T.CylinderGeometry(Math.min(0.55, H * 0.3), Math.min(0.55, H * 0.3), 0.22, 24), MAT.plata); snap.position.copy(ps); snap.quaternion.setFromUnitVectors(V(0, 1, 0), normal(uS)); g.add(snap);
-    if (st.cuero && H >= 3) {
-      [-1, 1].forEach((sgn) => { const pts = []; for (let u = 0.02; u <= 0.93; u += 0.006) pts.push({ p: center(u).addScaledVector(normal(u), thick / 2 + 0.02).add(V(0, sgn * (H / 2 - 0.35), 0)), n: normal(u) }); g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.38)); });
-    }
-    if (st.tachas === 'si') {
-      const list = []; const rows = H >= 3 ? [-H / 4, H / 4] : [0];
-      for (let u = 0.04; u <= 0.9; u += 0.045) rows.forEach((dy) => list.push({ p: center(u).addScaledVector(normal(u), thick / 2).add(V(0, dy, 0)), n: normal(u) }));
-      g.add(many(studGeo(Math.min(0.32, H * 0.22)), MAT.plata, list));
+    if (trenzada) {
+      g.add(trenza(center, normal, 0.03, 0.97, H, m, Math.PI * 2 * R * 0.94));
+      // terminales de metal y el broche
+      [0.03, 0.97].forEach((u) => { const c = new T.Mesh(new T.CylinderGeometry(0.42, 0.42, 0.9, 20), MAT.plata); c.position.copy(center(u)); c.quaternion.setFromUnitVectors(V(0, 1, 0), center(u + 0.01).sub(center(u - 0.01)).normalize()); g.add(c); });
+    } else {
+      g.add(band({ u0: 0, u1: 1, center, normal, height: () => H, thick, mat: m, closed: false, n: 260 }));
+      // broche donde se superponen las puntas
+      const uS = 0.965, ps = center(uS).addScaledVector(normal(uS), thick / 2 + 0.05);
+      const snap = new T.Mesh(new T.CylinderGeometry(Math.min(0.55, H * 0.3), Math.min(0.55, H * 0.3), 0.22, 24), MAT.plata); snap.position.copy(ps); snap.quaternion.setFromUnitVectors(V(0, 1, 0), normal(uS)); g.add(snap);
+      if (st.cuero && H >= 3) {
+        [-1, 1].forEach((sgn) => { const pts = []; for (let u = 0.02; u <= 0.93; u += 0.006) pts.push({ p: center(u).addScaledVector(normal(u), thick / 2 + 0.02).add(V(0, sgn * (H / 2 - 0.35), 0)), n: normal(u) }); g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.38)); });
+      }
+      if (st.deco === 'tachas' || st.deco === 'estrellas') {
+        const estrella = st.deco === 'estrellas', list = [], rows = st.cantidad === 'toda' && H >= 3 ? [-H / 4, H / 4] : [0];
+        repartir(st.cantidad || 'toda', 0.04, 0.9, estrella ? 0.06 : 0.045, 0.83).forEach((u) => rows.forEach((dy) => list.push({ p: center(u).addScaledVector(normal(u), thick / 2).add(V(0, dy, 0)), n: normal(u) })));
+        g.add(many(estrella ? starGeo(Math.min(0.62, H * 0.32)) : studGeo(Math.min(0.32, H * 0.22)), metalDe(st.metal, MAT.plata), list));
+      }
     }
     g.rotation.y = Math.PI * 0.15;
     const w = new T.Group(); w.add(g); w.rotation.x = 0.32;
@@ -573,14 +712,37 @@ window.DT3D = (() => {
     const normal = (u) => { const a = -Math.PI + 0.22 + u * (Math.PI * 2 - 0.44); return V(Math.sin(a) / rx, 0, Math.cos(a) / rz).normalize(); };
     const thick = 0.24;
     g.add(band({ u0: 0, u1: 1, center, normal, height: () => H, thick, mat: m, closed: false, n: 200 }));
+    const t0 = 0, t1 = 1;
+    // trenzado: un tiento de otro cuero que cruza el collar; de los dos lados forma V (">"), de un lado pasa solo por el borde de arriba
+    if (st.trenzado === 'uno' || st.trenzado === 'ambos') {
+      const mt = st.cuero2 ? leather(st.cuero2) : MAT.tiento, L = 32, paso = 1.0 / L, list = [], ang = 0.62;
+      const ambos = st.trenzado === 'ambos', largo = ambos ? (H / 2) / Math.cos(ang) + 0.1 : H * 0.55;
+      const geo = new T.BoxGeometry(Math.min(0.32, H * 0.22), largo, 0.1); uvPos(geo);
+      for (let u = 0.03; u <= 0.97; u += paso) {
+        const n = normal(u), p = (dy) => center(u).addScaledVector(n, thick / 2 + 0.04).add(V(0, dy, 0));
+        if (ambos) list.push({ p: p(H / 4), n, spin: ang }, { p: p(-H / 4), n, spin: -ang });
+        else list.push({ p: p(H / 2 - largo * 0.38), n, spin: ang });
+      }
+      g.add(many(geo, mt, list));
+    }
     // cordones atrás
     [0, 1].forEach((u) => { const p = center(u); const c = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, 4, 8), leather(st.cuero) === MAT.vacio ? MAT.canto : leather(st.cuero)); c.position.copy(p).add(V(u ? -0.3 : 0.3, -2, -0.3)); c.rotation.z = u ? 0.15 : -0.15; g.add(c); });
-    if (st.cuero) {
-      [-1, 1].forEach((sgn) => { const pts = []; for (let u = 0.04; u <= 0.96; u += 0.008) pts.push({ p: center(u).addScaledVector(normal(u), thick / 2 + 0.02).add(V(0, sgn * (H / 2 - 0.22), 0)), n: normal(u) }); g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.36)); });
+    if (st.cuero && !(st.trenzado === 'uno' || st.trenzado === 'ambos')) {
+      [-1, 1].forEach((sgn) => { const pts = []; for (let u = t0 + 0.04; u <= t1 - 0.04; u += 0.008) pts.push({ p: center(u).addScaledVector(normal(u), thick / 2 + 0.02).add(V(0, sgn * (H / 2 - 0.22), 0)), n: normal(u) }); g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.36)); });
     }
-    if (st.deco === 'si') {
-      const list = []; for (let u = 0.25; u <= 0.75; u += 0.032) list.push({ p: center(u).addScaledVector(normal(u), thick / 2), n: normal(u) });
-      g.add(many(studGeo(Math.min(0.36, H * 0.3)), MAT.plata, list));
+    const en = (u, dy = 0) => ({ p: center(u).addScaledVector(normal(u), thick / 2).add(V(0, dy, 0)), n: normal(u) });
+    const tachaR = Math.min(0.36, H * 0.3), estR = Math.min(0.55, H * 0.4);
+    if (st.deco === 'tachas' || st.deco === 'si') { const list = []; for (let u = 0.3; u <= 0.7; u += 0.032) list.push(en(u)); g.add(many(studGeo(tachaR), metalDe(st.metal, MAT.plata), list)); }
+    if (st.deco === 'sinpatron') {
+      // sueltas, sin orden (siempre las mismas, para que no cambien al girar)
+      const list = []; let sd = 7; const rnd = () => ((sd = (sd * 9301 + 49297) % 233280) / 233280);
+      for (let i = 0; i < 16; i++) list.push({ ...en(0.31 + rnd() * 0.38, (rnd() - 0.5) * H * 0.5), s: 0.6 + rnd() * 0.6 });
+      g.add(many(studGeo(tachaR), metalDe(st.metal, MAT.plata), list));
+    }
+    if (st.deco === 'estrellas') { const list = []; for (let u = 0.33; u <= 0.67; u += 0.048) list.push(en(u)); g.add(many(starGeo(estR), metalDe(st.metal, MAT.plata), list)); }
+    if (st.deco === 'estrellas-remaches') {
+      const se = [], sr = []; let k = 0; for (let u = 0.31; u <= 0.69; u += 0.03) (k++ % 2 ? sr : se).push(en(u));
+      g.add(many(starGeo(estR), metalDe(st.metal, MAT.plata), se)); g.add(many(studGeo(tachaR * 0.75), metalDe(st.metal, MAT.plata), sr));
     }
     g.rotation.y = -0.3;
     return { group: g, pitch: 0.06 };
@@ -598,9 +760,10 @@ window.DT3D = (() => {
   }
   function entorno(renderer) {
     const pm = new T.PMREMGenerator(renderer), sc = new T.Scene();
-    sc.background = new T.Color(0x5a4636);
+    sc.background = new T.Color(0x5c5c5c);
     const panel = (w, h, x, y, z, c) => { const p = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: c, side: T.DoubleSide })); p.position.set(x, y, z); p.lookAt(0, 0, 0); sc.add(p); };
-    panel(10, 6, 0, 9, 4, 0xfff4e2); panel(6, 8, -9, 2, 3, 0xc9b49a); panel(6, 8, 9, 3, -2, 0xe8d6bd); panel(20, 6, 0, -8, 0, 0x2b1d14);
+    // luz de estudio neutra (blanca y grises): el cuero se ve del color de la foto, sin teñirse
+    panel(10, 6, 0, 9, 4, 0xffffff); panel(6, 8, -9, 2, 3, 0xbdbdbd); panel(6, 8, 9, 3, -2, 0xdedede); panel(20, 6, 0, -8, 0, 0x2a2a2a);
     const t = pm.fromScene(sc, 0.04).texture; pm.dispose();
     return t;
   }
@@ -608,14 +771,14 @@ window.DT3D = (() => {
   function create(host) {
     const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    renderer.outputEncoding = T.sRGBEncoding; renderer.toneMapping = T.LinearToneMapping; renderer.toneMappingExposure = 0.95; // colores fieles al cuero real
+    renderer.outputEncoding = T.sRGBEncoding; renderer.toneMapping = T.LinearToneMapping; renderer.toneMappingExposure = 0.6; // calibrado: el cuero sale del mismo color que en la foto (medido cuero por cuero)
     host.innerHTML = ''; host.appendChild(renderer.domElement);
     renderer.domElement.className = 'p3d';
     const scene = new T.Scene(); scene.environment = entorno(renderer);
     const camera = new T.PerspectiveCamera(28, 1, 0.1, 1000);
-    scene.add(new T.HemisphereLight(0xfff5e8, 0x3d2619, 0.55));
-    const key = new T.DirectionalLight(0xfff0dc, 1.6); key.position.set(4, 6, 7); scene.add(key);
-    const rim = new T.DirectionalLight(0xffe2c0, 0.7); rim.position.set(-6, 3, -5); scene.add(rim);
+    scene.add(new T.HemisphereLight(0xffffff, 0x6e6a66, 0.6));
+    const key = new T.DirectionalLight(0xffffff, 1.3); key.position.set(4, 6, 7); scene.add(key);
+    const rim = new T.DirectionalLight(0xffffff, 0.7); rim.position.set(-6, 3, -5); scene.add(rim);
     const shadow = sombra(); scene.add(shadow);
     const pivot = new T.Group(); scene.add(pivot);
     let model = null, yaw = 0, pitch = 0.1, baseYaw = 0, dragging = false, lastX = 0, lastY = 0, idle = 0, vel = 0, dirty = true;
