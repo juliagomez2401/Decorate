@@ -19,12 +19,17 @@ from skimage import color, measure, morphology, filters
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # zonas que se borran a mano (la muesca en V de abajo del ginkgo), en coordenadas de la tarjeta
 BORRAR = {'ginkgo': [[(0.465, 1.0), (0.515, 0.83), (0.575, 1.0)]]}
-PELAR = {'ginkgo', 'margarita', 'flor-calada'}
-ORILLA = {'estrella', 'hoja', 'flor', 'margarita'}   # se les pela el halo claro del borde de afuera
-CALADOS = {'rama', 'flor', 'flor-calada', 'girasol', 'margarita'}
+PELAR = {'ginkgo', 'margarita', 'flor-calada', 'girasol', 'hoja-larga', 'pluma', 'rama'}
+ORILLA = {'estrella', 'hoja', 'flor'}   # se les pela el halo claro del borde de afuera
+# borde del metal: cuánto tiene que cambiar la luz para contar como borde (más bajo = no se escapa por donde el metal brilla como el papel)
+MURO = {'girasol': 6.0, 'hoja-larga': 6.0, 'pluma': 6.0, 'rama': 5.0, 'flor-calada': 5.0, 'margarita': 5.5}
+SUAVE = {'rama', 'flor-calada', 'margarita'}   # finitos: el pelado de papel, apenas
+CALADOS = {'rama', 'flor-calada', 'girasol', 'margarita'}
+RELLENAR = {'flor'}   # los pétalos tienen el centro hundido, que en la foto se confunde con papel
 NOMBRES = ['hoja', 'flor-piedra', 'girasol', 'flor', 'rama', 'ala', 'leopardo', 'ginkgo', 'margarita', 'hoja-larga', 'estrella', 'pluma', 'flor-calada']
 ALTO_HOJA_CM = 3.2   # la hoja grande mide unos 3,2 cm de alto: da la escala de todos
 LADO = 300
+VER = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--comparar=")), None)   # carpeta donde guardar foto y recorte lado a lado
 # umbrales del puntaje de metal (bajo, alto) y del papel de los huecos; se pueden ajustar por dije
 UMB = {'_': (0.9, 1.9)}
 
@@ -67,7 +72,7 @@ for i, r in enumerate(orden):
     y0, x0, y1, x1 = r.bbox; y0, x0 = max(0, y0 - 14), max(0, x0 - 14); y1, x1 = y1 + 14, x1 + 14
     G, Lc, Pc, Tc = grad[y0:y1, x0:x1], L[y0:y1, x0:x1], papel[y0:y1, x0:x1], tex[y0:y1, x0:x1]
     # borde del metal: gradiente fuerte; se engorda un pixel para que no haya fugas
-    muro = ndi.binary_dilation(G > 7.5, iterations=1)
+    muro = ndi.binary_dilation(G > MURO.get(nombre, 7.5), iterations=1)
     libre = measure.label(~muro, connectivity=1)
     borde = np.zeros(libre.shape, bool); borde[[0, -1], :] = True; borde[:, [0, -1]] = True
     fondo_ids = set(np.unique(libre[borde & (libre > 0)]))
@@ -108,6 +113,24 @@ for i, r in enumerate(orden):
             sil &= ~come
         sil = morphology.opening(sil, morphology.disk(2))
         l2 = measure.label(sil); sil = l2 == max(measure.regionprops(l2), key=lambda q: q.area).label
+    # con el borde más sensible queda un anillo de papel alrededor: se pela desde afuera lo que es del tono del
+    # papel y no es borde de metal (frena apenas llega al canto)
+    if nombre in MURO:
+        Cm = croma[y0:y1, x0:x1]
+        for _ in range(5):
+            orilla = ndi.binary_dilation(~sil, iterations=1) & sil
+            tl, tg = (12, 1.5) if nombre in SUAVE else (16, 2.5)
+            come = orilla & (np.abs(Lc - Pc) < tl) & (Cm < 10) & (G < MURO[nombre] + tg)
+            if not come.any(): break
+            sil &= ~come
+        sil = morphology.opening(sil, morphology.disk(1))
+        l2 = measure.label(sil); sil = l2 == max(measure.regionprops(l2), key=lambda q: q.area).label
+    # sin calados: se rellenan los huecos, menos el agujero de colgar (arriba)
+    if nombre in RELLENAR:
+        hh = ndi.binary_fill_holes(sil) & ~sil; lh = measure.label(hh)
+        ys_, _ = np.nonzero(sil); tope = ys_.min() + 0.26 * (ys_.max() - ys_.min())
+        for q in measure.regionprops(lh):
+            if q.centroid[0] > tope: sil |= lh == q.label
     # el borde de afuera: se pelan los pixeles casi del color del papel (el halo claro y los pedacitos de papel pegados)
     Cc = croma[y0:y1, x0:x1]
     for _ in range(3 if nombre in ORILLA else 0):
@@ -125,6 +148,10 @@ for i, r in enumerate(orden):
     alfa = np.clip((big - 0.5) * 3 + 0.5, 0, 1)
     pieza = im.crop((x0, y0, x1, y1)).resize((sil.shape[1] * 2, sil.shape[0] * 2), Image.LANCZOS)
     pieza.putalpha(Image.fromarray((alfa * 255).astype(np.uint8)))
+    if VER:   # para revisar: la foto y el recorte, uno al lado del otro
+        foto = im.crop((x0, y0, x1, y1)).resize(pieza.size, Image.LANCZOS)
+        par = Image.new('RGB', (pieza.width * 2 + 10, pieza.height), (40, 70, 60)); par.paste(foto, (0, 0)); par.paste(pieza, (pieza.width + 10, 0), pieza)
+        par.save(pathlib.Path(VER) / f'{nombre}.png')
     ys, xs = np.nonzero(alfa > 0.5); bx0, bx1, by0, by1 = xs.min(), xs.max(), ys.min(), ys.max()
     pieza = pieza.crop((bx0, by0, bx1 + 1, by1 + 1)); masc = (alfa > 0.5)[by0:by1 + 1, bx0:bx1 + 1]
     lado = int(max(pieza.width, pieza.height) * 1.04)

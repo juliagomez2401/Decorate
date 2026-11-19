@@ -21,9 +21,9 @@ function Save($img, [int]$maxSide, [string]$path, [long]$q) {
 # tanda 2 (pulseras y collares): tanda2-imageNNNNN.jpeg -> img\stock\(1000+N).jpg
 $files = @(Get-ChildItem $src -Recurse -Filter 'image*.jpeg') + @(Get-ChildItem $src -Recurse -Filter 'tanda2-image*.jpeg')
 # fotos que hay que girar (número de foto en la web), contando desde el original:
-# 14: se sacó dada vuelta. Porta lentes: todos parados con el enganche arriba, como los llaveros
+# Porta lentes: todos parados con el enganche arriba, como los llaveros
 # (son fotos desde arriba, así que girarlas no se nota).
-$giro = @{ 14 = 'Rotate180FlipNone' }
+$giro = @{}   # la 14 (tarjetero chocolate con leopardo) va como vino: girada quedaba cabeza abajo
 foreach ($n in 16, 18, 19, 47, 48, 49, 81, 52, 57, 58, 59, 56, 60, 61) { $giro[$n] = 'Rotate90FlipNone' }
 foreach ($n in 53) { $giro[$n] = 'Rotate270FlipNone' }
 foreach ($n in 54, 55, 62, 63) { $giro[$n] = 'Rotate180FlipNone' }

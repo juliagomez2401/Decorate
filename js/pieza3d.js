@@ -273,7 +273,7 @@ window.DT3D = (() => {
   const dijeCache = {};
   function dijeTex(id) {
     // abierta como archivo (doble clic), el 3D no puede leer fotos sueltas: se usa la copia de js/cueros-datos.js
-    const src = (window.DT_DIJES_B64 && window.DT_DIJES_B64[id]) || `img/dije-${id}.png?v=5`;
+    const src = (window.DT_DIJES_B64 && window.DT_DIJES_B64[id]) || `img/dije-${id}.png?v=6`;
     const tex = new T.TextureLoader().load(src, () => listeners.forEach((fn) => fn()));
     tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
     return tex;

@@ -104,7 +104,7 @@
   const stockPrice = (s) => (s.desde ? `Desde ${money(s.min)}` : range(s.min, s.max));
   const img = (f, sm = true) => `img/${f}${sm ? '-sm' : ''}.jpg`;
   // ?v=…: subirlo cuando se cambian fotos con el mismo nombre, así el navegador no muestra las viejas
-  const FOTOS_V = '3';
+  const FOTOS_V = '4';
   const stockImg = (n, sm = true) => `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`;
 
   function itemCard(s) {
