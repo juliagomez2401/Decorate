@@ -218,7 +218,7 @@
       <span class="opt__price">${o.etiqueta || 'Incluido'}</span>
     </button>`;
   const swatch = (key, c, sel, badge) => `<button type="button" class="swatch" data-group="${key}" data-id="${c.id}" aria-pressed="${sel}" title="${esc(c.name)}" aria-label="${esc(c.name)}"><span class="swatch__img"><img src="img/cuero-${c.id}-sm.jpg" alt="" loading="lazy" width="160" height="160"><span class="swatch__badge">${badge}</span></span></button>`;
-  const hebillaCard = (key, o, pre = 'hebilla') => `<button type="button" class="hcard" data-group="${key}" data-id="${o.id}" aria-pressed="${state[key] === o.id}"><span class="hcard__img"><img src="img/${pre}-${o.id}.png?v=3" alt="" loading="lazy" width="300" height="300"></span><span class="hcard__name">${esc(o.name)}</span><span class="hcard__price">${o.etiqueta}</span></button>`;
+  const hebillaCard = (key, o, pre = 'hebilla') => `<button type="button" class="hcard" data-group="${key}" data-id="${o.id}" aria-pressed="${state[key] === o.id}"><span class="hcard__img"><img src="img/${pre}-${o.id}.png?v=5" alt="" loading="lazy" width="300" height="300"></span><span class="hcard__name">${esc(o.name)}</span><span class="hcard__price">${o.etiqueta}</span></button>`;
   const elegido = () => { const p = pasos()[state.step]; if (!p) return ''; if (p.tipo === 'cueros') return state.cueros.map(cueroName).join(' + '); if (p.tipo === 'cuero') return cueroName(state[p.key]); return ''; };
   const selLine = () => `<p class="step__sel" data-sel>${elegido() ? 'Elegiste: <b>' + esc(elegido()) + '</b>' : 'Tocá una muestra para verla en la pieza.'}</p>`;
 
@@ -348,6 +348,19 @@
   el.prevBar.addEventListener('click', () => goStep(state.step - 1));
 
   render(true);
+
+  // guía "¿Cómo se usa?": abierta la primera vez que alguien entra; después queda cerrada
+  const guia = document.querySelector('[data-guia]');
+  if (guia) {
+    const txt = guia.querySelector('[data-guia-txt]'), KEY = 'decorate-guia-vista';
+    let vista = false; try { vista = localStorage.getItem(KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
+    guia.open = !vista;
+    const marcar = () => { txt.textContent = guia.open ? 'Cerrar' : 'Ver'; };
+    marcar();
+    guia.addEventListener('toggle', () => { marcar(); if (!guia.open) { try { localStorage.setItem(KEY, '1'); } catch (e) { /* nada */ } } });
+    // al elegir la primera opción, se da por vista
+    builder.addEventListener('click', (e) => { if (e.target.closest('[data-group]')) { try { localStorage.setItem(KEY, '1'); } catch (er) { /* nada */ } } });
+  }
 
   // la barra con Atrás, el total y Siguiente queda siempre fija abajo
 })();

@@ -273,7 +273,7 @@ window.DT3D = (() => {
   const dijeCache = {};
   function dijeTex(id) {
     // abierta como archivo (doble clic), el 3D no puede leer fotos sueltas: se usa la copia de js/cueros-datos.js
-    const src = (window.DT_DIJES_B64 && window.DT_DIJES_B64[id]) || `img/dije-${id}.png?v=3`;
+    const src = (window.DT_DIJES_B64 && window.DT_DIJES_B64[id]) || `img/dije-${id}.png?v=5`;
     const tex = new T.TextureLoader().load(src, () => listeners.forEach((fn) => fn()));
     tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
     return tex;
@@ -438,9 +438,9 @@ window.DT3D = (() => {
     const g = color.getContext('2d'), gr = rough.getContext('2d'), gm = metal.getContext('2d');
     gm.fillStyle = '#000'; gm.fillRect(0, 0, W, H);
     // silueta
-    const sil = new Path2D(); const N = 400;
-    for (let i = 0; i <= N; i++) { const dx = -L / 2 + L * i / N; const [t] = F(dx); i ? sil.lineTo(px(dx), py(t)) : sil.moveTo(px(dx), py(t)); }
-    for (let i = N; i >= 0; i--) { const dx = -L / 2 + L * i / N; const [, b] = F(dx); sil.lineTo(px(dx), py(b)); }
+    const sil = new Path2D(); const N = 400, E = 2;   // E: se pasa de las puntas (que se juntan atrás), así el canto oscuro va solo arriba y abajo
+    for (let i = 0; i <= N; i++) { const dx = -L / 2 - E + (L + 2 * E) * i / N; const [t] = F(dx); i ? sil.lineTo(px(dx), py(t)) : sil.moveTo(px(dx), py(t)); }
+    for (let i = N; i >= 0; i--) { const dx = -L / 2 - E + (L + 2 * E) * i / N; const [, b] = F(dx); sil.lineTo(px(dx), py(b)); }
     sil.closePath();
     // zonas: principal al centro; costados; detalle cruzado al lado de la hebilla
     const a = CORTE[forma];
@@ -627,12 +627,43 @@ window.DT3D = (() => {
   };
 
   const hebillaMat = {};
+  // hebilla hecha con su foto: una pieza de metal con el contorno y los huecos de la foto, con espesor y bisel;
+  // la foto va adelante (y de relieve, así se ven los labrados); el canto, del color del metal de esa hebilla
+  const hebillaCache = {}, hebillaFalla = {};   // si la foto no carga, se dibuja con formas simples
+  function hebillaFoto(hb, F, H, canto) {
+    const id = hb.id;
+    if (!hebillaCache[id]) {
+      const src = (window.DT_HEBILLAS_B64 && window.DT_HEBILLAS_B64[id]) || `img/hebilla-${id}.png?v=5`;
+      const tex = new T.TextureLoader().load(src, () => listeners.forEach((fn) => fn()), undefined, () => { hebillaFalla[id] = true; listeners.forEach((fn) => fn()); });
+      tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
+      hebillaCache[id] = new T.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: hb.tipo === 'rellena' ? 0.035 : 0.02, metalness: 0.5, roughness: 0.4, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.3, side: T.DoubleSide });
+    }
+    const [x0, y0, x1, y1] = F.caja, girada = Math.abs(F.giro) === 90;
+    // alto en el cinto: apenas más que la tira
+    const alto = (hb.tipo === 'rellena' ? 0.98 : 1.02) * H, s = alto / (girada ? x1 - x0 : y1 - y0);
+    const e = (hb.tipo === 'rellena' ? 0.4 : 0.3) / s, bev = 0.08 / s;
+    const clave = 'geo-' + id + '-' + H.toFixed(2);
+    if (!hebillaCache[clave]) {
+      const v2 = (q) => new T.Vector2(q[0], q[1]);
+      const sh = new T.Shape(F.contorno.map(v2));
+      F.huecos.forEach((h) => sh.holes.push(new T.Path(h.map(v2))));
+      const geo = new T.ExtrudeGeometry(sh, { depth: e, bevelEnabled: true, bevelThickness: bev, bevelSize: bev * 0.5, bevelSegments: 2, curveSegments: 4 });
+      geo.translate(-(x0 + x1) / 2, -(y0 + y1) / 2, -e / 2); geo.computeVertexNormals();
+      hebillaCache[clave] = geo;
+    }
+    const m = new T.Mesh(hebillaCache[clave], [hebillaCache[id], canto]);
+    m.scale.set(s, s, s); m.rotation.z = F.giro * Math.PI / 180;
+    return m;
+  }
   function hebilla(id, H) {
     const hb = ((window.DT && window.DT.hebillas) || []).find((x) => x.id === id) || { tipo: 'marco', forma: 'rect', metal: 'bronce' };
     // el color de cada hebilla sale de su foto (envejecida, no plata ni oro de catálogo)
     const mat = hb.color ? (hebillaMat[hb.id] || (hebillaMat[hb.id] = (() => { const mm = new T.MeshStandardMaterial({ color: hb.color, metalness: 0.9, roughness: hb.metal === 'oro' ? 0.3 : 0.42 }); mm.color.convertSRGBToLinear(); return mm; })()))
       : hb.metal === 'plata' ? MAT.plata : hb.metal === 'oro' ? MAT.oro : MAT.bronce;
     const g = new T.Group();
+    // con la silueta de la foto (js/hebillas-formas.js): la hebilla tiene la forma exacta y la foto encima
+    const F = window.DT_HEBILLAS_FORMAS && window.DT_HEBILLAS_FORMAS[hb.id];
+    if (F && !hebillaFalla[hb.id]) { g.add(hebillaFoto(hb, F, H, mat)); return g; }
     const ext = (shape, depth, bev) => new T.Mesh(new T.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 4, curveSegments: 48 }), mat);
     const ellipse = (rx, ry) => { const sh = new T.Shape(); sh.absellipse(0, 0, rx, ry, 0, Math.PI * 2); return sh; };
     const holeEllipse = (rx, ry) => { const ph = new T.Path(); ph.absellipse(0, 0, rx, ry, 0, Math.PI * 2, true); return ph; };
@@ -672,6 +703,9 @@ window.DT3D = (() => {
   // tarjetero: cuero fino. Atrás la pieza más alta; adelante, la del medio (franja, V o diagonal, a veces en
   // otro cuero) y la de adelante. Las de adelante están cosidas a la de atrás por los costados y abajo, y se
   // abomban hacia arriba: entre la de atrás y la del medio queda el bolsillo grande, para billetes.
+  // la hebilla sola (para revisar cada una de cerca)
+  M.hebilla = (st) => ({ group: hebilla(st.hebilla, 4.2), pitch: 0, yaw: 0 });
+
   M.tarjetero = (st) => {
     const g = new T.Group(), W = 10, HB = 7.2, yb = -HB / 2, x0 = -W / 2, x1 = W / 2, r = 0.6, t = 0.09;
     const m1 = leather(st.cuero), m2 = st.cuero2 ? leather(st.cuero2) : (st.detalle && st.detalle !== 'no' ? MAT.vacio : m1);
@@ -1066,6 +1100,7 @@ window.DT3D = (() => {
     const shadow = sombra(); scene.add(shadow);
     const pivot = new T.Group(); scene.add(pivot);
     let model = null, yaw = 0, pitch = 0.1, baseYaw = 0, dragging = false, lastX = 0, lastY = 0, idle = 0, vel = 0, dirty = true;
+    let zoom = 1, encuadre = null;   // zoom: 1 = la pieza entera; menos de 1 = más cerca
     let lastId = null, lastSt = null, pend = 0;
     const invalidate = () => { dirty = true; clearTimeout(pend); pend = setTimeout(() => { if (lastId) update(lastId, lastSt); }, 30); };
     listeners.add(invalidate);
@@ -1073,11 +1108,18 @@ window.DT3D = (() => {
     function fit() {
       const box = new T.Box3().setFromObject(pivot), sph = box.getBoundingSphere(new T.Sphere());
       const dist = sph.radius / Math.sin(T.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1.02 / camera.aspect : 1.02);
-      camera.position.set(sph.center.x, sph.center.y + sph.radius * 0.18, sph.center.z + dist);
-      camera.lookAt(sph.center);
+      encuadre = { c: sph.center.clone(), r: sph.radius, d: dist };
+      camara();
       shadow.position.set(sph.center.x, box.min.y - 0.05, sph.center.z);
       shadow.scale.setScalar(sph.radius * 2.2);
     }
+    function camara() {
+      if (!encuadre) return;
+      const { c, r, d } = encuadre;
+      camera.position.set(c.x, c.y + r * 0.18 * zoom, c.z + d * zoom);
+      camera.lookAt(c); dirty = true;
+    }
+    const acercar = (f) => { zoom = Math.max(0.3, Math.min(1.6, zoom * f)); camara(); idle = 0; };
     function disposeTree(o) { o.traverse((c) => { if (c.geometry) c.geometry.dispose(); }); }
     function update(id, st) {
       const build = M[id]; if (!build) return;
@@ -1099,10 +1141,27 @@ window.DT3D = (() => {
 
     // girar arrastrando (mouse o dedo); sola, despacio, cuando nadie la toca
     const el = renderer.domElement;
-    el.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; vel = 0; el.setPointerCapture(e.pointerId); });
-    el.addEventListener('pointermove', (e) => { if (!dragging) return; const dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; vel = dx * 0.008; yaw += vel; pitch = Math.max(-0.9, Math.min(1.25, pitch + dy * 0.004)); idle = 0; dirty = true; });
-    const up = () => { dragging = false; };
+    // un dedo (o el mouse) gira; dos dedos pellizcando acercan o alejan
+    const dedos = new Map(); let pinza = 0;
+    const separacion = () => { const [a, b] = [...dedos.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    el.addEventListener('pointerdown', (e) => {
+      dedos.set(e.pointerId, { x: e.clientX, y: e.clientY }); el.setPointerCapture(e.pointerId);
+      if (dedos.size === 2) { dragging = false; pinza = separacion(); return; }
+      dragging = true; lastX = e.clientX; lastY = e.clientY; vel = 0;
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (dedos.has(e.pointerId)) dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (dedos.size === 2) { const s2 = separacion(); if (pinza > 0 && s2 > 0) acercar(pinza / s2); pinza = s2; return; }
+      if (!dragging) return; const dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY; vel = dx * 0.008; yaw += vel; pitch = Math.max(-0.9, Math.min(1.25, pitch + dy * 0.004)); idle = 0; dirty = true;
+    });
+    const up = (e) => { dedos.delete(e.pointerId); if (dedos.size < 2) pinza = 0; if (!dedos.size) dragging = false; };
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    // botones + y −, para quien no sabe pellizcar
+    const zb = document.createElement('div'); zb.className = 'p3d-zoom';
+    zb.innerHTML = '<button type="button" aria-label="Acercar">+</button><button type="button" aria-label="Alejar">−</button>';
+    const [mas, menos] = zb.querySelectorAll('button');
+    mas.addEventListener('click', () => acercar(0.8)); menos.addEventListener('click', () => acercar(1.25));
+    host.appendChild(zb);
 
     let visible = true;
     if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(host);
@@ -1136,7 +1195,9 @@ window.DT3D = (() => {
       try { return out.toDataURL('image/jpeg', 0.8); } catch (e) { return null; }
     }
 
-    return { update, el, snapshot };
+    // girar desde afuera (lo usan las páginas de prueba de herramientas/)
+    const girar = (a, p) => { yaw += a; if (p !== undefined) pitch = p; idle = -1e9; dirty = true; };
+    return { update, el, snapshot, girar, acercar };
   }
 
   return { create, formas: Object.keys(FORMAS) };

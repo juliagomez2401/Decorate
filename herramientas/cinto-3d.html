@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="../"><title>Cinto 3D</title>
+<style>body{background:#efe7da;margin:0;padding:8px;font:13px sans-serif}.g{display:grid;grid-template-columns:1fr 1fr;gap:6px}.g img{width:100%;display:block;background:#f7f2ea}#h{position:fixed;left:-3000px;width:900px;height:560px}</style></head>
+<body><div class="g" id="g"></div><div id="h"></div>
+<script src="js/datos.js?v=99"></script><script src="js/dijes-formas.js?v=9"></script><script src="js/hebillas-formas.js?v=9"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/pieza3d.js?v=1001"></script>
+<script>
+// ?st={"tipo":"funcional",...}&giros=0,1.57,3.14
+(async()=>{const q=new URLSearchParams(location.search);const st=JSON.parse(q.get('st')||'{"tipo":"funcional","forma":"recta","cuero":"cebra","hebilla":"oval-bronce"}');
+const giros=(q.get('giros')||'0,1.57,3.14').split(',').map(Number), pitch=q.has('pitch')?+q.get('pitch'):undefined;
+const v=DT3D.create(document.getElementById('h'));v.update(q.get('pieza')||'cinto',st);await new Promise(r=>setTimeout(r,2500));v.update(q.get('pieza')||'cinto',st);await new Promise(r=>setTimeout(r,500));
+if(q.has("zoom"))v.acercar(+q.get("zoom"));let prev=0;for(const a of giros){v.girar(a-prev,pitch);prev=a;await new Promise(r=>setTimeout(r,300));const im=document.createElement('img');im.src=v.snapshot(900);document.getElementById('g').appendChild(im);}
+document.title='listo';})();
+</script></body></html>

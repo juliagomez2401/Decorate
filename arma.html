@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=44">
+  <link rel="stylesheet" href="css/estilos.css?v=56">
   <script src="js/arranque.js"></script>
 </head>
 <body style="background:var(--crema)">
@@ -31,18 +31,31 @@
           <p class="eyebrow" data-fade>A tu medida</p>
           <h1 class="display" id="arma-title" data-arma-title>Armá el tuyo</h1>
           <p data-arma-lead></p>
-          <nav class="arma-otros" aria-label="Otras piezas para armar" data-arma-otros></nav>
+          <details class="guia" data-guia>
+            <summary><span>¿Cómo se usa?</span><small data-guia-txt>Ver</small></summary>
+            <ol class="guia__pasos">
+              <li><b>Elegí una opción en cada paso:</b> la pieza en 3D cambia al instante.</li>
+              <li><b>Arrastrala</b> con el dedo o el mouse para verla de todos lados. Con <b>+</b> y <b>−</b> la acercás o alejás.</li>
+              <li><b>Avanzá con «Siguiente»</b>, abajo. Para cambiar algo, tocá «Atrás» o el número del paso.</li>
+              <li><b>Al final, agregala al carrito.</b> No se cobra nada en la web: te escribimos por WhatsApp.</li>
+            </ol>
+          </details>
         </header>
 
         <div class="builder__grid">
           <div class="builder__stagecol">
             <div class="stage" data-stage>
               <div class="stage__3d" data-draw></div>
+              <p class="stage__aviso">Es una representación para que te hagas una idea: tu pieza se hace a mano y puede variar un poco.</p>
               <p class="stage__caption"><span data-stage-caption></span></p>
             </div>
           </div>
 
           <div class="builder__panel">
+            <div class="arma-elegir">
+              <p class="arma-elegir__t">¿Qué querés armar?</p>
+              <nav class="arma-otros" aria-label="Elegí qué pieza armar" data-arma-otros></nav>
+            </div>
             <ol class="steps" data-steps aria-label="Pasos"></ol>
             <div class="builder__step" data-step-body></div>
             <div class="builder__nav">
@@ -71,12 +84,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="js/sitio.js?v=36" defer></script>
+  <script src="js/sitio.js?v=40" defer></script>
   <!-- abriendo la web como archivo (doble clic), el 3D necesita las muestras de cuero dentro del JS -->
-  <script>if (location.protocol === 'file:') document.write('<script src="js/cueros-datos.js"><\/script>');</script>
-  <script src="js/dijes-formas.js?v=3"></script>
+  <script>if (location.protocol === 'file:') document.write('<script src="js/cueros-datos.js?v=3"><\/script>');</script>
+  <script src="js/dijes-formas.js?v=4"></script>
+  <script src="js/hebillas-formas.js?v=2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-  <script src="js/pieza3d.js?v=44" defer></script>
-  <script src="js/armador-pieza.js?v=21" defer></script>
+  <script src="js/pieza3d.js?v=49" defer></script>
+  <script src="js/armador-pieza.js?v=25" defer></script>
 </body>
 </html>

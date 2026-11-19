@@ -74,12 +74,80 @@ def mascara(rgb, slug=''):
     return m
 
 
+# el borde de afuera de cada hebilla es una forma limpia: se rehace con esa forma (así no quedan pedazos de pared
+# pegados ni mordiscos), y adentro quedan solo los huecos de verdad
+RECTAS = {'cuadrada-remaches', 'doble-plateada', 'rectangular-dorada'}          # contorno de pocas rectas
+CURVAS = {'oval-bronce', 'oval-labrada', 'oval-repujada', 'redonda-bronce', 'redonda-guarda',
+          'redonda-plateada-ancha', 'redonda-plateada-fina'}                    # contorno convexo y redondeado
+# sombras que quedan adentro del aro (gris, sin color): se vacían
+INTERIOR_OSCURO = {'redonda-bronce'}   # aro dorado con barra y púa negras
+SOMBRA_ADENTRO = {'redonda-bronce', 'redonda-plateada-fina', 'redonda-plateada-ancha', 'oval-labrada', 'rectangular-dorada', 'doble-plateada'}
+
+
+def limpiar(m, rgb, slug):
+    from skimage import draw
+    h, w = m.shape
+    lab = color.rgb2lab(rgb)
+    core = morphology.opening(m, morphology.disk(9))
+    lb = measure.label(core)
+    if lb.max():
+        core = lb == max(measure.regionprops(lb), key=lambda r: r.area).label
+    llena = ndi.binary_fill_holes(m)
+    if slug in RECTAS or slug in CURVAS:
+        hull = morphology.convex_hull_image(core)
+        if slug in RECTAS:
+            c = max(measure.find_contours(np.pad(hull, 1).astype(float), 0.5), key=len) - 1
+            pol = measure.approximate_polygon(c, tolerance=7)
+            afuera = np.zeros_like(m); rr, cc = draw.polygon(pol[:, 0], pol[:, 1], m.shape); afuera[rr, cc] = True
+        else:
+            afuera = hull
+        afuera = ndi.binary_erosion(afuera, iterations=3)   # sin el halo claro del borde
+    else:
+        afuera = ndi.binary_erosion(ndi.binary_fill_holes(core), iterations=2)
+    # huecos de verdad: los grandes de la máscara original
+    huecos = llena & ~m
+    hl = measure.label(huecos)
+    tot = afuera.sum()
+    huecos = np.isin(hl, [r.label for r in measure.regionprops(hl) if r.area > tot * 0.01])
+    if slug in SOMBRA_ADENTRO and huecos.any():
+        # cerca de los huecos, lo gris claro sin color es pared o sombra, no metal
+        cerca = ndi.binary_dilation(huecos, iterations=40) & afuera
+        # el color de la pared: el de los huecos mismos
+        fondo = np.median(lab[huecos], axis=0)
+        dab = np.hypot(lab[..., 1] - fondo[1], lab[..., 2] - fondo[2])
+        lisa = ndi.gaussian_filter(np.abs(lab[..., 0] - ndi.gaussian_filter(lab[..., 0], 2)), 2) < 1.5
+        pared = cerca & (dab < 10) & (lab[..., 0] > fondo[0] - 40) & (lab[..., 0] < fondo[0] + 15)
+        if slug in {'doble-plateada', 'redonda-plateada-fina', 'redonda-plateada-ancha', 'oval-labrada'}: pared &= lisa   # el metal plateado es gris como la pared: ahí solo lo muy parejo
+        pared = morphology.opening(pared, morphology.disk(3))
+        pl = measure.label(pared)
+        # solo lo que toca un hueco
+        toca = set(np.unique(pl[ndi.binary_dilation(huecos, iterations=2)])) - {0}
+        huecos |= np.isin(pl, list(toca))
+        huecos = morphology.closing(huecos, morphology.disk(2))
+    if slug in INTERIOR_OSCURO and huecos.any():
+        # adentro del aro solo hay metal oscuro (la barra y la púa) o dorado: lo gris intermedio es sombra en la pared
+        adentro = ndi.binary_dilation(morphology.convex_hull_image(huecos), iterations=4) & afuera
+        croma = np.hypot(lab[..., 1], lab[..., 2])
+        # la sombra también es oscura: de lo oscuro queda solo lo que tiene forma de barra recta (la barra y la púa)
+        osc = lab[..., 0] < 45
+        R = morphology.footprint_rectangle
+        barras = morphology.opening(osc, R((160, 9))) | morphology.opening(osc, R((9, 160)))
+        barras = morphology.closing(barras, R((1, 31))) | morphology.closing(barras, R((31, 1)))
+        metal = morphology.closing(barras, morphology.disk(6)) | (ndi.binary_dilation(barras, iterations=14) & (croma > 12))
+        huecos |= adentro & ~metal
+        huecos = morphology.opening(huecos, morphology.disk(2))
+    huecos = ndi.binary_dilation(huecos, iterations=1)
+    m = morphology.opening(afuera & ~huecos, morphology.disk(3))   # sin hilachas ni pedacitos de pared
+    lb = measure.label(m)
+    return lb == max(measure.regionprops(lb), key=lambda r: r.area).label
+
+
 def procesar(p):
     slug = p.stem.split('-', 1)[1]
     im = Image.open(p).convert('RGB')
     im.thumbnail((1400, 1400), Image.LANCZOS)
     rgb = np.asarray(im).astype(np.float64) / 255
-    m = mascara(rgb, slug)
+    m = limpiar(mascara(rgb, slug), rgb, slug)
     a = Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.2))
     a = a.point(lambda v: 0 if v < 40 else 255 if v > 215 else int((v - 40) * 255 / 175))
     rgba = im.copy(); rgba.putalpha(a)

@@ -20,6 +20,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # zonas que se borran a mano (la muesca en V de abajo del ginkgo), en coordenadas de la tarjeta
 BORRAR = {'ginkgo': [[(0.465, 1.0), (0.515, 0.83), (0.575, 1.0)]]}
 PELAR = {'ginkgo', 'margarita', 'flor-calada'}
+ORILLA = {'estrella', 'hoja', 'flor', 'margarita'}   # se les pela el halo claro del borde de afuera
 CALADOS = {'rama', 'flor', 'flor-calada', 'girasol', 'margarita'}
 NOMBRES = ['hoja', 'flor-piedra', 'girasol', 'flor', 'rama', 'ala', 'leopardo', 'ginkgo', 'margarita', 'hoja-larga', 'estrella', 'pluma', 'flor-calada']
 ALTO_HOJA_CM = 3.2   # la hoja grande mide unos 3,2 cm de alto: da la escala de todos
@@ -107,6 +108,15 @@ for i, r in enumerate(orden):
             sil &= ~come
         sil = morphology.opening(sil, morphology.disk(2))
         l2 = measure.label(sil); sil = l2 == max(measure.regionprops(l2), key=lambda q: q.area).label
+    # el borde de afuera: se pelan los pixeles casi del color del papel (el halo claro y los pedacitos de papel pegados)
+    Cc = croma[y0:y1, x0:x1]
+    for _ in range(3 if nombre in ORILLA else 0):
+        orilla = ndi.binary_dilation(~sil, iterations=1) & sil
+        come = orilla & ((Lc > Pc - (26 if nombre == 'flor' else 14)) & (Cc < 12))
+        if not come.any(): break
+        sil &= ~come
+    sil = morphology.opening(sil, morphology.disk(1))
+    l2 = measure.label(sil); sil = l2 == max(measure.regionprops(l2), key=lambda q: q.area).label
     # el muro engordado deja una línea de papel alrededor: se saca un pixel de todo el borde (también el de los huecos)
     sil = ndi.binary_erosion(sil, iterations=1)
     # borde suave: a doble resolución, desenfocado y vuelto a cortar en 0,5

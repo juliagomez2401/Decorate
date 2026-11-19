@@ -75,7 +75,7 @@
         <button class="hd__icon hd__cart" type="button" data-cart-open aria-label="Abrir carrito">${ICON.bag}<span class="hd__count" data-cart-count>0</span></button>
       </div>
     </header>
-    ${html.dataset.page === 'tienda' ? '' : `<nav class="catbar" aria-label="Categorías"><div class="catbar__in">${D.categorias.map((c) => `<a href="${c.href}">${esc(c.name)}</a>`).join('')}</div></nav>`}
+    ${html.dataset.page === 'tienda' ? '' : `<nav class="catbar" aria-label="Categorías"><div class="catbar__in"><a class="catbar__tienda" href="tienda.html">Tienda</a>${D.categorias.map((c) => `<a href="${c.href}">${esc(c.name)}</a>`).join('')}</div></nav>`}
 
     <div class="search" id="buscar" data-search aria-hidden="true">
       <div class="search__veil" data-search-close></div>
@@ -612,6 +612,23 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runAnimations);
   else setTimeout(runAnimations, 0);
+
+  /* ---------------- barras que se deslizan de costado (categorías, piezas del armador) ----------------
+     en el celular no todos saben que se pueden deslizar: la primera vez de cada visita se corren un poco
+     solas y vuelven; el degradado del borde se va cuando se llega al final */
+  const pista = () => {
+    const barras = Array.from(document.querySelectorAll('.catbar__in, .arma-otros'));
+    const borde = (b) => { const fin = b.scrollLeft + b.clientWidth >= b.scrollWidth - 4; (b.closest('.catbar') || b).classList.toggle('al-final', fin); };
+    barras.forEach((b) => { borde(b); b.addEventListener('scroll', () => borde(b), { passive: true }); });
+    if (window.innerWidth >= 900 || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    let ya = false; try { ya = sessionStorage.getItem('decorate-pista') === '1'; sessionStorage.setItem('decorate-pista', '1'); } catch (e) { /* sin almacenamiento */ }
+    if (ya) return;
+    barras.filter((b) => b.scrollWidth > b.clientWidth + 10).forEach((b, i) => {
+      setTimeout(() => { b.scrollTo({ left: Math.min(90, b.scrollWidth - b.clientWidth), behavior: 'smooth' }); setTimeout(() => b.scrollTo({ left: 0, behavior: 'smooth' }), 900); }, 1300 + i * 500);
+    });
+  };
+  // la barra del armador se llena un poco después: se espera a que la página termine de cargar
+  if (document.readyState === 'complete') setTimeout(pista, 50); else window.addEventListener('load', pista);
 
   /* ---------------- utilidades para las otras páginas ---------------- */
   window.DTSite = { Cart, money, range, esc, wa, motion, hasGsap, lenis, scrollToEl, openDrawer, introDone, fine };
