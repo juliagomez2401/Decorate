@@ -1908,3 +1908,7 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .co__send:disabled { opacity: .7; cursor: progress; }
 /* hebillas recortadas (png sin fondo) */
 .hcard__img img { object-fit: contain; padding: 8%; }
+/* tarjetas con foto recortada (hebillas, dijes): mismo fondo tabaco que las fotos de llaveros y portafuegos */
+.hcard__img { background: radial-gradient(ellipse 80% 70% at 50% 45%, #6e4a32 0%, #341f15 100%); }
+/* inicio: los dos botones del principio, uno al lado del otro */
+.hero__btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }

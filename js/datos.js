@@ -104,22 +104,36 @@ window.DT = {
     { id: 'redonda-guarda', name: 'Redonda con guarda', tipo: 'rellena', forma: 'redonda', metal: 'bronce', price: 150 },
     { id: 'oval-repujada', name: 'Ovalada repujada', tipo: 'rellena', forma: 'oval', metal: 'bronce', price: 150 },
   ],
+  // uniones entre cuero y cuero (solo si el cinto lleva dos cueros)
   uniones: [
-    { id: 'ninguna', name: 'De una sola pieza', desc: 'Sin cortes, de punta a punta.', price: 0, onlySingle: true },
     { id: 'remaches', name: 'Remaches', desc: 'Los cueros se unen con remaches de metal.', price: 50 },
-    { id: 'argollas', name: 'Argollas', desc: 'Una argolla entre cuero y cuero.', price: 100 },
     { id: 'trenzado', name: 'Trenzado', desc: 'Unión cosida y trenzada a mano.', price: 150 },
+    { id: 'ondulada', name: 'Corte ondulado', desc: 'El corte con ondas y un remache en cada una.', price: 50 },
+    { id: 'acordonada', name: 'Acordonada', desc: 'Ojalillos con tiento cruzado, como un corsé.', price: 150 },
   ],
+  // decoración: el funcional lleva tachas o soles en todo el largo; la faja, solo flecos
   deco: [
     { id: 'no', name: 'Sin decoración', desc: 'El cuero solo.', price: 0 },
-    { id: 'si', name: 'Con tachas', desc: 'Tachas de metal arriba y abajo.', price: 100 },
-    { id: 'flecos', name: 'Con flecos', desc: 'Flecos de cuero de 40 cm a los costados.', price: 200 },
+    { id: 'tachas', name: 'Tachas arriba y abajo', desc: 'Dos filas en todo el cinto.', price: 100, tipo: 'funcional' },
+    { id: 'tachas-medio', name: 'Tachas en el medio', desc: 'Una fila en todo el cinto.', price: 100, tipo: 'funcional' },
+    { id: 'zigzag', name: 'Tachas en zigzag', desc: 'Una fila que sube y baja, en todo el cinto.', price: 100, tipo: 'funcional' },
+    { id: 'soles', name: 'Soles cosidos', desc: 'Soles bordados con hilo en todo el cinto.', price: 100, tipo: 'funcional' },
+    { id: 'flecos', name: 'Flecos', desc: 'Flecos de cuero de 40 cm, de un solo lado.', price: 200, tipo: 'decorativo' },
   ],
   // color del metal de remaches, argollas y tachas
   metales: [
     { id: 'oro-viejo', name: 'Oro viejo', desc: 'Dorado apagado, como bronce.' },
-    { id: 'plata', name: 'Plata', desc: 'Plateado.' },
+    { id: 'plomo', name: 'Plomo', desc: 'Gris oscuro.' },
     { id: 'dorado', name: 'Dorado', desc: 'Dorado brillante.' },
+    { id: 'plata', name: 'Plata', desc: 'Plateado.' },
+    { id: 'cobre', name: 'Cobre', desc: 'Marrón cobrizo. Solo en estrellas.', soloEstrellas: true },
+  ],
+  // dijes para el portafuego (foto de Julia, nov. 2026; img/dije-<id>.png)
+  dijes: [
+    { id: 'hoja', name: 'Hoja' }, { id: 'hoja-larga', name: 'Hoja larga' }, { id: 'pluma', name: 'Pluma' }, { id: 'ala', name: 'Ala' },
+    { id: 'rama', name: 'Rama' }, { id: 'ginkgo', name: 'Ginkgo' }, { id: 'girasol', name: 'Girasol' }, { id: 'margarita', name: 'Margarita' },
+    { id: 'flor', name: 'Flor' }, { id: 'flor-calada', name: 'Flor calada' }, { id: 'flor-piedra', name: 'Flor con piedra' },
+    { id: 'estrella', name: 'Estrella' }, { id: 'leopardo', name: 'Leopardo dorado' },
   ],
   maxCueros: 3,
 
@@ -148,7 +162,7 @@ window.DT = {
       fotos: ['pulsera', 'pulseras-puestas'],
       alts: ['Pulsera ancha de cuero dorado con estrella', 'Pulseras de cuero puestas'],
       desc: 'Tres anchos, de la más fina a la de 5 cm.',
-      opciones: [{ key: 'ancho', label: 'Ancho', items: [{ id: '1-3', name: '1,3 cm', price: 250 }, { id: 'intermedia', name: 'Intermedia', price: 300 }, { id: '5', name: '5 cm', price: 350 }] }],
+      opciones: [{ key: 'ancho', label: 'Ancho', items: [{ id: '1-3', name: '1,3 cm', price: 250 }, { id: 'intermedia', name: '3 cm', price: 300 }, { id: '5', name: '5 cm', price: 350 }] }],
       cuero: true,
     },
     {
@@ -157,7 +171,7 @@ window.DT = {
       alts: ['Collar de cuero rojo y turquesa trenzado'],
       desc: 'Collar de cuero, fino o más grueso, con o sin decoración.',
       opciones: [
-        { key: 'ancho', label: 'Ancho', items: [{ id: '1-3', name: '1,3 cm', price: 350 }, { id: 'grueso', name: 'Más grueso', price: 450 }] },
+        { key: 'ancho', label: 'Ancho', items: [{ id: '1-3', name: '1,3 cm', price: 350 }, { id: 'grueso', name: '2,6 cm', price: 450 }] },
         { key: 'deco', label: 'Decoración', items: [{ id: 'no', name: 'Sin decoración', price: 0 }, { id: 'si', name: 'Con decoración', price: 50, max: 100, note: '+$50 a $100' }] },
       ],
       cuero: true,

@@ -14,6 +14,8 @@ datos = (root / 'js' / 'datos.js').read_text(encoding='utf-8')
 familia = dict(re.findall(r"\{ id: '([a-z0-9-]+)', name: '[^']*', familia: '([a-z-]+)' \}", datos))
 S = 1024
 CENTRO = {'33': (0.5, 0.32)}
+# fotos con poca zona en foco: recorte más chico (parte de la foto)
+TAM = {'01': 0.32}
 # cuánto se empareja la luz (1 = todo). Los de pelo menos, para no lavar el dibujo.
 PAREJO = {'pelo': 0.55, 'croco': 0.8, 'croco-metal': 0.85, 'reptil': 0.75}
 
@@ -21,10 +23,28 @@ PAREJO = {'pelo': 0.55, 'croco': 0.8, 'croco-metal': 0.85, 'reptil': 0.75}
 OV = int(S * 0.2)  # franja de más que se usa para empalmar los bordes
 
 
+def nitidez(im):
+    # cuánto detalle hay en cada zona (las fotos pierden foco hacia los bordes)
+    g = np.asarray(im.convert('L').resize((im.width // 4, im.height // 4)), dtype=np.float32)
+    lap = np.abs(g - gaussian_filter(g, 1.5))
+    return gaussian_filter(lap, 6)
+
+
 def muestra(n, slug):
     im = ImageOps.exif_transpose(Image.open(root / 'fotos' / 'cueros' / f'{n}-{slug}.jpg')).convert('RGB')
-    s = int(min(im.size) * 0.85)
-    cx, cy = CENTRO.get(n, (0.5, 0.5))
+    # recorte de la zona más nítida de la foto (así la textura no tiene partes borrosas)
+    s = int(min(im.size) * TAM.get(n, 0.62))
+    if n in CENTRO:
+        cx, cy = CENTRO[n]
+    else:
+        nt = nitidez(im); best = None; q = s / 4
+        for fy in np.linspace(0, 1, 9):
+            for fx in np.linspace(0, 1, 9):
+                x0 = fx * (im.width - s); y0 = fy * (im.height - s)
+                v = nt[int(y0 / 4):int((y0 + s) / 4), int(x0 / 4):int((x0 + s) / 4)]
+                sc = v.mean() + 0.6 * np.percentile(v, 20)   # que no tenga zonas flojas
+                if best is None or sc > best[0]: best = (sc, (x0 + s / 2) / im.width, (y0 + s / 2) / im.height)
+        _, cx, cy = best
     x = int(min(max(cx * im.width - s / 2, 0), im.width - s)); y = int(min(max(cy * im.height - s / 2, 0), im.height - s))
     T = S + OV
     return np.asarray(im.crop((x, y, x + s, y + s)).resize((T, T), Image.LANCZOS), dtype=np.float32) / 255
@@ -73,7 +93,7 @@ def empalme_x(b):
     L, R = b[:, S:S + OV], b[:, :OV]
     path = corte(((L - R) ** 2).sum(-1))
     m = (np.arange(OV)[None, :] >= path[:, None]).astype(np.float32)
-    m = gaussian_filter(m, (0, 2.0))
+    m = gaussian_filter(m, (0, 3.0))
     out = b[:, :S].copy()
     out[:, :OV] = L * (1 - m[..., None]) + R * m[..., None]
     return out
