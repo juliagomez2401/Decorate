@@ -452,7 +452,10 @@ window.DT3D = (() => {
     const lejos = (k) => () => k;
     const combo = st.combo || 'solo';
     const zonas = [];
+    // alternado: cada cuero dos veces (adelante y atrás el principal; los costados, el otro)
+    const xL2 = (y) => -(L / 2 - a) + PEND * y, xR2 = (y) => (L / 2 - a) + PEND * y;
     if (combo === 'solo') zonas.push([lejos(-L), lejos(L), st.cuero]);
+    else if (combo === 'alternado') zonas.push([lejos(-L), xL2, st.cuero], [xL2, xL, st.cuero2], [xL, xR, st.cuero], [xR, xR2, st.cuero2], [xR2, lejos(L), st.cuero]);
     else {
       zonas.push([lejos(-L), xL, st.cuero2], [xL, xR, st.cuero]);
       if (combo === 'detalle') zonas.push([xR, xD, st.cuero3], [xD, lejos(L), st.cuero2]);
@@ -474,7 +477,7 @@ window.DT3D = (() => {
     // uniones dibujadas: trenzado cruzado a lo largo de cada corte
     // con un solo cuero también se puede cortar y unir (para que se vea la unión)
     const unido = st.union && st.union !== 'ninguna';
-    const cortes = combo === 'solo' ? (unido ? [xL, xR] : []) : (combo === 'detalle' ? [xL, xR, xD] : [xL, xR]);
+    const cortes = combo === 'solo' ? (unido ? [xL, xR] : []) : combo === 'detalle' ? [xL, xR, xD] : combo === 'alternado' ? [xL2, xL, xR, xR2] : [xL, xR];
     if (st.union === 'trenzado') {
       cortes.forEach((xc) => {
         for (let y = -HM / 2; y <= HM / 2; y += 1.1) {
@@ -623,9 +626,12 @@ window.DT3D = (() => {
     return { group: g, pitch: -0.02 };
   };
 
+  const hebillaMat = {};
   function hebilla(id, H) {
     const hb = ((window.DT && window.DT.hebillas) || []).find((x) => x.id === id) || { tipo: 'marco', forma: 'rect', metal: 'bronce' };
-    const mat = hb.metal === 'plata' ? MAT.plata : hb.metal === 'oro' ? MAT.oro : MAT.bronce;
+    // el color de cada hebilla sale de su foto (envejecida, no plata ni oro de catálogo)
+    const mat = hb.color ? (hebillaMat[hb.id] || (hebillaMat[hb.id] = (() => { const mm = new T.MeshStandardMaterial({ color: hb.color, metalness: 0.9, roughness: hb.metal === 'oro' ? 0.3 : 0.42 }); mm.color.convertSRGBToLinear(); return mm; })()))
+      : hb.metal === 'plata' ? MAT.plata : hb.metal === 'oro' ? MAT.oro : MAT.bronce;
     const g = new T.Group();
     const ext = (shape, depth, bev) => new T.Mesh(new T.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 4, curveSegments: 48 }), mat);
     const ellipse = (rx, ry) => { const sh = new T.Shape(); sh.absellipse(0, 0, rx, ry, 0, Math.PI * 2); return sh; };

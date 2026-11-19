@@ -49,6 +49,7 @@
     { href: 'arma.html?p=cinto', label: 'Armá el tuyo', id: 'armar' },
     { href: 'como-comprar.html', label: 'Cómo comprar', id: 'como' },
   ];
+  const BUSCA_FOTO = { cintos: 'stock/74', tarjeteros: 'stock/6', 'porta-lentes': 'stock/54', portafuegos: 'stock/343', llaveros: 'stock/355', pulseras: 'stock/1028', collares: 'stock/1006' };
   const wa = (text) => `https://wa.me/${D.whatsapp}${text ? '?text=' + encodeURIComponent(text) : ''}`;
   const ICON = {
     bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l-1 12.5h-11z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -108,9 +109,8 @@
           </ul>
         </div>
         <div class="menu__foot">
-          ${MORE.filter((n) => n.id !== 'armar').map((n) => `<a href="${n.href}" ${n.id === page ? 'aria-current="page"' : ''}>${n.label}</a>`).join('')}
-          <a href="${wa()}" target="_blank" rel="noopener">WhatsApp</a>
-          <a href="https://www.instagram.com/${D.instagram}/" target="_blank" rel="noopener">Instagram</a>
+          <div class="menu__foot-fila">${MORE.filter((n) => n.id !== 'armar').map((n) => `<a href="${n.href}" ${n.id === page ? 'aria-current="page"' : ''}>${n.label}</a>`).join('')}</div>
+          <div class="menu__foot-fila"><a href="https://www.instagram.com/${D.instagram}/" target="_blank" rel="noopener">Instagram</a><a href="${wa()}" target="_blank" rel="noopener">WhatsApp</a></div>
         </div>
       </nav>
     </div>
@@ -243,7 +243,8 @@
   const sResults = $('[data-search-results]');
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const INDEX = [
-    ...D.categorias.map((c) => ({ title: c.name, kind: 'Categoría', href: c.href, img: c.foto })),
+    // foto de una pieza de cada categoría que no se repite con las del inicio ni con las de la tienda
+    ...D.categorias.map((c) => ({ title: c.name, kind: 'Categoría', href: c.href, img: BUSCA_FOTO[c.id] || c.foto })),
     ...(window.DT_STOCK || []).map((s) => { const c = D.categorias.find((x) => x.id === s.cat); return { title: s.name, kind: `${c ? c.name : ''} · en stock`, href: `producto.html?id=${s.id}`, img: `stock/${s.portada || s.fotos[0]}`, extra: `${s.sub || ''} ${s.id}` }; }),
     ...D.productos.map((p) => ({ title: `${p.name} a medida`, kind: 'A tu medida', href: `arma.html?p=${p.id}`, img: p.fotos[0], extra: p.desc })),
     ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html?p=cinto', swatch: c.id })),

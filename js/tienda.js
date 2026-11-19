@@ -253,7 +253,7 @@
           const its = STOCK.filter((s) => s.cat === x.id);
           return `<section class="shop__group">
             <div class="shop__group-head"><h2>${esc(x.name)}</h2><a class="link" href="${x.href}">Ver ${its.length ? 'todos' : 'más'}</a></div>
-            <div class="${gridClass(x.id)} shop__grid--todo">${its.slice(0, 2).map(itemCard).join('')}${customCard(x)}</div>
+            <div class="${gridClass(x.id)} shop__grid--todo">${its.slice(0, VERTICALES.includes(x.id) ? 3 : 2).map(itemCard).join('')}${customCard(x)}</div>
           </section>`;
         }).join('');
       }

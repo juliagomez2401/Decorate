@@ -4,8 +4,8 @@
    Precios en pesos uruguayos, tomados de la lista de precios.
    ========================================================= */
 window.DT = {
-  whatsapp: '59891455230',
-  whatsappVisible: '091 455 230',
+  whatsapp: '59898443336',
+  whatsappVisible: '098 443 336',
   instagram: 'decora___te',
 
   /* ---------- mensajes de la franja superior (se turnan) ---------- */
@@ -91,18 +91,18 @@ window.DT = {
   ],
   // Hebillas disponibles. tipo: marco (+$50) o rellena (+$150), según la lista de precios.
   hebillas: [
-    { id: 'oval-bronce', name: 'Ovalada bronce', tipo: 'marco', forma: 'oval', metal: 'bronce', price: 50 },
-    { id: 'redonda-bronce', name: 'Redonda bronce', tipo: 'marco', forma: 'redonda', metal: 'bronce', price: 50 },
-    { id: 'rectangular-dorada', name: 'Rectangular dorada', tipo: 'marco', forma: 'rect', metal: 'oro', price: 50 },
-    { id: 'doble-plateada', name: 'Doble púa plateada', tipo: 'marco', forma: 'rect', metal: 'plata', price: 50 },
-    { id: 'redonda-plateada-ancha', name: 'Redonda plateada ancha', tipo: 'marco', forma: 'redonda', metal: 'plata', price: 50 },
-    { id: 'redonda-plateada-fina', name: 'Redonda plateada fina', tipo: 'marco', forma: 'redonda', metal: 'plata', price: 50 },
-    { id: 'oval-labrada', name: 'Ovalada labrada plateada', tipo: 'marco', forma: 'oval', metal: 'plata', price: 50 },
-    { id: 'flor-bronce', name: 'Flor bronce', tipo: 'rellena', forma: 'flor', metal: 'bronce', price: 150 },
-    { id: 'rosa-bronce', name: 'Rosa bronce', tipo: 'rellena', forma: 'flor', metal: 'bronce', price: 150 },
-    { id: 'cuadrada-remaches', name: 'Cuadrada con remaches', tipo: 'rellena', forma: 'cuadrada', metal: 'bronce', price: 150 },
-    { id: 'redonda-guarda', name: 'Redonda con guarda', tipo: 'rellena', forma: 'redonda', metal: 'bronce', price: 150 },
-    { id: 'oval-repujada', name: 'Ovalada repujada', tipo: 'rellena', forma: 'oval', metal: 'bronce', price: 150 },
+    { id: 'oval-bronce', name: 'Ovalada bronce', tipo: 'marco', forma: 'oval', metal: 'bronce', color: '#7e6a51', price: 50 },
+    { id: 'redonda-bronce', name: 'Redonda bronce', tipo: 'marco', forma: 'redonda', metal: 'bronce', color: '#7e7559', price: 50 },
+    { id: 'rectangular-dorada', name: 'Rectangular dorada', tipo: 'marco', forma: 'rect', metal: 'oro', color: '#a7794a', price: 50 },
+    { id: 'doble-plateada', name: 'Doble púa plateada', tipo: 'marco', forma: 'rect', metal: 'plata', color: '#978c85', price: 50 },
+    { id: 'redonda-plateada-ancha', name: 'Redonda plateada ancha', tipo: 'marco', forma: 'redonda', metal: 'plata', color: '#979293', price: 50 },
+    { id: 'redonda-plateada-fina', name: 'Redonda plateada fina', tipo: 'marco', forma: 'redonda', metal: 'plata', color: '#978f8a', price: 50 },
+    { id: 'oval-labrada', name: 'Ovalada labrada plateada', tipo: 'marco', forma: 'oval', metal: 'plata', color: '#978e8a', price: 50 },
+    { id: 'flor-bronce', name: 'Flor bronce', tipo: 'rellena', forma: 'flor', metal: 'bronce', color: '#7e6a50', price: 150 },
+    { id: 'rosa-bronce', name: 'Rosa bronce', tipo: 'rellena', forma: 'flor', metal: 'bronce', color: '#7e6e57', price: 150 },
+    { id: 'cuadrada-remaches', name: 'Cuadrada con remaches', tipo: 'rellena', forma: 'cuadrada', metal: 'bronce', color: '#7e6349', price: 150 },
+    { id: 'redonda-guarda', name: 'Redonda con guarda', tipo: 'rellena', forma: 'redonda', metal: 'bronce', color: '#7e664f', price: 150 },
+    { id: 'oval-repujada', name: 'Ovalada repujada', tipo: 'rellena', forma: 'oval', metal: 'bronce', color: '#7e6e5f', price: 150 },
   ],
   // uniones entre cuero y cuero (solo si el cinto lleva dos cueros)
   uniones: [

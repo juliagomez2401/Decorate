@@ -52,9 +52,9 @@
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'El cuero principal', hint: 'Es el de adelante, donde va la hebilla.' },
         { key: 'combo', label: 'Cueros', titulo: '¿Uno o dos cueros?', hint: 'Así se combinan los cueros en nuestros cintos.', opciones: (st) => [
           { id: 'solo', name: 'Un solo cuero', desc: st.tipo === 'funcional' ? 'Todo el cinto en el cuero principal.' : 'Toda la faja en el cuero principal.' },
-          { id: 'costados', name: 'Dos cueros', desc: st.tipo === 'funcional' ? 'Adelante el principal; a los costados, lejos de la hebilla y los agujeros, el otro.' : 'Adelante el principal y los costados en otro, con cortes en diagonal.' }] },
-        { key: 'union', label: 'Unión', titulo: 'La unión', hint: 'Cómo se unen los dos cueros.', si: (st) => st.combo === 'costados', opciones: () => D.uniones.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
-        { key: 'cuero2', label: 'Segundo cuero', tipo: 'cuero', titulo: 'El segundo cuero', hint: 'Elegí uno que contraste con el principal.', si: (st) => st.combo === 'costados', excluir: 'cuero' },
+          { id: 'costados', name: 'Dos cueros', desc: st.tipo === 'funcional' ? 'Adelante el principal; a los costados, lejos de la hebilla y los agujeros, el otro.' : 'Adelante el principal y los costados en otro, con cortes en diagonal.' }].concat(st.tipo === 'decorativo' ? [{ id: 'alternado', name: 'Dos cueros alternados', desc: 'Cada uno se repite dos veces: adelante y atrás el principal, a los costados el otro.' }] : []) },
+        { key: 'union', label: 'Unión', titulo: 'La unión', hint: 'Cómo se unen los dos cueros.', si: (st) => st.combo === 'costados' || st.combo === 'alternado', opciones: () => D.uniones.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
+        { key: 'cuero2', label: 'Segundo cuero', tipo: 'cuero', titulo: 'El segundo cuero', hint: 'Elegí uno que contraste con el principal.', si: (st) => st.combo === 'costados' || st.combo === 'alternado', excluir: 'cuero' },
         { key: 'cierre', label: 'Cierre', titulo: '¿Cómo cierra?', hint: 'Con hebilla adelante o con broches al costado.', si: (st) => st.tipo === 'decorativo', opciones: () => [
           { id: 'hebilla', name: 'Hebilla adelante', desc: 'Elegís la hebilla en el paso que sigue.' },
           { id: 'broches', name: 'Broches al costado', desc: 'Sin hebilla: cierra al costado con tres broches.' }] },
@@ -68,7 +68,7 @@
       campos: [{ key: 'cintura', label: 'Cintura en cm (opcional)', num: true }],
       describir: (st) => [
         find(D.tipos, st.tipo) && (st.tipo === 'decorativo' ? 'Faja' + (st.forma ? ' ' + { recta: 'recta', asimetrica: 'asimétrica', mono: 'moño', cruzada: 'cruzada' }[st.forma] : '') : 'Cinto funcional'),
-        st.cuero && cueroName(st.cuero) + (st.cuero2 ? ' con ' + cueroName(st.cuero2).toLowerCase() : ''),
+        st.cuero && cueroName(st.cuero) + (st.cuero2 ? (st.combo === 'alternado' ? ' alternado con ' : ' con ') + cueroName(st.cuero2).toLowerCase() : ''),
         st.cierre === 'broches' && 'Cierra con broches al costado' + (st.metalCierre ? ' (' + nombre(D.metales, st.metalCierre).toLowerCase() + ')' : ''),
         find(D.hebillas, st.hebilla) && 'Hebilla ' + find(D.hebillas, st.hebilla).name.toLowerCase(),
         st.union && st.union !== 'ninguna' && 'Unión ' + find(D.uniones, st.union).name.toLowerCase(),

@@ -1912,3 +1912,37 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .hcard__img { background: radial-gradient(ellipse 80% 70% at 50% 45%, #6e4a32 0%, #341f15 100%); }
 /* inicio: los dos botones del principio, uno al lado del otro */
 .hero__btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* v37 · precios y textos un poco más grandes; menú más grande y sin hueco en la compu */
+.item__price { font-size: 16px; }
+.tile__price { font-size: 13px; }
+.mto__price { font-size: 15px; }
+.mto__card--main .mto__price { font-size: 17px; }
+.mto__tag { font-size: 12px; }
+.mto__card--main .mto__tag { font-size: 13px; }
+.mto__link { font-size: 13px; }
+.menu__label { font-size: 13px; }
+.menu__all { font-size: 13px; }
+.menu__name { font-size: 22px; }
+.menu__list small { font-size: 11px; }
+.menu__make-txt { font-size: 14px; }
+.menu__make-list { font-size: 21px; }
+.menu__foot { display: grid; gap: 10px; }
+.menu__foot-fila { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.menu__foot a { font-size: 12px; }
+/* en la compu el menú usa todo el alto: letras y espacios crecen con la altura de la pantalla */
+@media (min-height: 760px) and (min-width: 900px) {
+  .menu__label { font-size: clamp(13px, 1.45vh, 15px); padding-top: clamp(14px, 2vh, 30px); padding-bottom: clamp(6px, 0.9vh, 13px); }
+  .menu__list a { padding: clamp(4px, 0.72vh, 12px) 0; }
+  .menu__name { font-size: clamp(21px, 2.5vh, 27px); }
+  .menu__list small { font-size: clamp(11px, 1.2vh, 13px); }
+  .menu__all { font-size: clamp(13px, 1.45vh, 15px); margin-top: clamp(8px, 1.4vh, 16px); }
+  .menu__make { margin-top: clamp(14px, 2vh, 30px); }
+  .menu__make .menu__label { padding-top: clamp(12px, 1.7vh, 24px); }
+  .menu__make-txt { font-size: clamp(14px, 1.55vh, 16px); margin-bottom: clamp(4px, 0.9vh, 10px); }
+  .menu__make-list { font-size: clamp(20px, 2.35vh, 25px); }
+  .menu__make-list a { padding: clamp(4px, 0.62vh, 11px) 0; }
+  .menu__foot { padding-top: clamp(14px, 2vh, 24px); gap: clamp(8px, 1.2vh, 14px); }
+  .menu__foot a { font-size: clamp(12px, 1.35vh, 14px); }
+}
+}
