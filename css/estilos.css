@@ -1945,4 +1945,31 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
   .menu__foot { padding-top: clamp(14px, 2vh, 24px); gap: clamp(8px, 1.2vh, 14px); }
   .menu__foot a { font-size: clamp(12px, 1.35vh, 14px); }
 }
+/* celular: el pie del menú (dos filas) entra sin pasarse del alto */
+@media (max-width: 899px) {
+  .menu__foot { padding-top: 10px; gap: 6px; }
+  .menu__make { padding-bottom: 0; }
+  .menu__make-txt { margin-bottom: 2px; }
+}
+/* celular: "A medida" siempre en una columna (sin palabras cortadas ni filas desparejas);
+   letras y espacios se ajustan al alto de la pantalla para que entre todo el menú */
+@media (max-width: 899px) {
+  .menu__make-list { grid-template-columns: 1fr; font-size: clamp(16px, 2.55vh, 21px); }
+  .menu__make-list a::after { content: "Armar"; }
+  .menu__make-list li a, .menu__make-list li:nth-last-child(2) a { border-bottom: 1px solid var(--caoba-linea); padding: clamp(2px, 0.55vh, 7px) 0; }
+  .menu__make-list li:last-child a { border-bottom: 0; }
+  .menu__name { font-size: clamp(17px, 2.65vh, 22px); }
+  .menu__list a { padding: clamp(2px, 0.6vh, 7px) 0; }
+  .menu__label { padding-top: clamp(8px, 1.9vh, 18px); padding-bottom: clamp(3px, 0.7vh, 8px); }
+  .menu__make { margin-top: clamp(8px, 1.6vh, 18px); }
+  .menu__make .menu__label { padding-top: clamp(8px, 1.5vh, 14px); }
+  .menu__make-txt { font-size: clamp(12px, 1.75vh, 14px); margin-bottom: clamp(0px, 0.4vh, 6px); }
+  .menu__all { margin-top: clamp(4px, 1vh, 10px); }
+}
+@media (max-width: 899px) and (max-height: 700px) {
+  .menu__make-txt { display: none; }
+}
+@media (max-width: 899px) and (max-height: 640px) {
+  .menu__list a, .menu__make-list li a, .menu__make-list li:nth-last-child(2) a { padding: 1px 0; }
+  .menu__label { padding-top: 6px; }
 }

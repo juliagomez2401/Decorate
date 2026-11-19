@@ -573,8 +573,8 @@ window.DT3D = (() => {
     m.cortes.forEach((xc) => {
       const [t, b] = m.F(xc(0));
       if (st.union === 'remaches') g.add(pasa(studGeo(deco ? 0.4 : 0.3), mt, [1 / 3, 2 / 3].map((f) => { let y = b + (t - b) * f; const [t2, b2] = m.F(xc(y)); y = b2 + (t2 - b2) * f; return { p: at(xc(y), y, 0.02), n: nrm(xc(y)) }; }), thick + 0.07, 0.22));
-      // ondulada: un remache en el medio de cada onda, sobre la pieza del centro
-      if (st.union === 'ondulada') { const lado = xc(0) < 0 ? 1 : -1, list = []; for (let y = ONDA / 2; y < t - 0.4; y += ONDA) [y, -y].forEach((yy) => { if (yy > b + 0.4) list.push({ p: at(xc(yy) + lado * 0.6, yy, 0.02), n: nrm(xc(yy)) }); }); g.add(pasa(studGeo(0.3), mt, list, thick + 0.07, 0.2)); }
+      // ondulada: un remache en cada onda, justo sobre la raya del corte
+      if (st.union === 'ondulada') { const lado = xc(0) < 0 ? 1 : -1, list = []; for (let y = ONDA / 2; y < t - 0.4; y += ONDA) [y, -y].forEach((yy) => { if (yy > b + 0.4) list.push({ p: at(xc(yy), yy, 0.02), n: nrm(xc(yy)) }); }); g.add(pasa(studGeo(0.3), mt, list, thick + 0.07, 0.2)); }
       // acordonada: ojalillos de metal
       if (st.union === 'acordonada') { const list = []; for (let y = t - 0.9; y >= b + 0.8; y -= 1.15) [-0.75, 0.75].forEach((o) => list.push({ p: at(xc(y) + o, y, 0.03), n: nrm(xc(y)) })); g.add(many(new T.TorusGeometry(0.2, 0.07, 8, 20), mt, list)); }
       // grapas: tres puentes de metal cruzando el corte
