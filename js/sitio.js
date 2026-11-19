@@ -46,7 +46,7 @@
 
   /* ---------------- estructura común ---------------- */
   const MORE = [
-    { href: 'arma.html?p=cinto', label: 'Armá el tuyo', id: 'armar' },
+    { href: 'arma.html', label: 'Armá el tuyo', id: 'armar' },
     { href: 'como-comprar.html', label: 'Cómo comprar', id: 'como' },
   ];
   const BUSCA_FOTO = { cintos: 'stock/74', tarjeteros: 'stock/6', 'porta-lentes': 'stock/54', portafuegos: 'stock/343', llaveros: 'stock/355', pulseras: 'stock/1028', collares: 'stock/1006' };
@@ -247,8 +247,8 @@
     ...D.categorias.map((c) => ({ title: c.name, kind: 'Categoría', href: c.href, img: BUSCA_FOTO[c.id] || c.foto })),
     ...(window.DT_STOCK || []).map((s) => { const c = D.categorias.find((x) => x.id === s.cat); return { title: s.name, kind: `${c ? c.name : ''} · en stock`, href: `producto.html?id=${s.id}`, img: `stock/${s.portada || s.fotos[0]}`, extra: `${s.sub || ''} ${s.id}` }; }),
     ...D.productos.map((p) => ({ title: `${p.name} a medida`, kind: 'A tu medida', href: `arma.html?p=${p.id}`, img: p.fotos[0], extra: p.desc })),
-    ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html?p=cinto', swatch: c.id })),
-    { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma.html?p=cinto', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
+    ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html', swatch: c.id })),
+    { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma.html', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
     { title: 'Cómo comprar', kind: 'Ayuda', href: 'como-comprar.html', extra: 'pago transferencia efectivo' },
   ];
   function runSearch() {
@@ -306,7 +306,7 @@
     $('[data-cart-count-txt]').textContent = n ? `(${n})` : '';
     $('[data-cart-open]').setAttribute('aria-label', `Abrir carrito, ${n} ${n === 1 ? 'pieza' : 'piezas'}`);
     if (!Cart.items.length) {
-      list.innerHTML = `<div class="drawer__empty"><p>Todavía no agregaste nada.</p><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html?p=cinto">Armá el tuyo</a></div>`;
+      list.innerHTML = `<div class="drawer__empty"><p>Todavía no agregaste nada.</p><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html">Armá el tuyo</a></div>`;
       foot.innerHTML = '';
       return;
     }

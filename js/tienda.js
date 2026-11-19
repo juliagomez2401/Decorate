@@ -69,7 +69,7 @@
         <span class="tile__name">${esc(c.name)}</span>
         <span class="tile__price">Desde ${money(c.desde)}</span>
       </a>`).join('') + `
-      <a class="tile tile--make" href="arma.html?p=cinto">
+      <a class="tile tile--make" href="arma.html">
         <span class="tile__img"><span class="tile__swatches">${D.cueros.slice(0, 4).map((c) => `<i style="background-image:url(img/cuero-${c.id}-sm.jpg)"></i>`).join('')}</span></span>
         <span class="tile__name">Armá el tuyo</span>
         <span class="tile__price">A tu medida</span>
@@ -155,7 +155,7 @@
         <span class="sc__txt"><b>${esc(c.name)}</b><small>Desde ${money(c.desde)}</small></span>
       </a>`;
     const make = `
-      <a class="sc sc--make" href="arma.html?p=cinto" draggable="false">
+      <a class="sc sc--make" href="arma.html" draggable="false">
         <span class="sc__img sc__img--make"><span>${D.cueros.slice(0, 9).map((x) => `<i style="background-image:url(img/cuero-${x.id}-sm.jpg)"></i>`).join('')}</span></span>
         <span class="sc__txt"><b>Armá el tuyo</b><small>A tu medida</small></span>
       </a>`;
@@ -570,7 +570,7 @@
       const cnt = $('[data-co-count]', co);
       if (cnt) cnt.textContent = n ? `${n} ${n === 1 ? 'pieza' : 'piezas'}` : '';
       if (!Cart.items.length) {
-        itemsBox.innerHTML = `<div class="co__empty"><p>Tu carrito está vacío.</p><div><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html?p=cinto">Armá el tuyo</a></div></div>`;
+        itemsBox.innerHTML = `<div class="co__empty"><p>Tu carrito está vacío.</p><div><a class="link" href="tienda.html">Ver la tienda</a><a class="link" href="arma.html">Armá el tuyo</a></div></div>`;
         formBox.hidden = true;
         return;
       }

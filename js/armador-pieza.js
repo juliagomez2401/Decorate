@@ -177,6 +177,34 @@
   };
 
   const qs = new URLSearchParams(location.search);
+  // sin pieza (arma.html a secas): la página para elegir qué armar
+  if (!PIEZAS[qs.get('p')]) {
+    const box = document.querySelector('[data-elegir]');
+    if (box) {
+      builder.hidden = true; box.hidden = false;
+      document.documentElement.classList.add('elegir-pieza');
+      document.title = 'Armá el tuyo · Decora.te';
+      const cat = (id) => D.categorias.find((c) => c.custom && c.custom.href === `arma.html?p=${id}`) || {};
+      // fotos distintas a las del inicio, cada una en una tarjeta de su misma forma (así no se cortan):
+      // el cinto apaisado y grande; estuche, portafuego y llavero, verticales; tarjetero, pulsera y collar, apaisados
+      const FOTOS = { cinto: ['stock/76', '50% 50%', true], tarjetero: ['stock/8', '50% 50%'], 'porta-lentes': ['stock/51', '50% 50%'],
+        portafuego: ['stock/341', '50% 50%'], llavero: ['stock/353', '50% 50%'], pulsera: ['stock/1036', '50% 50%'], collar: ['stock/1008', '50% 50%'] };
+      box.querySelector('[data-elegir-grid]').innerHTML = Object.entries(PIEZAS).map(([id, x], i) => {
+        const c = cat(id), desde = x.precio(JSON.parse(JSON.stringify(x.state))).min;
+        const [f, pos, grande] = FOTOS[id] || [c.foto, c.pos || '50% 50%'];
+        return `<a class="elige elige--${id}${['porta-lentes', 'portafuego', 'llavero'].includes(id) ? ' elige--alta' : ''}" href="arma.html?p=${id}" style="--i:${i}">
+          <span class="elige__img"><img src="img/${f}${grande ? '' : '-sm'}.jpg?v=4" alt="${esc(x.nombre)} de cuero hecho a mano" style="object-position:${pos}"></span>
+          <span class="elige__info">
+            <span class="elige__num">0${i + 1}</span>
+            <span class="elige__name">${esc(x.nombre)}</span>
+            ${c.custom && c.custom.txt ? `<span class="elige__txt">${esc(c.custom.txt)}</span>` : ''}
+            <span class="elige__pie"><span class="elige__price">Desde ${money(desde)}</span><span class="elige__go">Empezar</span></span>
+          </span>
+        </a>`;
+      }).join('');
+      return;
+    }
+  }
   const pid = PIEZAS[qs.get('p')] ? qs.get('p') : 'cinto';
   const P = PIEZAS[pid];
   const state = Object.assign({ step: 0, nota: '' }, JSON.parse(JSON.stringify(P.state)));

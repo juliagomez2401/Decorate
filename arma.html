@@ -20,8 +20,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=56">
+  <link rel="stylesheet" href="css/estilos.css?v=59">
   <script src="js/arranque.js"></script>
+  <!-- sin pieza elegida (arma.html a secas): primero se elige qué armar -->
+  <script>if (!/[?&]p=/.test(location.search)) document.documentElement.classList.add('elegir-pieza');</script>
 </head>
 <body style="background:var(--crema)">
   <main>
@@ -37,7 +39,7 @@
               <li><b>Elegí una opción en cada paso:</b> la pieza en 3D cambia al instante.</li>
               <li><b>Arrastrala</b> con el dedo o el mouse para verla de todos lados. Con <b>+</b> y <b>−</b> la acercás o alejás.</li>
               <li><b>Avanzá con «Siguiente»</b>, abajo. Para cambiar algo, tocá «Atrás» o el número del paso.</li>
-              <li><b>Al final, agregala al carrito.</b> No se cobra nada en la web: te escribimos por WhatsApp.</li>
+              <li><b>Al final, agregala al carrito.</b></li>
             </ol>
           </details>
         </header>
@@ -77,6 +79,22 @@
         </div>
       </div>
     </section>
+
+    <section class="elegir" aria-labelledby="elegir-title" data-elegir hidden>
+      <div class="wrap">
+        <header class="elegir__top">
+          <div class="elegir__titulo">
+            <p class="eyebrow">A tu medida</p>
+            <h1 class="display" id="elegir-title"><span class="ln"><span>¿Qué querés</span></span> <span class="ln"><span><em>armar?</em></span></span></h1>
+          </div>
+          <div class="elegir__bajada">
+            <p>Elegí la pieza y armala paso a paso: la ves en 3D con el cuero real y sabés cuánto sale antes de pedirla.</p>
+            <ol class="elegir__pasos"><li><b>1</b>Elegís la pieza</li><li><b>2</b>La armás en 3D</li><li><b>3</b>La pedís</li></ol>
+          </div>
+        </header>
+        <div class="elegir__grid" data-elegir-grid></div>
+      </div>
+    </section>
   </main>
 
   <script src="js/datos.js?v=42"></script>
@@ -84,13 +102,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="js/sitio.js?v=40" defer></script>
+  <script src="js/sitio.js?v=41" defer></script>
   <!-- abriendo la web como archivo (doble clic), el 3D necesita las muestras de cuero dentro del JS -->
   <script>if (location.protocol === 'file:') document.write('<script src="js/cueros-datos.js?v=4"><\/script>');</script>
   <script src="js/dijes-formas.js?v=5"></script>
   <script src="js/hebillas-formas.js?v=2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="js/pieza3d.js?v=50" defer></script>
-  <script src="js/armador-pieza.js?v=26" defer></script>
+  <script src="js/armador-pieza.js?v=29" defer></script>
 </body>
 </html>
