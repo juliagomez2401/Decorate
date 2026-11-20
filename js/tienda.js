@@ -213,12 +213,15 @@
   if (mtoGrid) {
     const sw = $('[data-mto-cueros]');
     if (sw) sw.innerHTML = D.cueros.map((c) => `<li><img src="img/cuero-${c.id}-sm.jpg" alt="" loading="lazy" width="600" height="600"><span>${esc(c.name)}</span></li>`).join('');
-    // fotos apaisadas para que todas las tarjetas tengan la misma forma
-    const fotos = { cintos: 'stock/44', tarjeteros: 'stock/26', 'porta-lentes': 'inicio-portalentes', portafuegos: 'inicio-portafuego', llaveros: 'inicio-llavero', pulseras: 'stock/1044', collares: 'stock/1005' };
-    mtoGrid.innerHTML = D.categorias.map((c, i) => {
+    // el cinto arriba, grande; abajo dos filas parejas: las tres apaisadas y, debajo, las tres piezas que son
+    // verticales (con su foto vertical)
+    const fotos = { cintos: 'stock/44', tarjeteros: 'stock/26', 'porta-lentes': 'stock/60', portafuegos: 'stock/342', llaveros: 'stock/352', pulseras: 'stock/1044', collares: 'stock/1005' };
+    const VERT = ['porta-lentes', 'portafuegos', 'llaveros'];
+    const orden = [D.categorias[0], ...D.categorias.slice(1).filter((c) => !VERT.includes(c.id)), ...D.categorias.filter((c) => VERT.includes(c.id))];
+    mtoGrid.innerHTML = orden.map((c, i) => {
       const f = fotos[c.id] || c.foto;
-      const main = i === 0;
-      return `<a class="mto__card${main ? ' mto__card--main' : ''} mto__card--${c.id}" href="${c.custom.href}" data-fade>
+      const main = i === 0, vert = VERT.includes(c.id);
+      return `<a class="mto__card${main ? ' mto__card--main' : ''}${vert ? ' mto__card--vert' : ''} mto__card--${c.id}" href="${c.custom.href}" data-fade>
         <span class="mto__img"><img src="img/${f}${main ? '' : '-sm'}.jpg?v=3" alt="${esc(c.name)} hechos a mano" loading="lazy"></span>
         <span class="mto__info">
           <span class="mto__tag">A medida</span>

@@ -764,7 +764,7 @@ window.DT3D = (() => {
   function hebillaFoto(hb, F, H, canto) {
     const id = hb.id;
     if (!hebillaCache[id]) {
-      const src = (window.DT_HEBILLAS_B64 && window.DT_HEBILLAS_B64[id]) || `img/hebilla-${id}.png?v=7`;
+      const src = (window.DT_HEBILLAS_B64 && window.DT_HEBILLAS_B64[id]) || `img/hebilla-${id}.png?v=8`;
       const tex = new T.TextureLoader().load(src, () => listeners.forEach((fn) => fn()), undefined, () => { hebillaFalla[id] = true; listeners.forEach((fn) => fn()); });
       tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
       hebillaCache[id] = new T.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: hb.tipo === 'rellena' ? 0.035 : 0.02, metalness: 0.5, roughness: 0.4, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.3, side: T.DoubleSide });

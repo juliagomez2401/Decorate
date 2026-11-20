@@ -2110,3 +2110,20 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 @keyframes elegirAparece { from { opacity: 0; transform: translateY(14px); } }
 @keyframes elegirTelon { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 @keyframes elegirZoom { from { transform: scale(1.2); } }
+
+/* Armá el tuyo (inicio): dos filas parejas de tres, las apaisadas arriba y las verticales abajo */
+.mto__grid { grid-template-columns: repeat(3, 1fr); gap: 30px 10px; }
+.mto__card--vert .mto__img { aspect-ratio: 3 / 4; }
+.mto__card:not(.mto__card--main):not(.mto__card--vert) .mto__img { aspect-ratio: 4 / 3; }
+@media (max-width: 899px) {
+  .mto__card:not(.mto__card--main) .mto__desc { display: none; }
+  .mto__card:not(.mto__card--main) .mto__name { font-size: 15px; }
+  .mto__card:not(.mto__card--main) .mto__tag { font-size: 9px; letter-spacing: .16em; }
+  .mto__card:not(.mto__card--main) .mto__price { font-size: 12px; }
+  .mto__card:not(.mto__card--main) .mto__link { font-size: 10px; letter-spacing: .14em; }
+}
+@media (min-width: 900px) { .mto__grid { gap: 48px 26px; } }
+/* precio y "Personalizar" alineados abajo en cada fila, aunque el texto tenga distinto largo */
+.mto__card:not(.mto__card--main) { grid-template-rows: auto 1fr; }
+.mto__card:not(.mto__card--main) .mto__info { display: flex; flex-direction: column; align-items: flex-start; }
+.mto__card:not(.mto__card--main) .mto__price { margin-top: auto; padding-top: 6px; }
