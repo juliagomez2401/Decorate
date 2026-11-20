@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=59">
+  <link rel="stylesheet" href="css/estilos.css?v=60">
   <script src="js/arranque.js"></script>
   <!-- sin pieza elegida (arma.html a secas): primero se elige qué armar -->
   <script>if (!/[?&]p=/.test(location.search)) document.documentElement.classList.add('elegir-pieza');</script>
@@ -54,10 +54,6 @@
           </div>
 
           <div class="builder__panel">
-            <div class="arma-elegir">
-              <p class="arma-elegir__t">¿Qué querés armar?</p>
-              <nav class="arma-otros" aria-label="Elegí qué pieza armar" data-arma-otros></nav>
-            </div>
             <ol class="steps" data-steps aria-label="Pasos"></ol>
             <div class="builder__step" data-step-body></div>
             <div class="builder__nav">
@@ -102,7 +98,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="js/sitio.js?v=41" defer></script>
+  <script src="js/sitio.js?v=42" defer></script>
   <!-- abriendo la web como archivo (doble clic), el 3D necesita las muestras de cuero dentro del JS -->
   <script>if (location.protocol === 'file:') document.write('<script src="js/cueros-datos.js?v=4"><\/script>');</script>
   <script src="js/dijes-formas.js?v=5"></script>

@@ -1800,7 +1800,7 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 @media (max-height: 780px) {
   .menu__make-list { grid-template-columns: 1fr 1fr; column-gap: 18px; font-size: 18px; }
   .menu__make-list a::after { content: none; }
-  .menu__make-list li:nth-last-child(2) a { border-bottom: 0; }
+  /* son 7: la última va sola en su fila, así que solo esa queda sin raya (estuche de lentes, que ocupa dos renglones, va última) */
 }
 .menu__list a, .menu__make-list a { padding: 5px 0; } .menu__label { padding-top: 16px; }
 @media (max-height: 700px) { .menu__list a, .menu__make-list a { padding: 3px 0; } .menu__name { font-size: 18px; } .menu__label { padding-top: 12px; padding-bottom: 4px; } .menu__make { margin-top: 12px; } .menu__head { height: auto; min-height: 64px; padding-top: 10px; } }

@@ -105,7 +105,7 @@
           <p class="menu__label">A medida</p>
           <p class="menu__make-txt">Cualquier pieza se puede hacer en el cuero que elijas.</p>
           <ul class="menu__make-list">
-            ${D.categorias.filter((c) => c.custom).map((c) => `<li><a href="${c.custom.href}">${esc(c.custom.label.replace(/^Armá tu (.)/, (m, l) => l.toUpperCase()))}</a></li>`).join('')}
+            ${D.categorias.filter((c) => c.custom).sort((a, b) => (a.id === 'porta-lentes') - (b.id === 'porta-lentes')).map((c) => `<li><a href="${c.custom.href}">${esc(c.custom.label.replace(/^Armá tu (.)/, (m, l) => l.toUpperCase()))}</a></li>`).join('')}
           </ul>
         </div>
         <div class="menu__foot">
