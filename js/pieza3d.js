@@ -12,21 +12,24 @@ window.DT3D = (() => {
   const T = window.THREE;
   if (!T) return null;
   const V = (x = 0, y = 0, z = 0) => new T.Vector3(x, y, z);
-  const TILE = 11; // cm que ocupa una muestra de cuero (la textura se hace continua, sin uniones)
+  const TILE = 11; // unidad de las coordenadas de textura (cm)
+  const ENV_CUERO = window.__ENV_CUERO || 0.2; // cuánto refleja el cuero el ambiente: más, y se lava el color (medido contra las fotos)
+  const PXCM = 96; // px por cm de las texturas de cuero (herramientas/texturas-3d.py): el tamaño de la imagen dice cuántos cm cubre
 
   /* ---------------- cueros ---------------- */
   // rugosidad, relieve, brillo; los de pelo (cebra, leopardo, vaca) son mates
-  // cómo refleja la luz cada familia de cuero (la familia viene de js/datos.js)
+  // cómo refleja la luz cada familia de cuero (la familia viene de js/datos.js). bump: relieve sacado de la foto; las texturas
+  // tienen mucho detalle (96 px por cm), así que va bajo: si no, el pelo se ve sucio y el liso, arrugado
   const FAMILIA = {
-    pelo: { rough: 0.85, bump: 0.05 },
-    liso: { rough: 0.55, bump: 0.08, clear: 0.2 },
-    lavado: { rough: 0.35, bump: 0.1, clear: 0.45 },
-    charol: { rough: 0.12, bump: 0.02, clear: 1 },
-    metal: { rough: 0.32, bump: 0.06, metal: 0.3, clear: 0.3 },
-    gamuza: { rough: 0.97, bump: 0.03 },
-    croco: { rough: 0.45, bump: 0.2, clear: 0.2, tile: 6.5 },
-    'croco-metal': { rough: 0.32, bump: 0.2, metal: 0.3, clear: 0.3, tile: 6.5 },
-    reptil: { rough: 0.5, bump: 0.15, clear: 0.1, tile: 6.5 },
+    pelo: { rough: 0.85, bump: 0.008 },
+    liso: { rough: 0.55, bump: 0.03, clear: 0.2 },
+    lavado: { rough: 0.35, bump: 0.04, clear: 0.45 },
+    charol: { rough: 0.12, bump: 0.01, clear: 1 },
+    metal: { rough: 0.32, bump: 0.025, metal: 0.3, clear: 0.3 },
+    gamuza: { rough: 0.97, bump: 0.01 },
+    croco: { rough: 0.45, bump: 0.09, clear: 0.2 },
+    'croco-metal': { rough: 0.32, bump: 0.09, metal: 0.3, clear: 0.3 },
+    reptil: { rough: 0.5, bump: 0.06, clear: 0.1 },
   };
   const CUERO = {};
   ((window.DT && window.DT.cueros) || []).forEach((c) => { CUERO[c.id] = FAMILIA[c.familia] || FAMILIA.liso; });
@@ -38,21 +41,36 @@ window.DT3D = (() => {
     const tex = new T.CanvasTexture(cv);
     tex.wrapS = tex.wrapT = T.RepeatWrapping; tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
     const bump = new T.CanvasTexture(cv); bump.wrapS = bump.wrapT = T.RepeatWrapping;
-    // escala propia de cada cuero (el croco tiene escamas más chicas que lo que entra en una muestra)
-    const rep = TILE / ((CUERO[id] || {}).tile || TILE); tex.repeat.set(rep, rep); bump.repeat.set(rep, rep);
+    const b64 = window.DT_CUEROS_B64 && window.DT_CUEROS_B64[id];
     const img = new Image();
     img.onload = () => {
-      // la textura ya viene continua y con la luz pareja (herramientas/texturas-3d.py)
-      cv.getContext('2d').drawImage(img, 0, 0, 1024, 1024);
+      // la textura ya viene continua, a tamaño real y con la luz pareja (herramientas/texturas-3d.py).
+      // Se dibuja a PXCM px por cm (las de js/cueros-datos.js vienen a un cuarto)
+      const k = b64 ? 4 : 1;
+      cv.width = img.width * k; cv.height = img.height * k;
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
       cv.dataset.ok = '1';
+      tex.repeat.set(TILE * PXCM / cv.width, TILE * PXCM / cv.height); bump.repeat.copy(tex.repeat);
+      tex.dispose(); bump.dispose();
       tex.needsUpdate = true; bump.needsUpdate = true;
       listeners.forEach((fn) => fn());
     };
     // abriendo la web como archivo (doble clic) el navegador no deja usar fotos sueltas en 3D:
     // ahí se usan las muestras que vienen dentro de js/cueros-datos.js
-    img.src = (window.DT_CUEROS_B64 && window.DT_CUEROS_B64[id]) || `img/textura-${id}.jpg?v=2`;
+    img.src = b64 || `img/textura-${id}.jpg?v=7`;
     return (texCache[id] = { tex, bump, cv });
   }
+  // qué tan claro es un cuero (0 negro, 1 blanco), medido en su textura; para elegir un hilo que se vea
+  const luzCache = {};
+  function luzDe(id) {
+    if (!id) return 0.5;
+    if (luzCache[id] != null) return luzCache[id];
+    const cv = leatherTex(id).cv; if (!cv.dataset.ok) return null;
+    const c = document.createElement('canvas'); c.width = c.height = 8; const x = c.getContext('2d'); x.drawImage(cv, 0, 0, 8, 8);
+    const d = x.getImageData(0, 0, 8, 8).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    return (luzCache[id] = sum / 64 / 255);
+  }
+  const hiloContraste = (id) => { const l = luzDe(id); const claro = l == null ? !['cebra', 'plateado', 'blanco', 'vaca', 'leopardo', 'leopardo-claro', 'celeste', 'rosa', 'croco-crema', 'dorado'].includes(id) : l < 0.5; return claro ? '#e6d3a8' : '#3b2a1f'; };
   function leather(id) {
     if (!id) return MAT.vacio;
     if (matCache[id]) return matCache[id];
@@ -60,7 +78,7 @@ window.DT3D = (() => {
     const t = leatherTex(id);
     return (matCache[id] = new T.MeshPhysicalMaterial({
       map: t.tex, bumpMap: t.bump, bumpScale: p.bump, roughness: p.rough, metalness: p.metal || 0,
-      clearcoat: p.clear || 0, clearcoatRoughness: 0.25, side: T.DoubleSide,
+      clearcoat: p.clear || 0, clearcoatRoughness: 0.25, side: T.DoubleSide, envMapIntensity: ENV_CUERO,
     }));
   }
   const MAT = {
@@ -175,17 +193,18 @@ window.DT3D = (() => {
   const stitchGeo = (len) => { const g = new T.CylinderGeometry(0.045, 0.045, len, 6); g.rotateZ(Math.PI / 2); return g; };
   // puntadas a lo largo de una lista de puntos {p, n} (n: hacia afuera de la cara)
   function stitchesAlong(pts, mat, gap = 0.55, grosor = 0.05) {
+    // una puntada cada "gap" cm medidos a lo largo de toda la línea (no por tramo: si los puntos vienen muy
+    // juntos, las puntadas se pegaban y parecía una línea continua)
     const out = [];
-    for (let i = 0; i < pts.length - 1; i++) {
+    let sig = gap / 2;
+    for (let i = 0, acum = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1], d = b.p.clone().sub(a.p), len = d.length();
-      if (len < 0.01) continue;
-      const steps = Math.max(1, Math.floor(len / gap));
-      for (let k = 0; k < steps; k++) {
-        const p = a.p.clone().addScaledVector(d, (k + 0.5) / steps);
-        out.push({ p, n: a.n, dir: d.clone().normalize() });
-      }
+      if (len < 1e-4) continue;
+      while (sig <= acum + len) { const t = (sig - acum) / len; out.push({ p: a.p.clone().addScaledVector(d, t), n: a.n, dir: d.clone().normalize() }); sig += gap; }
+      acum += len;
     }
-    const geo = new T.CylinderGeometry(grosor, grosor, gap * 0.62, 6);
+    // hilo de 1 mm como mínimo: más fino no se llega a ver (pasaba en el estuche de lentes)
+    const r = Math.max(grosor, 0.045), geo = new T.CylinderGeometry(r, r, gap * 0.62, 6);
     const m = new T.InstancedMesh(geo, mat, Math.max(1, out.length));
     const o = new T.Object3D(), y = V(0, 1, 0);
     out.forEach((it, k) => { o.position.copy(it.p); o.quaternion.setFromUnitVectors(y, it.dir); o.updateMatrix(); m.setMatrixAt(k, o.matrix); });
@@ -239,9 +258,17 @@ window.DT3D = (() => {
   // la textura del cuero sigue al tamaño real de la pieza (1 muestra = TILE cm)
   const uvPos = (geo) => { const q = geo.attributes.position, uv = geo.attributes.uv; for (let i = 0; i < q.count; i++) uv.setXY(i, (q.getX(i) + q.getZ(i)) / TILE, q.getY(i) / TILE); uv.needsUpdate = true; return geo; };
   // flecos: tiras finas de cuero que cuelgan desde cada punto {p, n}
-  function flecos(puntos, largo, ancho, mat) {
-    const g = new T.Group(), geo = uvPos((() => { const b = new T.BoxGeometry(ancho, largo, 0.07, 1, 6, 1); b.translate(0, -largo / 2, 0); return b; })());
-    puntos.forEach(({ p, n }, k) => { const f = new T.Mesh(geo, mat); f.position.copy(p); f.lookAt(p.clone().add(V(n.x, 0, n.z))); f.rotateZ((((k * 37) % 11) - 5) * 0.01); g.add(f); });
+  // fuera(p): si se da, corre cada tira hacia afuera para que no atraviese el cuerpo (los flecos de la faja caen sobre la cadera)
+  function flecos(puntos, largo, ancho, mat, fuera) {
+    const g = new T.Group(), geo = uvPos((() => { const b = new T.BoxGeometry(ancho, largo, 0.07, 1, fuera ? 40 : 6, 1); b.translate(0, -largo / 2, 0); return b; })());
+    puntos.forEach(({ p, n }, k) => {
+      const f = new T.Mesh(geo, mat); f.position.copy(p); f.lookAt(p.clone().add(V(n.x, 0, n.z))); f.rotateZ((((k * 37) % 11) - 5) * 0.01);
+      if (!fuera) { g.add(f); return; }
+      f.updateMatrix(); const gg = geo.clone(); gg.applyMatrix4(f.matrix);
+      const q = gg.attributes.position;
+      for (let i = 0; i < q.count; i++) { const c = V(p.x, q.getY(i), p.z), d = fuera(c).sub(c); q.setXYZ(i, q.getX(i) + d.x, q.getY(i), q.getZ(i) + d.z); }
+      gg.computeVertexNormals(); g.add(new T.Mesh(gg, mat));
+    });
     return g;
   }
   // trenza de tres tientos planos a lo largo de un recorrido (center(u), normal(u)), de ancho "ancho"
@@ -280,6 +307,22 @@ window.DT3D = (() => {
   }
   // dije en 3D: una pieza de metal con la forma recortada de la foto (contorno y huecos de js/dijes-formas.js),
   // con espesor y bisel; la foto va de textura y de relieve, así se ven los grabados.
+  // un dije colgado de la argolla del mosquetón (argolla de centro C y radio R, parada de frente al costado):
+  // una argollita lo engancha de la parte de adelante y abajo de la argolla; el dije cuelga de ella y, si la
+  // pieza abulta, se apoya en ella inclinado. frente(y): hasta dónde llega la pieza adelante a esa altura
+  function dijeColgado(id, C, R, frente) {
+    const g = new T.Group(), alto = ((window.DT_DIJES_FORMAS || {})[id] || { cm: 2.6 }).cm, a = 0.9;
+    const P = C.clone().add(V(0, -Math.sin(a) * R, Math.cos(a) * R));
+    const aro = torus(0.24, 0.05, MAT.plata); aro.position.copy(P).add(V(0, -0.19, 0)); aro.rotation.y = 0.25; g.add(aro);
+    const agujero = aro.position.clone().add(V(0, -0.2, 0));
+    const piv = new T.Group(); piv.position.copy(agujero);
+    const dj = dijeModelo(id); dj.position.set(0, 0.1 - alto * 0.47, 0); piv.add(dj);
+    // si la pieza está más adelante que el agujero, el dije se apoya en ella (cuelga inclinado hacia afuera)
+    let falta = 0; for (let k = 0.2; k <= 1; k += 0.2) falta = Math.max(falta, (frente(agujero.y - alto * k) + 0.12 - agujero.z) / (alto * k));
+    piv.rotation.x = -Math.atan(Math.max(0, falta)); piv.rotation.y = 0.3;
+    g.add(piv);
+    return g;
+  }
   function dijeModelo(id) {
     const F = window.DT_DIJES_FORMAS && window.DT_DIJES_FORMAS[id];
     if (!dijeCache[id]) {
@@ -426,9 +469,19 @@ window.DT3D = (() => {
     g.fillStyle = color; g.beginPath(); g.arc(x, y, R * 0.1, 0, Math.PI * 2); g.fill();
   }
 
+  // las fajas reales: unos 8 cm en lo más ancho, y hacia la hebilla se afinan hasta el ancho de la hebilla (unos 5 cm)
+  const ESCALA_FAJA = 0.82, MEDIA_HEBILLA = 2.45;
+  const afinar = (F, conHebilla) => (dx) => {
+    const [t0, b0] = F(dx), t = t0 * ESCALA_FAJA, b = b0 * ESCALA_FAJA;
+    if (!conHebilla) return [t, b];
+    const w = 1 - ss(1.8, 10, Math.abs(dx)), half = (t - b) / 2, c = (t + b) / 2;
+    const h = mix(half, Math.min(half, MEDIA_HEBILLA), w), cc = c * (1 - w);
+    return [cc + h, cc - h];
+  };
+
   function fajaMolde(st, L) {
     const forma = st.tipo === 'funcional' ? 'funcional' : (st.forma || 'recta');
-    const F = FORMAS_FAJA[forma];
+    const F = forma === 'funcional' ? FORMAS_FAJA.funcional : afinar(FORMAS_FAJA[forma], !!st.hebilla && st.cierre !== 'broches');
     const HM = forma === 'funcional' ? 4.4 : 16;   // alto del molde (cm)
     const K = Math.floor(4096 / L);                 // px por cm
     const W = Math.round(L * K), H = Math.round(HM * K);
@@ -466,7 +519,7 @@ window.DT3D = (() => {
       const p = zona(x0, x1), c = CUERO[id] || {};
       const src = id && leatherTex(id).cv;
       if (src && src.dataset.ok) {
-        const pat = g.createPattern(src, 'repeat'), s = K * (c.tile || TILE) / 1024;
+        const pat = g.createPattern(src, 'repeat'), s = K / PXCM;
         if (pat.setTransform) pat.setTransform(new DOMMatrix([s, 0, 0, s, 0, 0]));
         g.fillStyle = pat;
       } else g.fillStyle = id ? '#9b8569' : '#cbbca3';
@@ -497,7 +550,12 @@ window.DT3D = (() => {
       });
     }
     // soles cosidos
-    if (st.deco === 'soles') { const fun = forma === 'funcional', R = fun ? 1.3 : 2.4, col = ['cebra', 'plateado', 'blanco', 'vaca', 'leopardo'].includes(st.cuero) ? '#3b2a1f' : '#e6d3a8'; solesPos(st, L, forma).forEach((d) => { const [t, b] = F(d); sol(g, px(d), py((t + b) / 2), R * K, K, col); }); }
+    if (st.deco === 'soles') {
+      // el hilo contrasta con el cuero que tiene abajo: claro sobre cuero oscuro, oscuro sobre cuero claro
+      const fun = forma === 'funcional', R = fun ? 1.3 : 2.4;
+      const cueroEn = (d) => { const z = zonas.find(([x0, x1]) => x0(0) <= d && d < x1(0)); return (z && z[2]) || st.cuero; };
+      solesPos(st, L, forma).forEach((d) => { const [t, b] = F(d); sol(g, px(d), py((t + b) / 2), R * K, K, hiloContraste(cueroEn(d))); });
+    }
     // tiento por el borde: puntadas en diagonal que abrazan el canto de arriba y el de abajo
     if (st.deco === 'tiento') {
       g.strokeStyle = '#d7bf96'; g.lineWidth = 0.22 * K; g.lineCap = 'round';
@@ -507,11 +565,7 @@ window.DT3D = (() => {
     if (st.deco === 'flecos') { const f = flecosRango(st, forma); g.fillStyle = '#140c08'; for (let d = f.d0; d <= f.d1; d += 0.9) { const dx = f.k * d, [, b] = F(dx); g.beginPath(); g.arc(px(dx), py(b + 0.55), 0.13 * K, 0, Math.PI * 2); g.fill(); } }
     // cierre con broches: la punta que se superpone, con su sombra
     if (st.cierre === 'broches' && forma !== 'funcional') { const [t, b] = F(BROCHES); g.fillStyle = 'rgba(20,12,8,.35)'; g.fillRect(px(BROCHES - 2.6), py(t), 0.25 * K, (t - b) * K); g.strokeStyle = 'rgba(25,15,10,.85)'; g.lineWidth = 0.3 * K; g.beginPath(); g.moveTo(px(BROCHES - 2.4), py(t)); g.lineTo(px(BROCHES - 2.4), py(b)); g.stroke(); }
-    // pespunte por los bordes
-    const hilo = ['cebra', 'plateado', 'vaca', 'leopardo', 'azul-lavado'].includes(st.cuero) ? '#2b1d15' : '#efe2c6';
-    g.strokeStyle = hilo; g.lineWidth = 0.13 * K; g.setLineDash([0.42 * K, 0.3 * K]);
-    [0, 1].forEach((k) => { g.beginPath(); for (let i = 0; i <= N; i++) { const dx = -L / 2 + L * i / N; const y = F(dx)[k] + (k ? 0.55 : -0.55); i ? g.lineTo(px(dx), py(y)) : g.moveTo(px(dx), py(y)); } g.stroke(); });
-    g.setLineDash([]);
+    // sin pespunte: en los cintos de Julia no se ve
     // agujeros del cinto funcional
     if (forma === 'funcional') { g.fillStyle = '#140c08'; for (let k = 0; k < 5; k++) { g.beginPath(); g.ellipse(px(2.6 + k * 1.15), py(0), 0.2 * K, 0.26 * K, 0, 0, Math.PI * 2); g.fill(); } }
     g.restore(); gr.restore(); gm.restore();
@@ -539,23 +593,39 @@ window.DT3D = (() => {
     const deco = st.tipo !== 'funcional';
     g.add(deco ? maniqui(SZ, -10, 9) : maniqui(SZ, -16, 1));
     const y0 = deco ? 0 : -9;
-    let r = 0; for (let y = y0 - 8; y <= y0 + 8; y += 0.5) r = Math.max(r, torsoR(y));
-    if (!deco) { r = 0; for (let y = y0 - 2.5; y <= y0 + 2.5; y += 0.5) r = Math.max(r, torsoR(y)); }
-    const rx = r + 0.35, rz = r * SZ + 0.35, thick = 0.38;
+    const thick = 0.38, hb = deco ? 4.5 : 2.2;
+    // el cuero se apoya en el cuerpo: sigue la cadera donde es más ancha y hace puente donde se afina (no es un cilindro);
+    // cae un poco más abajo adelante que atrás, como se usa; y tiene ondas y pliegues suaves, de cuero que se mueve
+    let rm = 0; for (let y = y0 - hb; y <= y0 + hb; y += 0.5) rm += torsoR(y) / (4 * hb + 1);
     const ang = (u) => -Math.PI + u * Math.PI * 2;
-    const center = (u) => V(rx * Math.sin(ang(u)), y0, rz * Math.cos(ang(u)));
-    const normal = (u) => V(Math.sin(ang(u)) / rx, 0, Math.cos(ang(u)) / rz).normalize();
+    const caida = (u) => (deco ? -1.4 : -0.7) * (1 + Math.cos(ang(u))) / 2 + 0.22 * Math.sin(ang(u) * 3 + 0.6);
+    const pliegue = (u, y) => (deco ? 0.13 : 0.06) * Math.sin(ang(u) * 11 + 1.1) * Math.sin(ang(u) * 4 - 0.3) + (deco ? 0.05 : 0.02) * y * Math.sin(ang(u) * 2 + 0.9);
+    const sup = (u, y) => {
+      const a = ang(u), yy = y0 + y + caida(u), tr = torsoR(yy);
+      const rb = Math.max(tr, 0.45 * tr + 0.55 * rm) + 0.35 + pliegue(u, y);
+      return V((rb) * Math.sin(a), yy, (rb - 0.35) * SZ * Math.cos(a) + 0.35 * Math.cos(a));
+    };
+    const supN = (u, y) => {
+      const e = 1e-3, du = sup(u + e, y).sub(sup(u - e, y)), dy = sup(u, y + 0.05).sub(sup(u, y - 0.05));
+      const n = dy.cross(du).normalize(), a = ang(u);
+      return n.dot(V(Math.sin(a), 0, Math.cos(a))) < 0 ? n.negate() : n;
+    };
+    const center = (u) => sup(u, 0);
+    const normal = (u) => supN(u, 0);
     // largo real del contorno
     let L = 0; for (let i = 1; i <= 400; i++) L += center(i / 400).distanceTo(center((i - 1) / 400));
     const m = fajaMolde(st, L);
     // banda: dos caras (afuera y adentro) con el molde; la forma sale de la transparencia
-    const N = 360, pos = [], uv = [], idx = [];
+    const N = 360, NY = 22, pos = [], uv = [], idx = [];
     [thick / 2, -thick / 2].forEach((off, face) => {
       const base = pos.length / 3;
       for (let i = 0; i <= N; i++) {
-        const u = i / N, c = center(u), n = normal(u);
-        [m.HM / 2, -m.HM / 2].forEach((y, k) => { const p = c.clone().addScaledVector(n, off).add(V(0, y, 0)); pos.push(p.x, p.y, p.z); uv.push(u, k ? 0 : 1); });
-        if (i) { const q = base + (i - 1) * 2; face ? idx.push(q, q + 2, q + 1, q + 1, q + 2, q + 3) : idx.push(q, q + 1, q + 2, q + 1, q + 3, q + 2); }
+        const u = i / N;
+        for (let j = 0; j <= NY; j++) {
+          const y = m.HM / 2 - m.HM * j / NY, p = sup(u, y).addScaledVector(supN(u, y), off);
+          pos.push(p.x, p.y, p.z); uv.push(u, 1 - j / NY);
+          if (i && j) { const q = base + i * (NY + 1) + j, a = q - (NY + 1) - 1, b = q - (NY + 1), c = q - 1; face ? idx.push(a, c, b, b, c, q) : idx.push(a, b, c, b, q, c); }
+        }
       }
     });
     const geo = new T.BufferGeometry();
@@ -563,11 +633,43 @@ window.DT3D = (() => {
     geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
     geo.setIndex(idx); geo.computeVertexNormals();
     const tex = new T.CanvasTexture(m.color); tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
-    const mat = new T.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.04, roughnessMap: new T.CanvasTexture(m.rough), metalnessMap: new T.CanvasTexture(m.metal), metalness: 1, roughness: 1, alphaTest: 0.5, transparent: false, side: T.DoubleSide });
+    const mat = new T.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 0.04, roughnessMap: new T.CanvasTexture(m.rough), metalnessMap: new T.CanvasTexture(m.metal), metalness: 1, roughness: 1, alphaTest: 0.5, transparent: false, side: T.DoubleSide, envMapIntensity: ENV_CUERO });
     g.add(new T.Mesh(geo, mat));
     // de (dx, y) del molde a un punto 3D sobre la faja
-    const at = (dx, y, out = 0) => { const u = 0.5 + dx / L; return center(u).add(V(0, y, 0)).addScaledVector(normal(u), thick / 2 + out); };
-    const nrm = (dx) => normal(0.5 + dx / L);
+    const at = (dx, y, out = 0) => { const u = 0.5 + dx / L; return sup(u, y).addScaledVector(supN(u, y), thick / 2 + out); };
+    const nrm = (dx, y = 0) => supN(0.5 + dx / L, y);
+    // una tira de cuero apoyada sobre la faja (o el cuerpo) siguiendo un camino de puntos (dx, y) del molde:
+    // ancho w, espesor e, separada "off" de la superficie; punta redondeada y pespunte por los dos bordes
+    function tira(camino, w, e, off, mat, hilo) {
+      const P = camino.map(([dx, y, sube = 0]) => at(dx, y, off - thick / 2 + sube)), Nn = camino.map(([dx, y]) => nrm(dx, y)), n = P.length;
+      const Ls = [0]; for (let i = 1; i < n; i++) Ls.push(Ls[i - 1] + P[i].distanceTo(P[i - 1]));
+      const tot = Ls[n - 1];
+      // la punta: en el funcional, redonda; en la faja, cortada en diagonal a mano (un lado más largo), con la esquina apenas gastada
+      const medio = (i, sg) => {
+        const d = tot - Ls[i];
+        if (!deco) { const rp = w * 0.5; if (d >= rp) return w / 2; const x = (rp - d) / rp; return (w / 2) * Math.sqrt(Math.max(0.02, 1 - x * x)); }
+        if (sg > 0) { const rp = w * 0.95; if (d >= rp) return w / 2; const t = d / rp; return (w / 2) * (0.22 + 0.78 * (t + 0.08 * Math.sin(t * Math.PI))); }
+        const rp = 0.55; if (d >= rp) return w / 2; const x = (rp - d) / rp; return (w / 2) - rp * (1 - Math.sqrt(Math.max(0, 1 - x * x)));
+      };
+      const lado = P.map((p, i) => { const tg = P[Math.min(n - 1, i + 1)].clone().sub(P[Math.max(0, i - 1)]).normalize(); return Nn[i].clone().cross(tg).normalize(); });
+      const pos = [], uv = [], idx = [], grupos = [];
+      const cara = (sn, sw0, sw1, grupo, vv) => {
+        const base = pos.length / 3, start = idx.length;
+        for (let i = 0; i < n; i++) {
+          [sw0, sw1].forEach((sw, k) => { const h = medio(i, sw); const q = P[i].clone().addScaledVector(lado[i], sw * h).addScaledVector(Nn[i], sn[k] * e / 2); pos.push(q.x, q.y, q.z); uv.push(Ls[i] / TILE, vv ? (sw * h) / TILE : k * 0.05); });
+          if (i) { const q = base + (i - 1) * 2; idx.push(q, q + 2, q + 1, q + 1, q + 2, q + 3); }
+        }
+        grupos.push([start, idx.length - start, grupo]);
+      };
+      cara([1, 1], -1, 1, 0, true); cara([-1, -1], 1, -1, 0, true);   // cara de arriba y de abajo
+      cara([1, -1], 1, 1, 1, false); cara([-1, 1], -1, -1, 1, false); // cantos
+      const geo = new T.BufferGeometry();
+      geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+      geo.setIndex(idx); grupos.forEach(([a0, c, mm]) => geo.addGroup(a0, c, mm)); geo.computeVertexNormals();
+      const grupo = new T.Group(); grupo.add(new T.Mesh(geo, [mat, MAT.canto]));
+      // pespunte por los dos bordes y alrededor de la punta
+      return grupo;
+    }
     // uniones en 3D: remaches y argollas sobre cada corte (en el metal elegido)
     const mt = metalDe(st.metal);
     m.cortes.forEach((xc) => {
@@ -591,16 +693,20 @@ window.DT3D = (() => {
       const list = [], fun = !deco, off = fun ? 0.72 : 1.15;
       // libre: ni sobre la hebilla y su doblez, ni sobre los agujeros, ni sobre el pasador
       const libre = (dx) => Math.abs(dx) > (fun ? 4.8 : 3.8) && !(fun && dx > 1.8 && dx < 8.4) && !(fun && dx > -7.2 && dx < -4.6) && !(st.cierre === 'broches' && Math.abs(dx - BROCHES) < 3.2);
-      if (st.deco === 'tachas') for (let dx = -L / 2 + 1.5; dx <= L / 2 - 1.5; dx += 1.5) { if (!libre(dx)) continue; const [t, b] = m.F(dx); list.push({ p: at(dx, t - off), n: nrm(dx) }, { p: at(dx, b + off), n: nrm(dx) }); }
-      if (st.deco === 'tachas-medio') for (let dx = -L / 2 + 1.5; dx <= L / 2 - 1.5; dx += 1.3) { if (!libre(dx)) continue; const [t, b] = m.F(dx); list.push({ p: at(dx, (t + b) / 2), n: nrm(dx) }); }
-      if (st.deco === 'zigzag') { let k = 0; for (let dx = -L / 2 + 1.5; dx <= L / 2 - 1.5; dx += 1.05) { if (!libre(dx)) continue; const [t, b] = m.F(dx), c = (t + b) / 2, amp = (t - b) / 2 - off; list.push({ p: at(dx, c + [amp, 0, -amp, 0][k % 4]), n: nrm(dx) }); k++; } }
+      // repartidas parejo en toda la vuelta, también donde se juntan las puntas atrás (cant: múltiplo, para el zigzag)
+      const vuelta = (paso, mult = 1) => { const n = Math.max(mult, Math.round(L / paso / mult) * mult), d = L / n, out = []; for (let i = 0; i < n; i++) out.push(-L / 2 + d * (i + 0.5)); return out; };
+      if (st.deco === 'tachas') for (const dx of vuelta(1.5)) { if (!libre(dx)) continue; const [t, b] = m.F(dx); list.push({ p: at(dx, t - off), n: nrm(dx) }, { p: at(dx, b + off), n: nrm(dx) }); }
+      if (st.deco === 'tachas-medio') for (const dx of vuelta(1.3)) { if (!libre(dx)) continue; const [t, b] = m.F(dx); list.push({ p: at(dx, (t + b) / 2), n: nrm(dx) }); }
+      if (st.deco === 'zigzag') { let k = 0; for (const dx of vuelta(1.05, 4)) { if (!libre(dx)) continue; const [t, b] = m.F(dx), c = (t + b) / 2, amp = (t - b) / 2 - off; list.push({ p: at(dx, c + [amp, 0, -amp, 0][k % 4]), n: nrm(dx) }); k++; } }
       g.add(pasa(studGeo(deco ? 0.4 : 0.28), mt, list, thick + 0.07, deco ? 0.24 : 0.17));
     }
     // flecos de 40 cm que salen de los agujeros del borde de abajo, de un solo costado
     if (st.deco === 'flecos' && st.cuero) {
       const f = flecosRango(st, m.forma), pts = [];
       for (let d = f.d0; d <= f.d1; d += 0.9) { const dx = f.k * d, [, b] = m.F(dx); [-0.12, 0.12].forEach((o) => pts.push({ p: at(dx + o, b + 0.55, 0.06), n: nrm(dx) })); }
-      g.add(flecos(pts, 40, 0.32, leather(st.cuero2 || st.cuero)));
+      // cada tira cae por fuera del cuerpo (la cadera es más ancha que donde está la faja)
+      const fuera = (c) => { const e = Math.hypot(c.x, c.z / SZ), need = torsoR(c.y) + 0.45; return e >= need || e < 1e-6 ? c.clone() : V(c.x * need / e, c.y, c.z * need / e); };
+      g.add(flecos(pts, 40, 0.32, leather(st.cuero2 || st.cuero), fuera));
     }
     // cierre con broches al costado (faja sin hebilla)
     const conBroches = deco && st.cierre === 'broches';
@@ -613,17 +719,42 @@ window.DT3D = (() => {
     if (!deco && st.cuero) {
       if (st.hebilla) g.add(pasa(studGeo(0.3), mt, [-3.3, -4.4].map((dx) => ({ p: at(dx, 0, 0.02), n: nrm(dx) })), thick + 0.07, 0.2));
       const k0 = 0.5 - 6.4 / L, k1 = 0.5 - 5.5 / L;
-      g.add(band({ u0: k0, u1: k1, center, normal, height: () => 4.6, thick: thick + 0.5, mat: leather(st.cuero), closed: false, n: 6 }));
+      g.add(band({ u0: k0, u1: k1, center, normal, height: () => 4.6, thick: thick + 1.05,   // abraza también la punta que pasa por adentro
+ mat: leather(st.cuero), closed: false, n: 6 }));
     }
     // hebilla adelante al medio
     if (st.hebilla && !conBroches) {
-      const [t, b] = m.F(0), alto = deco ? (m.forma === 'mono' ? 7 : Math.min(9.2, (t - b) * 0.95)) : 4.9;
-      const hb = hebilla(st.hebilla, alto); hb.position.copy(at(0, 0, 0.35)); g.add(hb);
-      // faja: dos remaches al lado de la hebilla, donde se dobla el cuero
-      if (deco) { const dx = alto * 0.62 + 1.2; g.add(pasa(studGeo(0.36), mt, [-1, 1].map((k) => ({ p: at(dx, (t + b) / 2 + k * 1.1, 0.02), n: nrm(dx) })), thick + 0.07, 0.22)); }
+      // tamaño real: apenas más alta que la tira que pasa por ella (unos 5,5 cm en la faja)
+      const [t, b] = m.F(0), alto = deco ? Math.min(6.2, (t - b) * 1.15) : 4.9;
+      const hb = hebilla(st.hebilla, alto), p0 = at(0, 0, 0.35); hb.position.copy(p0); hb.lookAt(p0.clone().add(nrm(0))); g.add(hb);
+      const info = ((window.DT && window.DT.hebillas) || []).find((x) => x.id === st.hebilla) || {};
+      const fo = window.DT_HEBILLAS_FORMAS && window.DT_HEBILLAS_FORMAS[st.hebilla];
+      const ancho = fo ? alto * (Math.abs(fo.giro) === 90 ? (fo.caja[3] - fo.caja[1]) / (fo.caja[2] - fo.caja[0]) : (fo.caja[2] - fo.caja[0]) / (fo.caja[3] - fo.caja[1])) : alto;
+      // la punta que sobra: después de pasar por la hebilla el cuero sigue unos centímetros (no queda justo).
+      // La púa apunta a la derecha: la punta sale a la izquierda. En el funcional la sostiene el pasador; en la faja
+      // no hay pasador, así que la punta cae un poco hacia abajo, apoyada sobre la faja y el cuerpo
+      {   // con todas las hebillas sobra un poco de cuero (también con las rellenas: sale por abajo de la placa)
+        const w = deco ? MEDIA_HEBILLA * 2 * 0.92 : 3.6, sale = -ancho / 2 + 0.3, camino = [];
+        if (deco) {
+          // sale derecha de la hebilla y, como el cuero es firme, se va venciendo de a poco hacia abajo con su peso
+          // (no dobla en seco); la punta, suelta, se despega apenas de la faja
+          const recto = 1.4, largo = 9, caeMax = 0.72;
+          for (let d = 0.4; d >= sale - recto; d -= 0.25) camino.push([d, 0]);
+          let x = sale - recto, y = 0;
+          for (let s = 0.25; s <= largo + 1e-6; s += 0.25) {
+            const a = caeMax * ss(0, largo * 0.8, s) * (0.65 + 0.35 * s / largo);
+            x -= Math.cos(a) * 0.25; y -= Math.sin(a) * 0.25;
+            camino.push([x, y, 0.22 * ss(largo * 0.35, largo, s)]);
+          }
+        } else for (let d = 0.4; d >= -9.6; d -= 0.25) camino.push([d, 0]);
+        // es la misma pieza que entra a la hebilla: la del centro
+        g.add(tira(camino, w, 0.28, thick / 2 + 0.17, leather(st.cuero), hiloPara(st.cuero)));
+      }
+      // faja: dos remaches donde se dobla el cuero de la hebilla (del lado donde no cae la punta, así se ven)
+      if (deco) { const dx = ancho / 2 + 1.2, [t2, b2] = m.F(dx); g.add(pasa(studGeo(0.36), mt, [-1, 1].map((k) => ({ p: at(dx, (t2 + b2) / 2 + k * 1.1, 0.02), n: nrm(dx) })), thick + 0.07, 0.22)); }
     }
     g.rotation.y = -0.35;
-    return { group: g, pitch: -0.02 };
+    return { group: g, pitch: -0.02, marco: deco ? 'faja' : 'funcional' };
   };
 
   const hebillaMat = {};
@@ -758,8 +889,8 @@ window.DT3D = (() => {
     g.add(lamina({ x0, x1, bot, top, z: zb, t, mat: m, nu: 34, nv: 46 }));
     g.add(lamina({ x0, x1, bot, top, z: zf, t, mat: m, nu: 34, nv: 46 }));
     // dos cueros: abajo de un corte en diagonal con una onda suave, el segundo cuero (adelante)
+    const corte = (x) => -3.2 + 3.6 * (x - x0) / W + 0.7 * Math.sin(Math.PI * (x - x0) / W * 2);
     if (st.combo === 'diagonal') {
-      const corte = (x) => -3.2 + 3.6 * (x - x0) / W + 0.7 * Math.sin(Math.PI * (x - x0) / W * 2);
       const m2 = st.cuero2 ? leather(st.cuero2) : MAT.vacio;
       g.add(lamina({ x0, x1, bot, top: corte, z: (x, y) => zf(x, y) + t + 0.01, t: 0.07, mat: m2, nu: 34, nv: 20 }));
     }
@@ -771,16 +902,12 @@ window.DT3D = (() => {
       const pts = []; for (let x = x0; x <= x1 + 1e-6; x += 0.4) pts.push(V(x, top(x) + 0.03, (zt(x, top(x)) + zb(x, top(x))) / 2));
       const r0 = Math.max(0.18, (zt(0, top(0)) - zb(0, top(0))) / 2);
       g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 40, r0, 10, false), m));
-      const borde = []; for (let x = x0 + 0.6; x <= x1 - 0.6 + 1e-6; x += 0.3) borde.push({ p: V(x, tb(x) + 0.45, zt(x, tb(x) + 0.45) + 0.08), n: V(0, 0, 1) });
-      g.add(stitchesAlong(borde, hiloPara(st.cuero), 0.42, 0.035));
       const snap = new T.Mesh(studGeo(0.5), MAT.plata); snap.position.set(0, tb(0) + 1.2, zt(0, tb(0) + 1.2) + 0.08); g.add(snap);
     }
-    const sobre = (x, y, out = 0.03) => ({ p: V(x, y, zf(x, y) + t / 2 + out), n: V(0, 0, 1) });
+    // sobre el cuero de afuera: donde va el segundo cuero (abajo del corte), sobre ese, que está más afuera
+    const encima = (x, y) => (st.combo === 'diagonal' && y < corte(x) + 0.3 ? t + 0.06 : 0);
+    const sobre = (x, y, out = 0.03) => ({ p: V(x, y, zf(x, y) + t / 2 + encima(x, y) + out), n: V(0, 0, 1) });
     const tope = (x) => (tapa ? top(x) - 6.8 : top(x) - 0.5);
-    if (st.cuero && st.union !== 'tiento') {
-      const pts = [sobre(x0 + 0.45, tope(x0 + 0.45))]; for (let x = x0 + 0.45; x <= x1 - 0.45 + 1e-6; x += 0.4) pts.push(sobre(x, bot(x) + 0.45)); pts.push(sobre(x1 - 0.45, tope(x1 - 0.45)));
-      g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.45, 0.035));
-    }
     if (st.union === 'tiento') {
       // tiento que abraza el canto: puntadas anchas y en diagonal por los costados y abajo, de los dos lados
       const mt = st.cuero2 && st.combo !== 'diagonal' ? leather(st.cuero2) : MAT.tiento, geo = new T.BoxGeometry(0.3, 1.0, 0.08), list = [];
@@ -795,23 +922,19 @@ window.DT3D = (() => {
     // tachas en L (costado del mosquetón y abajo) o alrededor (costados y abajo; arriba nunca)
     if (st.deco === 'l' || st.deco === 'alrededor') {
       const list = [], m0 = 0.95, techo = tope(x0) - 0.6;
-      for (let y = -H / 2 + m0 + 0.3; y <= techo; y += 1.1) list.push(sobre(x0 + m0, y, 0));
-      for (let x = x0 + m0 + 1.1; x <= x1 - m0 - 0.5; x += 1.1) list.push(sobre(x, bot(x) + m0, 0));
-      if (st.deco === 'alrededor') for (let y = -H / 2 + m0 + 0.3; y <= tope(x1) - 0.6; y += 1.1) list.push(sobre(x1 - m0, y, 0));
-      g.add(pasa(studGeo(0.27), metalDe(st.metal, MAT.bronce), list, (it) => 2 * it.p.z, 0.18));
+      for (let y = -H / 2 + m0 + 0.3; y <= techo; y += 1.1) list.push(sobre(x0 + m0, y, 0.01));
+      for (let x = x0 + m0 + 1.1; x <= x1 - m0 - 0.5; x += 1.1) list.push(sobre(x, bot(x) + m0, 0.01));
+      if (st.deco === 'alrededor') for (let y = -H / 2 + m0 + 0.3; y <= tope(x1) - 0.6; y += 1.1) list.push(sobre(x1 - m0, y, 0.01));
+      g.add(pasa(studGeo(0.3), metalDe(st.metal, MAT.bronce), list, (it) => 2 * it.p.z, 0.18));
     }
     // mosquetón en la esquina alta (pasa por un ojalillo)
     const ey = eyelet(0.32, MAT.plata); ey.position.set(x0 + 0.9, top(x0 + 0.9) - 0.8, zf(x0 + 0.9, top(x0) - 0.8) + t); g.add(ey);
     const ring = torus(0.75, 0.1, MAT.plata); ring.position.set(x0 + 0.9, top(x0) + 0.25, 0.1); ring.rotation.y = Math.PI / 2; g.add(ring);
     const cl = clasp(1.5, MAT.plata); cl.position.set(x0 + 0.9, top(x0) + 1.7, 0.1); g.add(cl);
     if (st.conDije === 'si') {
-      // el dije cuelga de la argolla del mosquetón, por delante del estuche
-      const dj = dijeModelo(st.dije || 'estrella'), al = ((window.DT_DIJES_FORMAS || {})[st.dije] || { cm: 2.6 }).cm;
-      const aro = torus(0.25, 0.05, MAT.plata); aro.position.set(x0 + 0.9, top(x0) + 0.05, zf(x0 + 0.9, top(x0) - 0.5) + 0.35); g.add(aro);
-      // con tapa, la tapa queda más afuera: el dije va delante de ella
-      const zd = zf(x0 + 0.9, top(x0) - 1.5) + (tapa ? 1.0 : 0.45);
-      aro.position.z = zd - 0.1;
-      dj.position.set(x0 + 0.9, top(x0) + 0.15 - al * 0.47, zd); dj.rotation.y = 0.3; g.add(dj);
+      // el dije cuelga de la argolla del mosquetón (enganchado de ella), por delante del estuche
+      const xr = x0 + 0.9, zTapa = (y) => (tapa ? 0.55 : 0);
+      g.add(dijeColgado(st.dije || 'estrella', V(xr, top(x0) + 0.25, 0.1), 0.75, (y) => zf(xr, Math.min(y, top(xr))) + t + zTapa(y)));
     }
     return { group: g, pitch: 0.12, yaw: -0.4 };
   };
@@ -830,19 +953,15 @@ window.DT3D = (() => {
     const tubo = new T.Mesh(new T.CylinderGeometry(zf(x0, 0), zf(x0, 0), H - 0.4, 16, 1, true, Math.PI, Math.PI), m); tubo.position.set(x0, 0.2, 0); g.add(tubo);
     const sobre = (x, y, out = 0.02) => ({ p: V(x, y, zf(x, y) + t / 2 + out), n: V(0, 0, 1) });
     const mt = metalDe(st.metal, MAT.bronce);
-    if (st.cuero) {
-      const pts = [sobre(x1 - 0.35, H / 2 - 0.4), sobre(x1 - 0.35, -H / 2 + 0.35), sobre(x0 + 0.4, -H / 2 + 0.35)];
-      g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.4, 0.03));
-    }
-    // decoración: estrellas o remaches, en columna al medio, en L (la esquina de abajo, del lado contrario al
-    // dije) o en dos filas verticales al costado
+    // sin pespunte: en los portafuegos de Julia no se ve
+    // decoración: estrellas o remaches en L (la esquina de abajo, del lado contrario al dije),
+    // en dos filas verticales al costado o una fila en cada costado
     if (['estrellas', 'remaches', 'estrellas-remaches'].includes(st.deco)) {
-      const list = [], ub = st.ubicacion || 'columna', yb = -H / 2 + 0.6, xa = x0 + 0.6;
+      const list = [], ub = st.ubicacion || 'L', yb = -H / 2 + 0.6, xa = x0 + 0.6;
       if (ub === 'costados') [xa, x1 - 0.6].forEach((x) => { for (let y = yb + 0.1; y <= H / 2 - 1.1; y += 0.85) list.push(sobre(x, y)); });
-      if (ub === 'columna') { const paso = (H - 2.6) / 2; for (let i = 0; i < 3; i++) list.push(sobre(-0.2, H / 2 - 1.3 - i * paso)); }
       if (ub === 'L') { for (let y = yb; y <= yb + H * 0.6; y += 0.8) list.push(sobre(xa, y)); for (let x = xa + 0.8; x <= x1 - 0.9; x += 0.8) list.push(sobre(x, yb)); }
       if (ub === 'filas') [xa, xa + 0.75].forEach((x) => { for (let y = yb + 0.1; y <= H / 2 - 0.8; y += 0.85) list.push(sobre(x, y)); });
-      const chico = ub !== 'columna', est = [], rem = [];
+      const chico = true, est = [], rem = [];
       list.forEach((q, i) => (st.deco === 'estrellas' || (st.deco === 'estrellas-remaches' && i % 2 === 0) ? est : rem).push(q));
       if (est.length) g.add(pasa(starGeo(chico ? 0.34 : 0.45), mt, est, (it) => 2 * it.p.z, 0.12));
       if (rem.length) g.add(pasa(studGeo(chico ? 0.2 : 0.26), mt, rem, (it) => 2 * it.p.z, 0.14));
@@ -853,11 +972,8 @@ window.DT3D = (() => {
     const argolla = torus(0.62, 0.08, MAT.bronce); argolla.position.set(ex, ey0 + 0.45, 0); argolla.rotation.y = Math.PI / 2; g.add(argolla);
     const cl = clasp(1.0, MAT.bronce); cl.position.set(ex, ey0 + 0.45 + 0.62 + 0.55 + 0.05, 0); g.add(cl);
     if (st.conDije === 'si') {
-      // el dije elegido (foto recortada) cuelga de la misma argolla, por delante
-      const dj = dijeModelo(st.dije || 'estrella'), alto = ((window.DT_DIJES_FORMAS || {})[st.dije] || { cm: 2.6 }).cm;
-      // cuelga de la argolla: el agujero de colgar del dije queda arriba, a la altura del ojalillo; apenas girado
-      dj.position.set(ex, ey0 + 0.35 - alto * 0.47, ez + 0.3); dj.rotation.y = 0.35; dj.rotation.z = 0.05; g.add(dj);
-      const aro = torus(0.25, 0.05, MAT.plata); aro.position.set(ex, ey0 + 0.25, ez + 0.2); g.add(aro);
+      // el dije cuelga de la misma argolla que el mosquetón (enganchado de ella), por delante
+      g.add(dijeColgado(st.dije || 'estrella', V(ex, ey0 + 0.45, 0), 0.62, (y) => zf(ex, Math.max(-H / 2, Math.min(y, H / 2))) + t / 2));
     }
     if (st.flecos === 'si') {
       const pts = []; for (let x = x0 + 0.3; x <= x1 - 0.25; x += 0.4) pts.push({ p: V(x, -H / 2 + 0.3, zf(x, -H / 2 + 0.3) - 0.02), n: V(0, 0, 1) });
@@ -896,7 +1012,7 @@ window.DT3D = (() => {
     const w = x1 - x0, h = y1 - y0, K = 640 / Math.max(w, h), cv = document.createElement('canvas'); cv.width = Math.ceil(w * K); cv.height = Math.ceil(h * K);
     const c = cv.getContext('2d'), path = new Path2D(); pts.forEach((q, i) => (i ? path.lineTo((q.x - x0) * K, (y1 - q.y) * K) : path.moveTo((q.x - x0) * K, (y1 - q.y) * K))); path.closePath();
     const src = id && leatherTex(id).cv, fam = CUERO[id] || {};
-    if (src && src.dataset.ok) { const pat = c.createPattern(src, 'repeat'), sc = K * (fam.tile || TILE) / 1024; if (pat.setTransform) pat.setTransform(new DOMMatrix([sc, 0, 0, sc, 0, 0])); c.fillStyle = pat; } else c.fillStyle = id ? '#9b8569' : '#cbbca3';
+    if (src && src.dataset.ok) { const pat = c.createPattern(src, 'repeat'), sc = K / PXCM; if (pat.setTransform) pat.setTransform(new DOMMatrix([sc, 0, 0, sc, 0, 0])); c.fillStyle = pat; } else c.fillStyle = id ? '#9b8569' : '#cbbca3';
     c.fill(path);
     c.strokeStyle = 'rgba(30,18,12,.55)'; c.lineWidth = 0.09 * K; c.stroke(path); // canto oscurecido
     const tex = new T.CanvasTexture(cv); tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
@@ -996,9 +1112,7 @@ window.DT3D = (() => {
       const largo = Math.PI * 2 * R * turns, paso = Math.max(0.55, Math.min(0.85, H * 0.32)) / largo, us = [];
       for (let u = 0.02; u <= 0.94; u += paso) us.push(u);
       tientoEnlazado(g, punto, us, H, true, st.cuero2 ? leather(st.cuero2) : MAT.tiento, thick);
-    } else if (st.cuero && H >= 3) {
-      [-1, 1].forEach((sgn) => { const pts = []; for (let u = 0.02; u <= 0.93; u += 0.006) pts.push(cara(u, sgn * (H / 2 - 0.35), 0.02)); g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.38, 0.035)); });
-    }
+    }   // sin pespunte: en las pulseras de Julia no se ve
     const largoP = Math.PI * 2 * R * turns, U0 = 0.48;   // U0: el frente
     const fina = H < 2, rT = fina ? 0.15 : 0.22, rE = fina ? 0.24 : 0.36;   // tachas y estrellas, chicas
     if (['tachas', 'estrellas', 'estrellas-tachas'].includes(st.deco)) {
@@ -1054,9 +1168,7 @@ window.DT3D = (() => {
     }
     // cordones atrás
     [0, 1].forEach((u) => { const p = center(u); const c = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, 4, 8), leather(st.cuero) === MAT.vacio ? MAT.canto : leather(st.cuero)); c.position.copy(p).add(V(u ? -0.3 : 0.3, -2, -0.3)); c.rotation.z = u ? 0.15 : -0.15; g.add(c); });
-    if (st.cuero && !trenzado) {
-      [-1, 1].forEach((sgn) => { const pts = []; for (let u = 0.04; u <= 0.96; u += 0.008) { const tl = tilt(u), n = normal(u).multiplyScalar(Math.cos(tl)).add(V(0, Math.sin(tl), 0)), up = V(0, Math.cos(tl), 0).addScaledVector(normal(u), -Math.sin(tl)); pts.push({ p: center(u).addScaledVector(n, thick / 2 + 0.02).addScaledVector(up, sgn * (alto(u) / 2 - 0.22)), n }); } g.add(stitchesAlong(pts, hiloPara(st.cuero), 0.36, 0.035)); });
-    }
+    // sin pespunte: en los collares de Julia no se ve
     // decoración: cinco adelante o en todo el collar
     if (st.deco && st.deco !== 'no') {
       const en = (u) => { const tl = tilt(u), n = normal(u).multiplyScalar(Math.cos(tl)).add(V(0, Math.sin(tl), 0)); return { p: center(u).addScaledVector(n, thick / 2), n }; }, toda = st.cantidad === 'toda';
@@ -1101,7 +1213,7 @@ window.DT3D = (() => {
     const pivot = new T.Group(); scene.add(pivot);
     let model = null, yaw = 0, pitch = 0.1, baseYaw = 0, dragging = false, lastX = 0, lastY = 0, idle = 0, vel = 0, dirty = true;
     let zoom = 1, encuadre = null;   // zoom: 1 = la pieza entera; menos de 1 = más cerca
-    let lastId = null, lastSt = null, pend = 0;
+    let lastId = null, lastSt = null, pend = 0, ultimoMarco = null, centro = null, tocado = false;
     const invalidate = () => { dirty = true; clearTimeout(pend); pend = setTimeout(() => { if (lastId) update(lastId, lastSt); }, 30); };
     listeners.add(invalidate);
 
@@ -1119,7 +1231,7 @@ window.DT3D = (() => {
       camera.position.set(c.x, c.y + r * 0.18 * zoom, c.z + d * zoom);
       camera.lookAt(c); dirty = true;
     }
-    const acercar = (f) => { zoom = Math.max(0.3, Math.min(1.6, zoom * f)); camara(); idle = 0; };
+    const acercar = (f) => { zoom = Math.max(0.3, Math.min(1.6, zoom * f)); camara(); idle = 0; tocado = true; };
     function disposeTree(o) { o.traverse((c) => { if (c.geometry) c.geometry.dispose(); }); }
     function update(id, st) {
       const build = M[id]; if (!build) return;
@@ -1127,11 +1239,19 @@ window.DT3D = (() => {
       const r = build(lastSt);
       if (model) { pivot.remove(model); disposeTree(model); }
       model = r.group; pivot.add(model);
-      // centrar el modelo en el eje de giro, así al girarlo no se sale del cuadro
-      const c = new T.Box3().setFromObject(model).getCenter(V()); model.position.sub(c);
-      if (r.yaw !== undefined && baseYaw === 0 && yaw === 0) { yaw = r.yaw; }
-      pitch = r.pitch || 0.1;
-      pivot.rotation.set(0, 0, 0); fit(); dirty = true;
+      // al cambiar una opción la pieza se queda exactamente donde estaba (mismo giro, inclinación, zoom y centro);
+      // solo se vuelve a encuadrar al cambiar de pieza (o de cinto funcional a faja: es otro maniquí)
+      const marco = id + '|' + (r.marco || '');
+      if (marco !== ultimoMarco || !centro) {
+        ultimoMarco = marco;
+        // centrar el modelo en el eje de giro, así al girarlo no se sale del cuadro
+        centro = new T.Box3().setFromObject(model).getCenter(V());
+        if (r.yaw !== undefined && baseYaw === 0 && yaw === 0) { yaw = r.yaw; }
+        pitch = r.pitch || 0.1;
+        model.position.sub(centro);
+        pivot.rotation.set(0, 0, 0); fit();
+      } else model.position.sub(centro);
+      dirty = true;
     }
     function resize() {
       const w = host.clientWidth || 300, h = host.clientHeight || 300;
@@ -1145,7 +1265,7 @@ window.DT3D = (() => {
     const dedos = new Map(); let pinza = 0;
     const separacion = () => { const [a, b] = [...dedos.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
     el.addEventListener('pointerdown', (e) => {
-      dedos.set(e.pointerId, { x: e.clientX, y: e.clientY }); el.setPointerCapture(e.pointerId);
+      dedos.set(e.pointerId, { x: e.clientX, y: e.clientY }); el.setPointerCapture(e.pointerId); tocado = true;
       if (dedos.size === 2) { dragging = false; pinza = separacion(); return; }
       dragging = true; lastX = e.clientX; lastY = e.clientY; vel = 0;
     });
@@ -1174,7 +1294,7 @@ window.DT3D = (() => {
       if (!dragging) {
         idle += dt;
         if (Math.abs(vel) > 0.0005) { yaw += vel; vel *= 0.93; dirty = true; }
-        else if (idle > 2500 && !reduce) { yaw += dt * 0.00018; dirty = true; }
+        else if (idle > 2500 && !reduce && !tocado) { yaw += dt * 0.00018; dirty = true; }   // gira sola solo hasta que alguien la mueve
       }
       if (!dirty) return;
       pivot.rotation.set(pitch, yaw, 0);

@@ -11,7 +11,7 @@ from skimage import measure
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # las fotos donde la púa no apunta a la derecha: cuánto girarlas (en grados, a la izquierda) para que el cinto
 # pase de costado como en las demás
-GIRO = {'rectangular-dorada': 90, 'oval-labrada': -90}
+GIRO = {'oval-bronce': 180}   # la púa apunta a la derecha en todas (la punta del cinto sale a la izquierda)
 
 formas = {}
 for p in sorted((ROOT / 'img').glob('hebilla-*.png')):

@@ -177,3 +177,10 @@ select.ad-buscar { min-height: 40px; }
 .ad-cuero__txt { display: grid; gap: 4px; min-width: 0; }
 .ad-cuero__txt b { font-family: var(--serif); font-weight: 400; font-size: 16px; }
 .ad-cuero select { min-height: 36px; padding: 4px 8px; font-size: 13px; }
+
+/* precios de venta */
+.ad-prfila { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 10px; background: var(--hueso); border: 1px solid var(--linea); }
+.ad-prfila__n { grid-column: 1 / -1; font-weight: 600; color: var(--tinta); }
+.ad-prfila .ad-link { justify-self: end; }
+.ad-prfila input { min-height: 40px; width: 90px; padding: 6px 10px; font-size: 15px; }
+@media (min-width: 760px) { .ad-prfila { grid-template-columns: 1fr 150px 170px auto; } .ad-prfila__n { grid-column: auto; } }

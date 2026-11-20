@@ -1,4 +1,4 @@
-# Genera js/cueros-datos.js: las texturas del 3D (img/textura-*.jpg, achicadas), los dijes del portafuego
+# Genera js/cueros-datos.js: las texturas del 3D (img/textura-*.jpg, a un cuarto: js/pieza3d.js lo sabe), los dijes del portafuego
 # (img/dije-*.png) y las hebillas (img/hebilla-*.png) metidos dentro del JS. Solo se usa cuando la web se abre como archivo (doble clic),
 # porque así el navegador no deja que el 3D lea las fotos sueltas. En internet no se carga.
 # Uso: .venv-fotos/Scripts/python.exe herramientas/generar-cueros-datos.py
@@ -7,7 +7,7 @@ from PIL import Image
 root = pathlib.Path(__file__).resolve().parent.parent
 d = {}
 for p in sorted((root / 'img').glob('textura-*.jpg')):
-    buf = io.BytesIO(); Image.open(p).resize((512, 512), Image.LANCZOS).save(buf, 'JPEG', quality=75)
+    buf = io.BytesIO(); (lambda im: im.resize((im.width // 4, im.height // 4), Image.LANCZOS))(Image.open(p)).save(buf, 'JPEG', quality=75)
     d[p.stem.replace('textura-', '')] = 'data:image/jpeg;base64,' + base64.b64encode(buf.getvalue()).decode()
 dj = {}
 for p in sorted((root / 'img').glob('dije-*.png')):

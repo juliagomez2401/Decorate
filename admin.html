@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=3">
+  <link rel="stylesheet" href="css/admin.css?v=4">
 </head>
 <body>
   <header class="ad-hd">
@@ -22,6 +22,7 @@
     <button type="button" data-ir="pedidos" aria-current="page">Pedidos</button>
     <button type="button" data-ir="stock">Stock</button>
     <button type="button" data-ir="materiales">Materiales</button>
+    <button type="button" data-ir="precios">Precios</button>
   </nav>
 
   <main class="ad" data-app>
@@ -95,6 +96,13 @@
       <p class="ad-hoja__sub">Lo que te cuesta cada cosa. Si cambia un precio, cambialo acá: el costo de todas las piezas se recalcula solo.</p>
       <div data-mat-lista></div>
     </section>
+
+    <!-- precios de venta de lo que se arma a medida (lo que ve el cliente en «Armá el tuyo») -->
+    <section class="ad-ped" data-vista="precios" hidden>
+      <div class="ad-ped__top"><h1>Precios</h1></div>
+      <p class="ad-hoja__sub">Lo que paga el cliente por lo que se arma a medida. Lo que cambies acá se ve en la web al recargar la página. Las piezas en stock tienen su precio en Stock.</p>
+      <div data-pr-lista></div>
+    </section>
   </main>
 
   <!-- detalle de un pedido / cargar uno nuevo -->
@@ -108,6 +116,6 @@
 
   <div class="ad-aviso" data-aviso role="status" aria-live="polite"></div>
 
-  <script src="js/admin.js?v=4"></script>
+  <script src="js/admin.js?v=5"></script>
 </body>
 </html>

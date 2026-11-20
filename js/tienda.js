@@ -368,7 +368,7 @@
             <h1 class="pdp__name">${esc(s.name)}</h1>
             <p class="pdp__price">${stockPrice(s)}</p>
             ${s.confirmar ? '<p class="pdp__note"><span class="placeholder">[PLACEHOLDER] Precio exacto de esta pieza a confirmar</span></p>' : ''}
-            <p class="pdp__stock"><span></span>Pieza única · en stock</p>
+            <p class="pdp__stock"><span></span>Pieza única · en stock${s.talle ? ` · talle ${s.talle}` : ''}</p>
             <div class="pdp__buy pdp__buy--one" data-buy>
               <button type="button" class="btn" data-add-stock>Agregar al carrito</button>
             </div>
@@ -377,7 +377,8 @@
             ${c.custom ? `<a class="pdp__custom" href="${c.custom.href}"><small>¿Lo querés en otro cuero?</small><b>${esc(c.custom.label)}</b></a>` : ''}
             <ul class="pdp__notes">
               <li><span>Código</span><span>${s.id.toUpperCase()}</span></li>
-              <li><span>Medidas</span><span class="placeholder">[PLACEHOLDER] Medidas de la pieza</span></li>
+              ${s.talle ? `<li><span>Talle</span><span>${s.talle}</span></li>` : ''}
+              ${s.talle ? '' : '<li><span>Medidas</span><span class="placeholder">[PLACEHOLDER] Medidas de la pieza</span></li>'}
               <li><span>Elaboración</span><span>Hecho a mano</span></li>
               <li><span>Pago</span><span>Efectivo o transferencia</span></li>
             </ul>
@@ -397,7 +398,7 @@
         if (!e.target.closest('[data-add-stock]')) return;
         const already = Cart.items.some((i) => i.key === 'stock|' + s.id);
         if (already) { $('[data-added]', pdpEl).textContent = 'Ya está en tu carrito.'; S.openDrawer(); return; }
-        Cart.add({ key: 'stock|' + s.id, kind: 'stock', id: s.id, name: s.name, detail: ['Pieza única', 'Código ' + s.id.toUpperCase()].concat(s.confirmar ? ['Precio a confirmar'] : []), min: s.min, max: s.max, confirmar: s.confirmar, foto: S.fotoStock(s.portada || s.fotos[0]), qty: 1 });
+        Cart.add({ key: 'stock|' + s.id, kind: 'stock', id: s.id, name: s.name, detail: ['Pieza única', 'Código ' + s.id.toUpperCase()].concat(s.talle ? ['Talle ' + s.talle] : [], s.confirmar ? ['Precio a confirmar'] : []), min: s.min, max: s.max, confirmar: s.confirmar, foto: S.fotoStock(s.portada || s.fotos[0]), qty: 1 });
         $('[data-added]', pdpEl).textContent = 'Agregado al carrito.';
         S.openDrawer();
       });

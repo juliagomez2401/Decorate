@@ -59,7 +59,9 @@
   };
   // flecha para volver: en todas las páginas menos el inicio
   const enInicio = html.dataset.page === 'inicio';
-  const volverA = { piezas: 'tienda.html' }[html.dataset.page] || 'index.html';
+  // armando una pieza (arma.html?p=…), la flecha vuelve a «¿Qué querés armar?»
+  const armandoPieza = html.dataset.page === 'armar' && /[?&]p=/.test(location.search);
+  const volverA = armandoPieza ? 'arma.html' : { piezas: 'tienda.html' }[html.dataset.page] || 'index.html';
 
   document.body.insertAdjacentHTML('afterbegin', `
     <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -98,7 +100,7 @@
         </div>
         <p class="menu__label">Tienda</p>
         <ul class="menu__list">
-          ${D.categorias.map((c) => `<li><a href="${c.href}"><span class="menu__name">${esc(c.name)}</span><small>Desde ${money(c.desde)}</small></a></li>`).join('')}
+          ${D.categorias.map((c) => `<li><a href="${c.href}"><span class="menu__name">${esc(c.name)}</span><small data-desde-cat="${c.id}">Desde ${money(c.desde)}</small></a></li>`).join('')}
         </ul>
         <a class="menu__all" href="tienda.html">Ver toda la tienda</a>
         <div class="menu__make">
@@ -202,6 +204,7 @@
   /* ---------------- volver ---------------- */
   const backBtn = $('[data-back]');
   if (backBtn) backBtn.addEventListener('click', (e) => {
+    if (armandoPieza) return;   // va siempre a elegir qué armar (no a la página anterior)
     let mismoSitio = false;
     try { mismoSitio = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
     if (mismoSitio && history.length > 1) { e.preventDefault(); history.back(); }
@@ -636,5 +639,13 @@
 
   /* ---------------- utilidades para las otras páginas ---------------- */
   window.DTSite = { Cart, money, range, esc, wa, motion, hasGsap, lenis, scrollToEl, openDrawer, introDone, fine, fotoSrc, fotoStock };
+
+  // precios del panel (Supabase): el menú se armó antes de que llegaran
+  (window.DT_STOCK_LISTO || Promise.resolve()).then(() => {
+    document.querySelectorAll('[data-desde-cat]').forEach((el) => {
+      const c = D.categorias.find((x) => x.id === el.dataset.desdeCat);
+      if (c) el.textContent = 'Desde ' + money(c.desde);
+    });
+  });
   document.dispatchEvent(new CustomEvent('dtsite'));
 })();

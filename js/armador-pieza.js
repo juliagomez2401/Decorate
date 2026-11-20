@@ -3,7 +3,7 @@
    Pasos, vista 3D en vivo con el cuero real, precio y pedido
    (carrito o WhatsApp). La pieza sale de arma.html?p=…
    ========================================================= */
-(() => {
+(window.DT_STOCK_LISTO || Promise.resolve()).then(() => {
   'use strict';
   const D = window.DT;
   const S = window.DTSite;
@@ -17,6 +17,7 @@
   const prod = (id) => D.productos.find((p) => p.id === id) || {};
   const opts = (pid, key) => ((prod(pid).opciones || []).find((o) => o.key === key) || {}).items || [];
   const plus = (n) => (n ? '+' + money(n) : 'Incluido');
+  const rangoDe = (items) => ({ min: Math.min(...items.map((i) => i.price)), max: Math.max(...items.map((i) => i.price)) });
   const TACHAS = [{ id: 'no', name: 'Sin tachas', desc: 'Solo el pespunte.' }, { id: 'si', name: 'Con tachas', desc: 'Tachas de metal por el borde.' }];
   const NOTA_TACHAS = '[PLACEHOLDER] Confirmar si las tachas cambian el precio.';
   // conEstrellas(st): si lleva estrellas, también se ofrece cobre (solo existe en estrellas)
@@ -25,7 +26,7 @@
   const nombre = (lista, id) => (find(lista, id) || {}).name || '';
 
   const TRAMO = [{ id: 'corto', name: '12 cm', desc: 'Desde donde se juntan los cueros.' }, { id: 'largo', name: '22 cm', desc: 'Desde donde se juntan los cueros, más hacia atrás.' }];
-  const UBIC_PF = [{ id: 'columna', name: 'En columna', desc: 'Tres en el medio del frente.' }, { id: 'L', name: 'En L', desc: 'En la esquina de abajo, del lado contrario al dije.' }, { id: 'filas', name: 'En dos filas', desc: 'Dos filas verticales juntas, en un costado.' }, { id: 'costados', name: 'Una fila en cada costado', desc: 'Dos filas verticales, una a cada lado.' }];
+  const UBIC_PF = [{ id: 'L', name: 'En L', desc: 'En la esquina de abajo, del lado contrario al dije.' }, { id: 'filas', name: 'En dos filas', desc: 'Dos filas verticales juntas, en un costado.' }, { id: 'costados', name: 'Una fila en cada costado', desc: 'Dos filas verticales, una a cada lado.' }];
   const DECO_LENTES = [{ id: 'no', name: 'Sin tachas', desc: '' }, { id: 'l', name: 'Tachas en L', desc: 'Por el costado del mosquetón y abajo.' }, { id: 'alrededor', name: 'Tachas alrededor', desc: 'Por los dos costados y abajo.' }];
   const DECO_PF = [
     { id: 'no', name: 'Sin decoración', desc: 'El cuero solo.' }, { id: 'estrellas', name: 'Estrellas', desc: 'Estrellas de metal.' },
@@ -41,7 +42,7 @@
     cinto: {
       nombre: 'Cinto', titulo: 'Armá tu cinto', bajada: 'Elegís el tipo, la forma, cómo se combinan los cueros, la hebilla y el detalle final. Lo ves con el cuero real y sabés cuánto sale antes de pedirlo.',
       state: { tipo: null, forma: null, cuero: null, combo: null, union: null, cuero2: null, cierre: null, hebilla: null, deco: null, lado: null, tramo: null, metal: null, metalCierre: null, cintura: '' },
-      precio: (st) => { const t = find(D.tipos, st.tipo); if (!t) return { min: D.tipos[0].min, max: D.tipos[1].max }; let x = 0; [[D.hebillas, st.hebilla], [D.uniones, st.union], [D.deco, st.deco]].forEach(([l, id]) => { const o = find(l, id); if (o) x += o.price; }); return { min: t.min + x, max: t.max + x }; },
+      precio: (st) => { const t = find(D.tipos, st.tipo); if (!t) return { min: Math.min(...D.tipos.map((x) => x.min)), max: Math.max(...D.tipos.map((x) => x.max)) }; let x = 0; [[D.hebillas, st.hebilla], [D.uniones, st.union], [D.deco, st.deco]].forEach(([l, id]) => { const o = find(l, id); if (o) x += o.price; }); return { min: t.min + x, max: t.max + x }; },
       pasos: [
         { key: 'tipo', label: 'Tipo', titulo: '¿Qué cinto buscás?', hint: 'El funcional ajusta el pantalón; la faja es ancha y va sobre la ropa.', opciones: () => D.tipos.map((t) => ({ ...t, name: t.id === 'decorativo' ? 'Faja (decorativo)' : t.name, etiqueta: S.range(t.min, t.max) })) },
         { key: 'forma', label: 'Forma', titulo: 'La forma', hint: 'Las mismas formas de las fajas que ya hicimos.', si: (st) => st.tipo === 'decorativo', opciones: () => [
@@ -58,7 +59,7 @@
         { key: 'cierre', label: 'Cierre', titulo: '¿Cómo cierra?', hint: 'Con hebilla adelante o con broches al costado.', si: (st) => st.tipo === 'decorativo', opciones: () => [
           { id: 'hebilla', name: 'Hebilla adelante', desc: 'Elegís la hebilla en el paso que sigue.' },
           { id: 'broches', name: 'Broches al costado', desc: 'Sin hebilla: cierra al costado con tres broches.' }] },
-        { key: 'hebilla', label: 'Hebilla', si: (st) => !(st.tipo === 'decorativo' && st.cierre === 'broches'), titulo: 'La hebilla', hint: 'Las que tenemos en el taller. Las de marco suman $50 y las rellenas $150.', fotos: 'hebilla', opciones: () => D.hebillas.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
+        { key: 'hebilla', label: 'Hebilla', si: (st) => !(st.tipo === 'decorativo' && st.cierre === 'broches'), titulo: 'La hebilla', hint: () => { const p = (t) => D.hebillas.filter((h) => h.tipo === t).map((h) => h.price), txt = (l) => (Math.min(...l) === Math.max(...l) ? money(l[0]) : `${money(Math.min(...l))} a ${money(Math.max(...l))}`); return `Las que tenemos en el taller. Las de marco suman ${txt(p('marco'))} y las rellenas ${txt(p('rellena'))}.`; }, fotos: 'hebilla', opciones: () => D.hebillas.map((o) => ({ ...o, etiqueta: plus(o.price) })) },
         { key: 'deco', label: 'Decoración', titulo: 'La decoración', hint: (st) => (st.tipo === 'decorativo' ? 'En la faja, la decoración son los flecos.' : 'Siempre en todo el cinto.'), opciones: (st) => D.deco.filter((o) => !o.tipo || o.tipo === st.tipo).map((o) => ({ ...o, etiqueta: plus(o.price) })) },
         { key: 'lado', label: 'Lado', titulo: '¿De qué lado los flecos?', hint: 'Salen del borde de abajo, desde donde se juntan los cueros hacia atrás.', si: (st) => st.deco === 'flecos', opciones: () => [{ id: 'izquierda', name: 'Izquierda', desc: 'Del lado izquierdo de quien lo usa.' }, { id: 'derecha', name: 'Derecha', desc: 'Del lado derecho de quien lo usa.' }] },
         { key: 'tramo', label: 'Largo', titulo: '¿Cuánto ocupan los flecos?', hint: 'Empiezan donde se juntan los cueros y siguen hacia atrás.', si: (st) => st.deco === 'flecos', opciones: () => TRAMO },
@@ -78,7 +79,7 @@
     tarjetero: {
       nombre: 'Tarjetero', titulo: 'Armá tu tarjetero', bajada: 'Arriba, el compartimiento grande para billetes; adelante, dos escalonados para tarjetas. Elegís el cuero y el detalle. Siempre cosido a mano.',
       state: { cuero: null, detalle: null, cuero2: null },
-      precio: () => ({ min: 650, max: 650 }), notaPrecio: '[PLACEHOLDER] Confirmar si el detalle cambia el precio.',
+      precio: () => ({ min: prod('tarjetero').base, max: prod('tarjetero').base }), notaPrecio: '[PLACEHOLDER] Confirmar si el detalle cambia el precio.',
       pasos: [
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero de todo el tarjetero.' },
         { key: 'detalle', label: 'Detalle', titulo: 'El detalle', hint: 'El compartimiento del medio puede ir en otro cuero.', opciones: () => [
@@ -93,7 +94,7 @@
     'porta-lentes': {
       nombre: 'Estuche de lentes', titulo: 'Armá tu estuche de lentes', bajada: 'Con o sin tapa, en uno o dos cueros, con mosquetón para colgar.',
       state: { modelo: null, cuero: null, combo: null, cuero2: null, union: null, deco: null, metal: null, conDije: null, dije: null },
-      precio: (st) => { const o = find(opts('porta-lentes', 'modelo'), st.modelo); return o ? { min: o.price, max: o.price } : { min: 550, max: 650 }; },
+      precio: (st) => { const o = find(opts('porta-lentes', 'modelo'), st.modelo); return o ? { min: o.price, max: o.price } : rangoDe(opts('porta-lentes', 'modelo')); },
       pasos: [
         { key: 'modelo', label: 'Modelo', titulo: '¿Con o sin tapa?', hint: 'La tapa cierra con un broche.', opciones: () => opts('porta-lentes', 'modelo').map((o) => ({ ...o, desc: o.id === 'con-tapa' ? 'Tapa que cubre la boca del estuche.' : 'Abierto arriba, el lente entra y sale fácil.', etiqueta: money(o.price) })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero principal del estuche.' },
@@ -114,7 +115,7 @@
     portafuego: {
       nombre: 'Portafuego', titulo: 'Armá tu portafuego', bajada: 'Funda de cuero para el encendedor, con mosquetón para colgar. En dos tamaños.',
       state: { tamano: null, cuero: null, deco: null, ubicacion: null, metal: null, conDije: null, dije: null, flecos: null },
-      precio: (st) => { const o = find(opts('portafuego', 'tamano'), st.tamano); return o ? { min: o.price, max: o.price } : { min: 150, max: 200 }; },
+      precio: (st) => { const o = find(opts('portafuego', 'tamano'), st.tamano); return o ? { min: o.price, max: o.price } : rangoDe(opts('portafuego', 'tamano')); },
       pasos: [
         { key: 'tamano', label: 'Tamaño', titulo: 'El tamaño', hint: 'Según el encendedor que uses.', opciones: () => opts('portafuego', 'tamano').map((o) => ({ ...o, desc: o.id === 'grande' ? 'Para encendedores grandes.' : 'Para encendedores chicos.', etiqueta: money(o.price) })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero de toda la funda.' },
@@ -130,7 +131,7 @@
     llavero: {
       nombre: 'Llavero', titulo: 'Armá tu llavero', bajada: 'Elegís la forma, el cuero y si lleva tachas o estrellas.',
       state: { forma: null, cuero: null, trenzado: null, cuero2: null, deco: null, metal: null },
-      precio: () => ({ min: 300, max: 300 }), notaPrecio: '[PLACEHOLDER] Confirmar si todas las formas tienen el mismo precio.',
+      precio: () => ({ min: prod('llavero').base, max: prod('llavero').base }), notaPrecio: '[PLACEHOLDER] Confirmar si todas las formas tienen el mismo precio.',
       pasos: [
         { key: 'forma', label: 'Forma', titulo: 'La forma', hint: 'Las que ya hicimos.', opciones: () => [{ id: 'estrella', name: 'Estrella' }, { id: 'estrellas', name: 'Varias estrellas', desc: 'Tres estrellas de distintos tamaños en la misma argolla.' }, { id: 'dos-estrellas', name: 'Dos estrellas', desc: 'La chica cuelga de la grande, que cuelga del mosquetón.' }, { id: 'corazon', name: 'Corazón' }, { id: 'luna', name: 'Luna' }, { id: 'rayo', name: 'Rayo' }, { id: 'gota', name: 'Gota' }].map((o) => ({ desc: '', ...o })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'De los dos lados.' },
@@ -144,7 +145,7 @@
     pulsera: {
       nombre: 'Pulsera', titulo: 'Armá tu pulsera', bajada: 'Lisa o con tiento trenzado por los bordes, con tachas, estrellas o las dos.',
       state: { modelo: null, ancho: null, cuero: null, cuero2: null, deco: null, cantidad: null, metal: null },
-      precio: (st) => { const o = find(opts('pulsera', 'ancho'), st.ancho); return o ? { min: o.price, max: o.price } : { min: 250, max: 350 }; }, notaPrecio: NOTA_TACHAS,
+      precio: (st) => { const o = find(opts('pulsera', 'ancho'), st.ancho); return o ? { min: o.price, max: o.price } : rangoDe(opts('pulsera', 'ancho')); }, notaPrecio: NOTA_TACHAS,
       pasos: [
         { key: 'modelo', label: 'Modelo', titulo: '¿Lisa o trenzada?', hint: 'La trenzada lleva un tiento de cuero enlazado por los dos bordes.', opciones: () => [
           { id: 'lisa', name: 'Lisa', desc: 'Tira de cuero con broche.', etiqueta: 'Desde ' + money(250) },
@@ -161,7 +162,7 @@
     collar: {
       nombre: 'Collar', titulo: 'Armá tu collar', bajada: 'Fino o más grueso, con trenzado y decoración a elección, atado con cordón.',
       state: { ancho: null, cuero: null, trenzado: null, cuero2: null, deco: null, cantidad: null, metal: null },
-      precio: (st) => { const a = find(opts('collar', 'ancho'), st.ancho), si = find(opts('collar', 'deco'), 'si'), con = st.deco && st.deco !== 'no'; return { min: (a ? a.price : 350) + (con ? si.price : 0), max: (a ? a.price : 450) + (con ? si.max : 0) }; },
+      precio: (st) => { const a = find(opts('collar', 'ancho'), st.ancho), si = find(opts('collar', 'deco'), 'si'), con = st.deco && st.deco !== 'no'; const r = rangoDe(opts('collar', 'ancho')); return { min: (a ? a.price : r.min) + (con ? si.price : 0), max: (a ? a.price : r.max) + (con ? si.max : 0) }; },
       pasos: [
         { key: 'ancho', label: 'Ancho', titulo: 'El ancho', hint: 'El precio cambia según el ancho.', opciones: () => opts('collar', 'ancho').map((o) => ({ ...o, desc: o.id === 'grueso' ? 'Más ancho, tipo gargantilla.' : 'Fino, 1,3 cm.', etiqueta: money(o.price) })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero de todo el collar.' },
@@ -391,4 +392,4 @@
   }
 
   // la barra con Atrás, el total y Siguiente queda siempre fija abajo
-})();
+});

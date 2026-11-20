@@ -71,7 +71,7 @@
   }
 
   /* ---------------- vistas ---------------- */
-  const SECCIONES = ['pedidos', 'stock', 'materiales'];
+  const SECCIONES = ['pedidos', 'stock', 'materiales', 'precios'];
   function mostrar(v) {
     $$('[data-vista]').forEach((el) => { el.hidden = el.dataset.vista !== v; });
     const adentro = SECCIONES.includes(v);
@@ -578,15 +578,45 @@
     });
   });
 
+  /* ---------------- PRECIOS de venta del armador (los lee la web) ---------------- */
+  const GRUPOS_PR = [['cinto', 'Cintos a medida', 'El precio base. Lo de abajo (hebilla, unión, decoración) se suma.'], ['hebilla', 'Hebillas', 'Lo que se suma al cinto según la hebilla.'],
+    ['union', 'Uniones', 'Cuando el cinto lleva dos cueros.'], ['deco', 'Decoración del cinto', ''], ['pieza', 'Las demás piezas', 'El «desde» de cada categoría en la web se calcula solo, con el más barato.']];
+  let precios = [];
+  async function cargarPrecios() { precios = await api('precios?select=*&order=orden.asc'); }
+  function pintarPrecios() {
+    $('[data-pr-lista]').innerHTML = GRUPOS_PR.map(([g, n, sub]) => {
+      const ps = precios.filter((x) => x.grupo === g); if (!ps.length) return '';
+      return `<h3 class="ad-mat-t">${n}</h3>${sub ? `<p class="ad-hoja__sub">${sub}</p>` : ''}<div class="ad-lista">${ps.map((x) => `
+        <form class="ad-prfila" data-pr="${esc(x.id)}">
+          <span class="ad-prfila__n">${esc(x.nombre)}</span>
+          <label class="ad-matfila__costo">$ <input name="precio" type="number" step="1" min="0" inputmode="numeric" value="${x.precio}" aria-label="Precio" required></label>
+          ${x.precio_max != null ? `<label class="ad-matfila__costo">hasta $ <input name="precio_max" type="number" step="1" min="0" inputmode="numeric" value="${x.precio_max}" aria-label="Precio máximo"></label>` : '<span></span>'}
+          <button class="ad-link" type="submit">Guardar</button>
+        </form>`).join('')}</div>`;
+    }).join('') || '<p class="ad-hoja__sub">No hay precios cargados.</p>';
+  }
+  $('[data-pr-lista]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, x = precios.find((r) => r.id === f.dataset.pr);
+    const datos = { precio: Math.round(Number(f.precio.value)) || 0 };
+    if (f.precio_max) datos.precio_max = Math.max(datos.precio, Math.round(Number(f.precio_max.value)) || datos.precio);
+    try {
+      const [r] = await api(`precios?id=eq.${encodeURIComponent(x.id)}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(datos) });
+      Object.assign(x, r); if (f.precio_max) f.precio_max.value = x.precio_max;
+      aviso(`${x.nombre}: ${x.precio_max != null && x.precio_max !== x.precio ? rango(x.precio, x.precio_max) : money(x.precio)}. Ya se ve en la web.`);
+    } catch (err) { aviso(errorDe(err), true); }
+  });
+
   // ---- menú de secciones
   $('[data-nav]').addEventListener('click', async (e) => {
     const b = e.target.closest('[data-ir]'); if (!b) return;
     const v = b.dataset.ir; mostrar(v); window.scrollTo(0, 0);
     try {
       if (v === 'pedidos') await cargar();
+      else if (v === 'precios') { await cargarPrecios(); pintarPrecios(); }
       else { await cargarStock(); v === 'stock' ? pintarStock() : pintarMateriales(); }
     } catch (err) {
-      aviso(/42P01|does not exist|404/.test(String(err.message)) ? 'Falta correr en Supabase el SQL del paso 4 (04-stock.sql).' : errorDe(err), true);
+      aviso(/42P01|does not exist|404/.test(String(err.message)) ? (v === 'precios' ? 'Falta correr en Supabase el SQL del paso 6 (06-precios.sql).' : 'Falta correr en Supabase el SQL del paso 4 (04-stock.sql).') : errorDe(err), true);
     }
   });
 
