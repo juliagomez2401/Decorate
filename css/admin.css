@@ -184,3 +184,8 @@ select.ad-buscar { min-height: 40px; }
 .ad-prfila .ad-link { justify-self: end; }
 .ad-prfila input { min-height: 40px; width: 90px; padding: 6px 10px; font-size: 15px; }
 @media (min-width: 760px) { .ad-prfila { grid-template-columns: 1fr 150px 170px auto; } .ad-prfila__n { grid-column: auto; } }
+/* celular: las cuatro secciones entran sin correr el menú */
+@media (max-width: 759px) {
+  .ad-nav { padding: 0 6px; }
+  .ad-nav button { flex: 1 1 0; padding: 12px 4px; letter-spacing: .06em; font-size: 11px; text-align: center; }
+}
