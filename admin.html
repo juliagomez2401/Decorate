@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es-UY">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel · Decora.te</title>
+  <meta name="theme-color" content="#3d2619">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1410'/%3E%3Cpath d='M16 25s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 24 14c0 6-8 11-8 11z' fill='%23efe7da'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css?v=1">
+</head>
+<body>
+  <header class="ad-hd">
+    <a class="ad-hd__logo" href="index.html" title="Ver la web"><img src="img/logo-claro.png" alt="Decora.te"></a>
+    <span class="ad-hd__t">Panel</span>
+    <button class="ad-hd__salir" type="button" data-salir hidden>Salir</button>
+  </header>
+
+  <main class="ad" data-app>
+    <p class="ad-cargando" data-vista="cargando">Cargando…</p>
+
+    <!-- entrar -->
+    <section class="ad-login" data-vista="entrar" hidden>
+      <h1>Hola</h1>
+      <p>Entrá con tu mail y tu contraseña.</p>
+      <form data-form-entrar>
+        <label>Mail <input type="email" name="email" autocomplete="username" required></label>
+        <label>Contraseña <input type="password" name="pass" autocomplete="current-password" required></label>
+        <button class="ad-btn" type="submit">Entrar</button>
+        <p class="ad-err" data-err></p>
+        <button class="ad-link" type="button" data-olvide>Me olvidé la contraseña</button>
+      </form>
+    </section>
+
+    <!-- elegir contraseña (desde el mail de invitación o de "me olvidé") -->
+    <section class="ad-login" data-vista="clave" hidden>
+      <h1>Elegí tu contraseña</h1>
+      <p>Es solo tuya: con ella entrás al panel desde el celular o la compu.</p>
+      <form data-form-clave>
+        <label>Contraseña nueva <input type="password" name="pass" autocomplete="new-password" minlength="8" required></label>
+        <label>Repetila <input type="password" name="pass2" autocomplete="new-password" minlength="8" required></label>
+        <button class="ad-btn" type="submit">Guardar y entrar</button>
+        <p class="ad-err" data-err></p>
+      </form>
+    </section>
+
+    <!-- sin permiso -->
+    <section class="ad-login" data-vista="sin-permiso" hidden>
+      <h1>Esta cuenta no es de administración</h1>
+      <p>Para entrar al panel, la cuenta tiene que estar habilitada en Supabase.</p>
+    </section>
+
+    <!-- pedidos -->
+    <section class="ad-ped" data-vista="pedidos" hidden>
+      <div class="ad-ped__top">
+        <h1>Pedidos</h1>
+        <button class="ad-btn" type="button" data-nuevo>Cargar pedido</button>
+      </div>
+      <div class="ad-resumen" data-resumen></div>
+      <div class="ad-filtros">
+        <div class="ad-tabs" data-tabs role="tablist"></div>
+        <input class="ad-buscar" type="search" placeholder="Buscar por nombre, teléfono o número" data-buscar>
+      </div>
+      <div class="ad-lista" data-lista></div>
+    </section>
+  </main>
+
+  <!-- detalle de un pedido / cargar uno nuevo -->
+  <div class="ad-hoja" data-hoja hidden>
+    <div class="ad-hoja__velo" data-cerrar></div>
+    <div class="ad-hoja__in" role="dialog" aria-modal="true" aria-labelledby="hoja-t">
+      <button class="ad-hoja__x" type="button" data-cerrar aria-label="Cerrar">×</button>
+      <div data-hoja-cuerpo></div>
+    </div>
+  </div>
+
+  <div class="ad-aviso" data-aviso role="status" aria-live="polite"></div>
+
+  <script src="js/admin.js?v=1"></script>
+</body>
+</html>
