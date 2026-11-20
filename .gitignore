@@ -39,3 +39,4 @@ Decorate*.pdf
 # SQL con los costos de Julia: se corre en Supabase, no va al repositorio público
 herramientas/supabase/04-stock.sql
 herramientas/supabase/generar-04-stock.py
+herramientas/supabase/05-cueros.sql

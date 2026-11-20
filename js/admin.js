@@ -335,13 +335,18 @@
   const redondo = (n) => Math.round(n);
   const pesos = (n) => money(redondo(n));
 
-  let stock = [], materiales = [], fSt = 'disponible', fCat = '';
-  const mat = (id) => materiales.find((m) => m.id === id);
+  let stock = [], materiales = [], cueros = [], fSt = 'disponible', fCat = '';
+  // "cuero:cebra" = el cuero por su nombre: cuesta lo que su grupo (retazo, intermedio…)
+  const mat = (id) => {
+    if (String(id).startsWith('cuero:')) { const c = cueros.find((x) => 'cuero:' + x.id === id); const g = c && c.grupo && materiales.find((m) => m.id === c.grupo); return g ? { ...g, id, nombre: c.nombre } : null; }
+    return materiales.find((m) => m.id === id);
+  };
   const costoDe = (p) => (p.materiales || []).reduce((s, x) => s + (mat(x.m) ? Number(mat(x.m).costo) * Number(x.c) : 0), 0) + (p.costo_extra || 0);
   const ganancia = (p) => p.min - costoDe(p);
 
   async function cargarStock() {
-    [stock, materiales] = await Promise.all([api('stock?select=*&order=orden.asc'), api('materiales?select=*&order=orden.asc')]);
+    [stock, materiales, cueros] = await Promise.all([api('stock?select=*&order=orden.asc'), api('materiales?select=*&order=orden.asc'),
+      api('cueros?select=*&order=orden.asc').catch(() => [])]);   // sin el SQL del paso 5 todavía: sin lista de cueros
   }
 
   function pintarStock() {
@@ -378,7 +383,8 @@
 
   // ---- ficha de una pieza (o una nueva)
   function opcionesMat(sel) {
-    return GRUPOS.map(([g, n]) => `<optgroup label="${n}">${materiales.filter((m) => m.grupo === g).map((m) => `<option value="${esc(m.id)}" ${m.id === sel ? 'selected' : ''}>${esc(m.nombre)} (${money(m.costo)} / ${esc(m.unidad)})</option>`).join('')}</optgroup>`).join('');
+    const porNombre = cueros.length ? `<optgroup label="Cuero, por nombre">${cueros.map((c) => { const m = mat('cuero:' + c.id); return `<option value="cuero:${esc(c.id)}" ${'cuero:' + c.id === sel ? 'selected' : ''}>${esc(c.nombre)}${m ? ` (${money(m.costo)} / m²)` : ' (sin grupo)'}</option>`; }).join('')}</optgroup>` : '';
+    return porNombre + GRUPOS.map(([g, n]) => `<optgroup label="${n}">${materiales.filter((m) => m.grupo === g).map((m) => `<option value="${esc(m.id)}" ${m.id === sel ? 'selected' : ''}>${esc(m.nombre)} (${money(m.costo)} / ${esc(m.unidad)})</option>`).join('')}</optgroup>`).join('');
   }
   const filaMat = (x = { m: 'cuero-retazo', c: '' }) => `<div class="ad-mat" data-mat-fila>
       <select name="m">${opcionesMat(x.m)}</select>
@@ -515,7 +521,17 @@
 
   // ---- materiales: precios editables
   function pintarMateriales() {
-    $('[data-mat-lista]').innerHTML = GRUPOS.map(([g, n]) => {
+    const gruposCuero = materiales.filter((m) => m.grupo === 'cuero');
+    const lista = cueros.length ? `<h3 class="ad-mat-t">Cada cuero y su precio</h3>
+      <p class="ad-hoja__sub">A qué grupo pertenece cada cuero. El precio por m² sale del grupo (más abajo, en «Cuero»).</p>
+      <div class="ad-cueros">${cueros.map((c) => { const g = gruposCuero.find((m) => m.id === c.grupo); return `
+        <label class="ad-cuero${c.grupo ? '' : ' sin-grupo'}">
+          <span class="ad-cuero__img" style="background-image:url(img/cuero-${esc(c.id)}-sm.jpg)"></span>
+          <span class="ad-cuero__txt"><b>${esc(c.nombre)}</b>
+            <select data-cuero="${esc(c.id)}"><option value="">Sin definir</option>${gruposCuero.map((m) => `<option value="${esc(m.id)}" ${m.id === c.grupo ? 'selected' : ''}>${esc(m.nombre.replace(/^Cuero /, '').replace(/[()]/g, '').replace(/^./, (l) => l.toUpperCase()))} · ${money(m.costo)}/m²</option>`).join('')}</select>
+          </span>
+        </label>`; }).join('')}</div>` : '';
+    $('[data-mat-lista]').innerHTML = lista + GRUPOS.map(([g, n]) => {
       const ms = materiales.filter((m) => m.grupo === g); if (!ms.length) return '';
       return `<h3 class="ad-mat-t">${n}</h3><div class="ad-lista">${ms.map((m) => `
         <form class="ad-matfila" data-mat="${esc(m.id)}">
@@ -526,6 +542,14 @@
         </form>`).join('')}</div>`;
     }).join('');
   }
+  $('[data-mat-lista]').addEventListener('change', async (e) => {
+    const sel = e.target.closest('[data-cuero]'); if (!sel) return;
+    const c = cueros.find((x) => x.id === sel.dataset.cuero);
+    try {
+      await api(`cueros?id=eq.${encodeURIComponent(c.id)}`, { method: 'PATCH', body: JSON.stringify({ grupo: sel.value || null }) });
+      c.grupo = sel.value || null; sel.closest('.ad-cuero').classList.toggle('sin-grupo', !c.grupo); aviso(`${c.nombre}: guardado.`);
+    } catch (err) { aviso(errorDe(err), true); }
+  });
   $('[data-mat-lista]').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target, m = mat(f.dataset.mat);
