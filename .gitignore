@@ -32,3 +32,10 @@ foto dijes/
 fotos cintos/
 fotos tarjetero/
 fotos nuevas hebillas dijes/
+
+# costos de Julia y su PDF (privado)
+costos-julia.md
+Decorate*.pdf
+# SQL con los costos de Julia: se corre en Supabase, no va al repositorio público
+herramientas/supabase/04-stock.sql
+herramientas/supabase/generar-04-stock.py

@@ -242,10 +242,14 @@
   const sInput = $('[data-search-input]');
   const sResults = $('[data-search-results]');
   const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  const INDEX = [
+  // una foto de la web ('stock/79', 'cinto-blanco') o un link (fotos subidas desde el panel)
+  const fotoSrc = (f, sm = true) => (/^https?:/.test(f) ? f : `img/${f}${sm ? '-sm' : ''}.jpg`);
+  const fotoStock = (n) => (/^https?:/.test(n) ? n : 'stock/' + n);
+  const indice = () => [
+
     // foto de una pieza de cada categoría que no se repite con las del inicio ni con las de la tienda
     ...D.categorias.map((c) => ({ title: c.name, kind: 'Categoría', href: c.href, img: BUSCA_FOTO[c.id] || c.foto })),
-    ...(window.DT_STOCK || []).map((s) => { const c = D.categorias.find((x) => x.id === s.cat); return { title: s.name, kind: `${c ? c.name : ''} · en stock`, href: `producto.html?id=${s.id}`, img: `stock/${s.portada || s.fotos[0]}`, extra: `${s.sub || ''} ${s.id}` }; }),
+    ...(window.DT_STOCK || []).map((s) => { const c = D.categorias.find((x) => x.id === s.cat); return { title: s.name, kind: `${c ? c.name : ''} · en stock`, href: `producto.html?id=${s.id}`, img: fotoStock(s.portada || s.fotos[0]), extra: `${s.sub || ''} ${s.id}` }; }),
     ...D.productos.map((p) => ({ title: `${p.name} a medida`, kind: 'A tu medida', href: `arma.html?p=${p.id}`, img: p.fotos[0], extra: p.desc })),
     ...D.cueros.map((c) => ({ title: `Cuero ${c.name.toLowerCase()}`, kind: 'Cuero', href: 'arma.html', swatch: c.id })),
     { title: 'Armá el tuyo', kind: 'Personalizá', href: 'arma.html', img: 'taller-mesa', extra: 'personalizar a medida cinto' },
@@ -255,9 +259,9 @@
     const q = norm(sInput.value.trim());
     if (!q) { sResults.innerHTML = `<p class="search__hint">Probá con <button type="button" data-q="cinto">cinto</button>, <button type="button" data-q="estuche de lentes">estuche de lentes</button> o <button type="button" data-q="cebra">cebra</button>.</p>`; return; }
     const words = q.split(/\s+/);
-    const hits = INDEX.filter((it) => { const hay = norm(`${it.title} ${it.kind} ${it.extra || ''}`); return words.every((w) => hay.includes(w)); }).slice(0, 8);
+    const hits = indice().filter((it) => { const hay = norm(`${it.title} ${it.kind} ${it.extra || ''}`); return words.every((w) => hay.includes(w)); }).slice(0, 8);
     sResults.innerHTML = hits.length
-      ? `<ul class="search__list">${hits.map((h) => `<li><a href="${h.href}"><span class="search__thumb" style="${h.img ? `background-image:url(img/${h.img}-sm.jpg)` : h.swatch ? `background-image:url(img/cuero-${h.swatch}-sm.jpg)` : ''}"></span><span><b>${esc(h.title)}</b><small>${esc(h.kind)}</small></span></a></li>`).join('')}</ul>`
+      ? `<ul class="search__list">${hits.map((h) => `<li><a href="${h.href}"><span class="search__thumb" style="${h.img ? `background-image:url(${fotoSrc(h.img)})` : h.swatch ? `background-image:url(img/cuero-${h.swatch}-sm.jpg)` : ''}"></span><span><b>${esc(h.title)}</b><small>${esc(h.kind)}</small></span></a></li>`).join('')}</ul>`
       : `<p class="search__hint">No encontramos "${esc(sInput.value.trim())}". Escribinos por <a href="${wa(`Hola Decora.te! Estoy buscando: ${sInput.value.trim()}`)}" target="_blank" rel="noopener">WhatsApp</a> y lo vemos.</p>`;
   }
   function openSearch() {
@@ -284,7 +288,7 @@
   const list = $('[data-drawer-list]');
   const foot = $('[data-drawer-foot]');
   function itemHTML(it, compact) {
-    const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
+    const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="${fotoSrc(it.foto)}" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
     return `<li class="ci" data-uid="${it.uid}">
       <div class="ci__media">${img}</div>
       <div class="ci__body">
@@ -631,6 +635,6 @@
   if (document.readyState === 'complete') setTimeout(pista, 50); else window.addEventListener('load', pista);
 
   /* ---------------- utilidades para las otras páginas ---------------- */
-  window.DTSite = { Cart, money, range, esc, wa, motion, hasGsap, lenis, scrollToEl, openDrawer, introDone, fine };
+  window.DTSite = { Cart, money, range, esc, wa, motion, hasGsap, lenis, scrollToEl, openDrawer, introDone, fine, fotoSrc, fotoStock };
   document.dispatchEvent(new CustomEvent('dtsite'));
 })();

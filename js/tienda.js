@@ -1,7 +1,7 @@
 /* =========================================================
    Decora.te — tienda: piezas, producto, carrito y adelantos del inicio
    ========================================================= */
-(() => {
+(window.DT_STOCK_LISTO || Promise.resolve()).then(() => {
   'use strict';
   const D = window.DT;
   const S = window.DTSite;
@@ -105,7 +105,7 @@
   const img = (f, sm = true) => `img/${f}${sm ? '-sm' : ''}.jpg`;
   // ?v=…: subirlo cuando se cambian fotos con el mismo nombre, así el navegador no muestra las viejas
   const FOTOS_V = '4';
-  const stockImg = (n, sm = true) => `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`;
+  const stockImg = (n, sm = true) => (/^https?:/.test(n) ? n : `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`);
 
   function itemCard(s) {
     const a = s.portada || s.fotos[0], b = s.hover;
@@ -397,7 +397,7 @@
         if (!e.target.closest('[data-add-stock]')) return;
         const already = Cart.items.some((i) => i.key === 'stock|' + s.id);
         if (already) { $('[data-added]', pdpEl).textContent = 'Ya está en tu carrito.'; S.openDrawer(); return; }
-        Cart.add({ key: 'stock|' + s.id, kind: 'stock', id: s.id, name: s.name, detail: ['Pieza única', 'Código ' + s.id.toUpperCase()].concat(s.confirmar ? ['Precio a confirmar'] : []), min: s.min, max: s.max, confirmar: s.confirmar, foto: 'stock/' + (s.portada || s.fotos[0]), qty: 1 });
+        Cart.add({ key: 'stock|' + s.id, kind: 'stock', id: s.id, name: s.name, detail: ['Pieza única', 'Código ' + s.id.toUpperCase()].concat(s.confirmar ? ['Precio a confirmar'] : []), min: s.min, max: s.max, confirmar: s.confirmar, foto: S.fotoStock(s.portada || s.fotos[0]), qty: 1 });
         $('[data-added]', pdpEl).textContent = 'Agregado al carrito.';
         S.openDrawer();
       });
@@ -576,7 +576,7 @@
       }
       formBox.hidden = false;
       itemsBox.innerHTML = `<h2 class="co__h">Tu pedido</h2><ul class="co__list">${Cart.items.map((it) => {
-        const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="img/${it.foto}-sm.jpg" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
+        const img = it.img3d ? `<img src="${it.img3d}" alt="">` : it.foto ? `<img src="${S.fotoSrc(it.foto)}" alt="" loading="lazy">` : (it.swatch ? `<span class="ci__swatch" style="background-image:url(img/cuero-${it.swatch}-sm.jpg)"></span>` : '<span class="ci__empty"></span>');
         return `<li class="coi" data-uid="${it.uid}">
           <div class="coi__media">${img}</div>
           <div class="coi__body">
@@ -631,7 +631,7 @@
         for (const it of Cart.items) {
           let foto = null;
           if (it.img3d) foto = await DTNube.subirFoto(it.img3d);
-          else if (it.foto) foto = abs(`img/${it.foto}-sm.jpg`);
+          else if (it.foto) foto = abs(S.fotoSrc(it.foto));
           items.push({
             tipo: it.kind, id: it.id || null, nombre: it.name, detalle: it.detail || [], cantidad: it.qty,
             min: it.min * it.qty, max: it.max * it.qty, foto,
@@ -721,4 +721,4 @@
     if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => { if (en.isIntersecting) start(); else if (started) { clearInterval(timer); started = false; } }, { threshold: 0.35 }).observe(teaser);
     else start();
   }
-})();
+});

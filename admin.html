@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=1">
+  <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
 <body>
   <header class="ad-hd">
@@ -18,6 +18,11 @@
     <span class="ad-hd__t">Panel</span>
     <button class="ad-hd__salir" type="button" data-salir hidden>Salir</button>
   </header>
+  <nav class="ad-nav" data-nav hidden>
+    <button type="button" data-ir="pedidos" aria-current="page">Pedidos</button>
+    <button type="button" data-ir="stock">Stock</button>
+    <button type="button" data-ir="materiales">Materiales</button>
+  </nav>
 
   <main class="ad" data-app>
     <p class="ad-cargando" data-vista="cargando">Cargando…</p>
@@ -66,6 +71,30 @@
       </div>
       <div class="ad-lista" data-lista></div>
     </section>
+
+    <!-- stock: piezas únicas, con su costo y lo que se gana -->
+    <section class="ad-ped" data-vista="stock" hidden>
+      <div class="ad-ped__top">
+        <h1>Stock</h1>
+        <button class="ad-btn" type="button" data-pieza-nueva>Agregar pieza</button>
+      </div>
+      <div class="ad-resumen" data-st-resumen></div>
+      <div class="ad-filtros">
+        <div class="ad-tabs" data-st-tabs role="tablist"></div>
+        <select class="ad-buscar" data-st-cat aria-label="Categoría"></select>
+      </div>
+      <div class="ad-lista" data-st-lista></div>
+    </section>
+
+    <!-- materiales: lo que le cuesta cada cosa (de acá sale el costo de cada pieza) -->
+    <section class="ad-ped" data-vista="materiales" hidden>
+      <div class="ad-ped__top">
+        <h1>Materiales</h1>
+        <button class="ad-btn" type="button" data-mat-nuevo>Agregar material</button>
+      </div>
+      <p class="ad-hoja__sub">Lo que te cuesta cada cosa. Si cambia un precio, cambialo acá: el costo de todas las piezas se recalcula solo.</p>
+      <div data-mat-lista></div>
+    </section>
   </main>
 
   <!-- detalle de un pedido / cargar uno nuevo -->
@@ -79,6 +108,6 @@
 
   <div class="ad-aviso" data-aviso role="status" aria-live="polite"></div>
 
-  <script src="js/admin.js?v=1"></script>
+  <script src="js/admin.js?v=3"></script>
 </body>
 </html>
