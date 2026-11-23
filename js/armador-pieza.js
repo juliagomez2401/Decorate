@@ -24,6 +24,9 @@
   const metalTxt = (st) => st.metal && 'Metal ' + find(D.metales, st.metal).name.toLowerCase();
   const nombre = (lista, id) => (find(lista, id) || {}).name || '';
 
+  // talle del cinto: la misma escala que los cintos de la tienda (de a 5 cm)
+  const TALLES_CINTO = [75, 80, 85, 90, 95, 100, 105, 110, 115, 120].map((n) => ({ id: String(n), name: String(n), desc: '', etiqueta: 'Incluido' }))
+    .concat([{ id: 'nose', name: 'No sé mi talle', desc: 'Lo vemos juntos por WhatsApp antes de hacerlo.', etiqueta: 'Incluido' }]);
   const TRAMO = [{ id: 'corto', name: '12 cm', desc: 'Desde donde se juntan los cueros.' }, { id: 'largo', name: '22 cm', desc: 'Desde donde se juntan los cueros, más hacia atrás.' }];
   const UBIC_PF = [{ id: 'L', name: 'En L', desc: 'En la esquina de abajo, del lado contrario al dije.' }, { id: 'filas', name: 'En dos filas', desc: 'Dos filas verticales juntas, en un costado.' }, { id: 'costados', name: 'Una fila en cada costado', desc: 'Dos filas verticales, una a cada lado.' }];
   const DECO_LENTES = [{ id: 'no', name: 'Sin tachas', desc: '' }, { id: 'l', name: 'Tachas en L', desc: 'Por el costado del mosquetón y abajo.' }, { id: 'alrededor', name: 'Tachas alrededor', desc: 'Por los dos costados y abajo.' }];
@@ -42,7 +45,7 @@
   const PIEZAS = {
     cinto: {
       nombre: 'Cinto', titulo: 'Armá tu cinto', bajada: 'Elegís el tipo, la forma, cómo se combinan los cueros, la hebilla y el detalle final. Lo ves con el cuero real y sabés cuánto sale antes de pedirlo.',
-      state: { tipo: null, forma: null, cuero: null, combo: null, union: null, cuero2: null, cierre: null, hebilla: null, deco: null, lado: null, tramo: null, metal: null, metalCierre: null, cintura: '' },
+      state: { tipo: null, forma: null, cuero: null, combo: null, union: null, cuero2: null, cierre: null, hebilla: null, deco: null, lado: null, tramo: null, metal: null, metalCierre: null, talle: null },
       precio: (st) => { const t = find(D.tipos, st.tipo); if (!t) return { min: Math.min(...D.tipos.map((x) => x.min)), max: Math.max(...D.tipos.map((x) => x.max)) }; let x = 0; [[D.hebillas, st.hebilla], [D.uniones, st.union], [D.deco, st.deco]].forEach(([l, id]) => { const o = find(l, id); if (o) x += o.price; }); return { min: t.min + x, max: t.max + x }; },
       pasos: [
         { key: 'tipo', label: 'Tipo', titulo: '¿Qué cinto buscás?', hint: 'El funcional ajusta el pantalón; la faja es ancha y va sobre la ropa.', opciones: () => D.tipos.map((t) => ({ ...t, name: t.id === 'decorativo' ? 'Faja (decorativo)' : t.name, etiqueta: S.range(t.min, t.max) })) },
@@ -66,15 +69,15 @@
         { key: 'tramo', label: 'Largo', titulo: '¿Cuánto ocupan los flecos?', hint: 'Empiezan donde se juntan los cueros y siguen hacia atrás.', si: (st) => st.deco === 'flecos', opciones: () => TRAMO },
         METAL((st) => ['remaches', 'ondulada', 'acordonada'].includes(st.union) || ['tachas', 'tachas-medio', 'zigzag'].includes(st.deco)),
         { key: 'metalCierre', label: 'Broches', titulo: 'El color de los broches', hint: 'Los tres broches del costado.', si: (st) => st.tipo === 'decorativo' && st.cierre === 'broches', opciones: () => D.metales.filter((o) => !o.soloEstrellas).map((o) => ({ ...o, etiqueta: 'Incluido' })) },
+        { key: 'talle', label: 'Talle', titulo: 'Tu talle', hint: 'Tu talle es tu medida de cintura menos 15. Por ejemplo, si tu cintura mide 100 cm, tu talle es 85. Si no lo sabés, elegí «No sé mi talle».', opciones: () => TALLES_CINTO },
       ],
-      campos: [{ key: 'cintura', label: 'Cintura en cm (opcional)', num: true }],
       describir: (st) => [
         find(D.tipos, st.tipo) && (st.tipo === 'decorativo' ? 'Faja' + (st.forma ? ' ' + { recta: 'recta', asimetrica: 'asimétrica', mono: 'moño', cruzada: 'cruzada' }[st.forma] : '') : 'Cinto funcional'),
         st.cuero && cueroName(st.cuero) + (st.cuero2 ? (st.combo === 'alternado' ? ' alternado con ' : ' con ') + cueroName(st.cuero2).toLowerCase() : ''),
         st.cierre === 'broches' && 'Cierra con broches al costado' + (st.metalCierre ? ' (' + nombre(D.metales, st.metalCierre).toLowerCase() + ')' : ''),
         find(D.hebillas, st.hebilla) && 'Hebilla ' + find(D.hebillas, st.hebilla).name.toLowerCase(),
         st.union && st.union !== 'ninguna' && 'Unión ' + find(D.uniones, st.union).name.toLowerCase(),
-        st.deco && st.deco !== 'no' && nombre(D.deco, st.deco) + (st.deco === 'flecos' ? ' de 40 cm' + (st.lado ? ' a la ' + st.lado : '') + (st.tramo ? ', ' + nombre(TRAMO, st.tramo).toLowerCase() : '') : ''), metalTxt(st), st.cintura.trim() && `Cintura ${st.cintura.trim()} cm`].filter(Boolean),
+        st.deco && st.deco !== 'no' && nombre(D.deco, st.deco) + (st.deco === 'flecos' ? ' de 40 cm' + (st.lado ? ' a la ' + st.lado : '') + (st.tramo ? ', a lo largo de ' + nombre(TRAMO, st.tramo).toLowerCase() : '') : ''), metalTxt(st), st.talle && (st.talle === 'nose' ? 'Talle a confirmar por WhatsApp' : 'Talle ' + st.talle)].filter(Boolean),
       nota: (st) => (st.tipo === 'funcional' ? 'En el cinto funcional, el precio final depende del cuero.' : ''),
     },
     tarjetero: {

@@ -2127,3 +2127,6 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 .mto__card:not(.mto__card--main) { grid-template-rows: auto 1fr; }
 .mto__card:not(.mto__card--main) .mto__info { display: flex; flex-direction: column; align-items: flex-start; }
 .mto__card:not(.mto__card--main) .mto__price { margin-top: auto; padding-top: 6px; }
+
+/* celular: que el botón de WhatsApp no tape el final del pie */
+@media (max-width: 899px) { .ft { padding-bottom: calc(88px + env(safe-area-inset-bottom)); } }
