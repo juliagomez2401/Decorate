@@ -31,6 +31,8 @@
   const DECO_PF = [
     { id: 'no', name: 'Sin decoración', desc: 'El cuero solo.' }, { id: 'estrellas', name: 'Estrellas', desc: 'Estrellas de metal.' },
     { id: 'remaches', name: 'Remaches', desc: 'Remaches de metal.' }, { id: 'estrellas-remaches', name: 'Estrellas y remaches', desc: 'Intercalados.' }];
+  // talle de pulsera: el contorno de la muñeca
+  const TALLES_PULSERA = [{ id: 'XS', name: 'XS', desc: '13 a 14,5 cm' }, { id: 'S', name: 'S', desc: '14,5 a 16 cm' }, { id: 'M', name: 'M', desc: '16 a 17,5 cm' }, { id: 'L', name: 'L', desc: '17,5 a 19 cm' }, { id: 'XL', name: 'XL', desc: '19 a 21 cm' }];
   const CANTIDAD = [{ id: '5', name: 'Cinco', desc: 'Repartidas parejo en todo el largo.' }, { id: 'toda', name: 'En toda la pulsera', desc: 'Una fila de punta a punta.' }];
   const CANTIDAD_COLLAR = [{ id: '5', name: 'Cinco', desc: 'Repartidas parejo adelante.' }, { id: 'toda', name: 'En todo el collar', desc: 'Una fila de punta a punta.' }];
   const DECO_METAL = [
@@ -144,20 +146,21 @@
     },
     pulsera: {
       nombre: 'Pulsera', titulo: 'Armá tu pulsera', bajada: 'Lisa o con tiento trenzado por los bordes, con tachas, estrellas o las dos.',
-      state: { modelo: null, ancho: null, cuero: null, cuero2: null, deco: null, cantidad: null, metal: null },
+      state: { modelo: null, ancho: null, talle: null, cuero: null, cuero2: null, deco: null, cantidad: null, metal: null },
       precio: (st) => { const o = find(opts('pulsera', 'ancho'), st.ancho); return o ? { min: o.price, max: o.price } : rangoDe(opts('pulsera', 'ancho')); }, notaPrecio: NOTA_TACHAS,
       pasos: [
         { key: 'modelo', label: 'Modelo', titulo: '¿Lisa o trenzada?', hint: 'La trenzada lleva un tiento de cuero enlazado por los dos bordes.', opciones: () => [
           { id: 'lisa', name: 'Lisa', desc: 'Tira de cuero con broche.', etiqueta: 'Desde ' + money(250) },
           { id: 'trenzada', name: 'Trenzada', desc: 'Con tiento por los bordes.', etiqueta: 'Desde ' + money(250) }] },
         { key: 'ancho', label: 'Ancho', titulo: 'El ancho', hint: 'El precio cambia según el ancho.', opciones: () => opts('pulsera', 'ancho').map((o) => ({ ...o, desc: { '1-3': 'Fina.', intermedia: 'Ni fina ni ancha.', 5: 'Ancha, tipo puño.' }[o.id] || '', etiqueta: money(o.price) })) },
+        { key: 'talle', label: 'Talle', titulo: 'El talle', hint: 'Medí el contorno de la muñeca con un centímetro, justo donde va la pulsera.', opciones: () => TALLES_PULSERA.map((o) => ({ ...o, etiqueta: 'Incluido' })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero de toda la pulsera.' },
         { key: 'cuero2', label: 'Tiento', tipo: 'cuero', titulo: 'El cuero del tiento', hint: 'Queda lindo en un color que contraste.', si: (st) => st.modelo === 'trenzada', excluir: 'cuero' },
         { key: 'deco', label: 'Decoración', titulo: 'La decoración', hint: 'De metal, o un sol cosido.', opciones: (st) => DECO_METAL.concat(st.modelo === 'lisa' && st.ancho && st.ancho !== '1-3' ? [{ id: 'sol', name: 'Un sol cosido', desc: 'Bordado con hilo, adelante.' }] : [], [{ id: 'azar', name: 'Estrellas y tachas sueltas', desc: 'Al azar, en toda la pulsera.' }]) },
         { key: 'cantidad', label: 'Cantidad', titulo: '¿Cuántas?', hint: 'Siempre ubicadas en forma pareja.', si: (st) => ['tachas', 'estrellas', 'estrellas-tachas'].includes(st.deco), opciones: () => CANTIDAD },
         METAL((st) => ['tachas', 'estrellas', 'estrellas-tachas', 'azar'].includes(st.deco), (st) => ['estrellas', 'estrellas-tachas', 'azar'].includes(st.deco)),
       ],
-      describir: (st) => [st.modelo === 'trenzada' && 'Trenzada' + (st.cuero2 ? ' con tiento ' + cueroName(st.cuero2).toLowerCase() : ''), st.ancho && 'Ancho ' + find(opts('pulsera', 'ancho'), st.ancho).name.toLowerCase(), st.cuero && cueroName(st.cuero), st.deco && st.deco !== 'no' && ({ sol: 'Un sol cosido', azar: 'Estrellas y tachas sueltas' }[st.deco] || nombre(DECO_METAL, st.deco) + (st.cantidad ? ': ' + nombre(CANTIDAD, st.cantidad).toLowerCase() : '')), metalTxt(st)].filter(Boolean),
+      describir: (st) => [st.modelo === 'trenzada' && 'Trenzada' + (st.cuero2 ? ' con tiento ' + cueroName(st.cuero2).toLowerCase() : ''), st.ancho && 'Ancho ' + find(opts('pulsera', 'ancho'), st.ancho).name.toLowerCase(), st.talle && 'Talle ' + st.talle, st.cuero && cueroName(st.cuero), st.deco && st.deco !== 'no' && ({ sol: 'Un sol cosido', azar: 'Estrellas y tachas sueltas' }[st.deco] || nombre(DECO_METAL, st.deco) + (st.cantidad ? ': ' + nombre(CANTIDAD, st.cantidad).toLowerCase() : '')), metalTxt(st)].filter(Boolean),
     },
     collar: {
       nombre: 'Collar', titulo: 'Armá tu collar', bajada: 'Fino o más grueso, con trenzado y decoración a elección, atado con cordón.',

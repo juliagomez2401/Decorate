@@ -40,6 +40,12 @@ RECORTE = {'bordo-lavado': (0.95, 0.45)}   # foto vertical: solo la mitad de arr
 LISOS = {'liso', 'lavado', 'charol', 'metal', 'gamuza'}
 
 
+
+def movil(im, destino):
+    """versión para el celular: la mitad de px por cm (PXCM / 2), más liviana"""
+    im.resize((max(1, im.width // 2), max(1, im.height // 2)), Image.LANCZOS).save(
+        destino, quality=74, optimize=True, progressive=True)
+
 def nitidez(g):
     lap = np.abs(g - gaussian_filter(g, 1.5))
     return gaussian_filter(lap, 8)
@@ -237,7 +243,8 @@ if __name__ == '__main__':
         im_out = Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8))
         for intento in range(5):   # en Windows el archivo puede estar abierto un instante (servidor local, antivirus)
             try:
-                im_out.save(root / 'img' / f'textura-{slug}.jpg', quality=80, optimize=True, progressive=True); break
+                im_out.save(root / 'img' / f'textura-{slug}.jpg', quality=80, optimize=True, progressive=True)
+                movil(im_out, root / 'img' / f'textura-{slug}-m.jpg'); break
             except OSError:
                 import time; time.sleep(1.5)
         print(slug, fam, out.shape[:2], flush=True)

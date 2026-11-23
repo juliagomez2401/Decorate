@@ -324,6 +324,7 @@
   /* =========================================================
      STOCK Y MATERIALES: costo de cada pieza = materiales × su precio + otros gastos
      ========================================================= */
+  const TALLES_PULSERA = [['XS', '13 a 14,5 cm'], ['S', '14,5 a 16 cm'], ['M', '16 a 17,5 cm'], ['L', '17,5 a 19 cm'], ['XL', '19 a 21 cm']];
   const CATS = [['cintos', 'Cintos'], ['tarjeteros', 'Tarjeteros'], ['porta-lentes', 'Estuches de lentes'], ['portafuegos', 'Portafuegos'], ['llaveros', 'Llaveros'], ['pulseras', 'Pulseras'], ['collares', 'Collares']];
   const SUBS = { cintos: [['decorativos', 'Decorativos'], ['funcionales', 'Funcionales']], pulseras: [['anchas', 'Anchas'], ['finas', 'Finas']] };
   const PREFIJO = { cintos: 'c', tarjeteros: 't', 'porta-lentes': 'p', portafuegos: 'pf', llaveros: 'l', pulseras: 'pu', collares: 'co' };
@@ -413,7 +414,8 @@
         <label class="pn-check"><input type="checkbox" name="desde" ${p.desde ? 'checked' : ''}> Mostrar «desde»</label>
         <label class="pn-check"><input type="checkbox" name="confirmar" ${p.confirmar ? 'checked' : ''}> Precio a confirmar</label>
         <label data-solo-cinto>Largo (cm) <input name="largo" type="number" min="0" step="1" inputmode="numeric" value="${p.largo ?? ''}"></label>
-        <label data-solo-cinto>Talle <input name="talle" type="number" readonly value="${p.talle ?? ''}" tabindex="-1"></label>
+        <label data-solo-cinto>Talle <input name="talle" type="number" readonly value="${p.cat === 'cintos' ? p.talle ?? '' : ''}" tabindex="-1"></label>
+        <label data-solo-pulsera>Talle <select name="talle_p"><option value="">Sin talle</option>${TALLES_PULSERA.map(([t, cm]) => `<option value="${t}" ${p.talle === t ? 'selected' : ''}>${t} (${cm})</option>`).join('')}</select></label>
         <label>Estado <select name="estado">${ESTADOS_ST.map(([id, n]) => `<option value="${id}" ${p.estado === id ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <fieldset class="pn-cobro">
           <legend>Materiales (para el costo)</legend>
@@ -434,6 +436,7 @@
       f.sub.innerHTML = subs.length ? subs.map(([id, n]) => `<option value="${id}" ${p.sub === id ? 'selected' : ''}>${n}</option>`).join('') : '<option value="">—</option>';
       f.sub.closest('label').hidden = !subs.length;
       $$('[data-solo-cinto]', f).forEach((el) => { el.hidden = f.cat.value !== 'cintos'; });
+      $$('[data-solo-pulsera]', f).forEach((el) => { el.hidden = f.cat.value !== 'pulseras'; });
     };
     subSel(); f.cat.addEventListener('change', subSel);
     f.largo.addEventListener('input', () => { f.talle.value = f.largo.value ? 5 * Math.round(f.largo.value / 5) : ''; });
@@ -477,7 +480,7 @@
       const datos = {
         name: f.name.value.trim(), cat: f.cat.value, sub: (SUBS[f.cat.value] ? f.sub.value : null) || null,
         min, max, desde: f.desde.checked, confirmar: f.confirmar.checked,
-        largo: f.cat.value === 'cintos' ? num(f.largo.value) : null, talle: f.cat.value === 'cintos' ? num(f.talle.value) : null,
+        largo: f.cat.value === 'cintos' ? num(f.largo.value) : null, talle: f.cat.value === 'cintos' ? (num(f.talle.value) ? String(num(f.talle.value)) : null) : f.cat.value === 'pulseras' ? f.talle_p.value || null : null,
         estado: f.estado.value, materiales: leerMats(), costo_extra: num(f.costo_extra.value) || 0, notas: f.notas.value.trim() || null,
         fotos: fotos.map(String), portada: fotos.length ? String(fotos[0]) : null, hover: fotos.length > 1 && p.hover && fotos.map(String).includes(String(p.hover)) ? String(p.hover) : null,
       };

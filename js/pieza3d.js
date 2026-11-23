@@ -15,6 +15,8 @@ window.DT3D = (() => {
   const TILE = 11; // unidad de las coordenadas de textura (cm)
   const ENV_CUERO = window.__ENV_CUERO || 0.2; // cuánto refleja el cuero el ambiente: más, y se lava el color (medido contra las fotos)
   const PXCM = 96; // px por cm de las texturas de cuero (herramientas/texturas-3d.py): el tamaño de la imagen dice cuántos cm cubre
+  // en el celular las texturas van a la mitad de resolución (img/textura-<cuero>-m.jpg): cargan 4 veces más rápido
+  const MOVIL = window.matchMedia('(max-width: 899px), (pointer: coarse)').matches;
 
   /* ---------------- cueros ---------------- */
   // rugosidad, relieve, brillo; los de pelo (cebra, leopardo, vaca) son mates
@@ -45,19 +47,19 @@ window.DT3D = (() => {
     const img = new Image();
     img.onload = () => {
       // la textura ya viene continua, a tamaño real y con la luz pareja (herramientas/texturas-3d.py).
-      // Se dibuja a PXCM px por cm (las de js/cueros-datos.js vienen a un cuarto)
-      const k = b64 ? 4 : 1;
+      // Se dibuja a PXCM px por cm (las de js/cueros-datos.js vienen a un cuarto); en el celular, a la mitad
+      const k = b64 ? 4 : 1, px = MOVIL && !b64 ? PXCM / 2 : PXCM;
       cv.width = img.width * k; cv.height = img.height * k;
       cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-      cv.dataset.ok = '1';
-      tex.repeat.set(TILE * PXCM / cv.width, TILE * PXCM / cv.height); bump.repeat.copy(tex.repeat);
+      cv.dataset.ok = '1'; cv.dataset.pxcm = px;
+      tex.repeat.set(TILE * px / cv.width, TILE * px / cv.height); bump.repeat.copy(tex.repeat);
       tex.dispose(); bump.dispose();
       tex.needsUpdate = true; bump.needsUpdate = true;
       listeners.forEach((fn) => fn());
     };
     // abriendo la web como archivo (doble clic) el navegador no deja usar fotos sueltas en 3D:
     // ahí se usan las muestras que vienen dentro de js/cueros-datos.js
-    img.src = b64 || `img/textura-${id}.jpg?v=7`;
+    img.src = b64 || `img/textura-${id}${MOVIL ? '-m' : ''}.jpg?v=7`;
     return (texCache[id] = { tex, bump, cv });
   }
   // qué tan claro es un cuero (0 negro, 1 blanco), medido en su textura; para elegir un hilo que se vea
@@ -519,7 +521,7 @@ window.DT3D = (() => {
       const p = zona(x0, x1), c = CUERO[id] || {};
       const src = id && leatherTex(id).cv;
       if (src && src.dataset.ok) {
-        const pat = g.createPattern(src, 'repeat'), s = K / PXCM;
+        const pat = g.createPattern(src, 'repeat'), s = K / +src.dataset.pxcm;
         if (pat.setTransform) pat.setTransform(new DOMMatrix([s, 0, 0, s, 0, 0]));
         g.fillStyle = pat;
       } else g.fillStyle = id ? '#9b8569' : '#cbbca3';
@@ -1012,7 +1014,7 @@ window.DT3D = (() => {
     const w = x1 - x0, h = y1 - y0, K = 640 / Math.max(w, h), cv = document.createElement('canvas'); cv.width = Math.ceil(w * K); cv.height = Math.ceil(h * K);
     const c = cv.getContext('2d'), path = new Path2D(); pts.forEach((q, i) => (i ? path.lineTo((q.x - x0) * K, (y1 - q.y) * K) : path.moveTo((q.x - x0) * K, (y1 - q.y) * K))); path.closePath();
     const src = id && leatherTex(id).cv, fam = CUERO[id] || {};
-    if (src && src.dataset.ok) { const pat = c.createPattern(src, 'repeat'), sc = K / PXCM; if (pat.setTransform) pat.setTransform(new DOMMatrix([sc, 0, 0, sc, 0, 0])); c.fillStyle = pat; } else c.fillStyle = id ? '#9b8569' : '#cbbca3';
+    if (src && src.dataset.ok) { const pat = c.createPattern(src, 'repeat'), sc = K / +src.dataset.pxcm; if (pat.setTransform) pat.setTransform(new DOMMatrix([sc, 0, 0, sc, 0, 0])); c.fillStyle = pat; } else c.fillStyle = id ? '#9b8569' : '#cbbca3';
     c.fill(path);
     c.strokeStyle = 'rgba(30,18,12,.55)'; c.lineWidth = 0.09 * K; c.stroke(path); // canto oscurecido
     const tex = new T.CanvasTexture(cv); tex.encoding = T.sRGBEncoding; tex.anisotropy = 8;
