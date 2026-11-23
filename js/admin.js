@@ -168,20 +168,20 @@
     $('[data-lista]').innerHTML = lista.length ? lista.map((p) => {
       const foto = (p.items || []).map((i) => i.foto).find(Boolean);
       const que = (p.items || []).map((i) => (i.cantidad > 1 ? i.cantidad + ' × ' : '') + i.nombre).join(' · ');
-      return `<button class="ad-fila ad-fila--${p.estado}" type="button" data-abrir="${p.id}">
-        <span class="ad-fila__img">${foto ? `<img src="${esc(foto)}" alt="" loading="lazy">` : ''}</span>
-        <span class="ad-fila__txt">
-          <span class="ad-fila__arriba"><b>${esc(p.nombre)}</b><small>${codigo(p.id)} · ${fecha(p.creado)}${p.origen !== 'web' ? ' · ' + esc(p.origen) : ''}</small></span>
-          <span class="ad-fila__que">${esc(que)}</span>
-          <span class="ad-fila__abajo">
-            <span class="ad-chip ad-chip--${p.estado}">${estadoNombre(p.estado)}</span>
-            ${p.entrega ? `<span class="ad-dato">Entrega ${fecha(p.entrega)}</span>` : ''}
-            ${p.estado !== 'cancelado' ? (debe(p) ? '<span class="ad-dato ad-dato--debe">Sin cobrar</span>' : p.cobrado ? '<span class="ad-dato ad-dato--ok">Cobrado</span>' : '') : ''}
+      return `<button class="pn-fila pn-fila--${p.estado}" type="button" data-abrir="${p.id}">
+        <span class="pn-fila__img">${foto ? `<img src="${esc(foto)}" alt="" loading="lazy">` : ''}</span>
+        <span class="pn-fila__txt">
+          <span class="pn-fila__arriba"><b>${esc(p.nombre)}</b><small>${codigo(p.id)} · ${fecha(p.creado)}${p.origen !== 'web' ? ' · ' + esc(p.origen) : ''}</small></span>
+          <span class="pn-fila__que">${esc(que)}</span>
+          <span class="pn-fila__abajo">
+            <span class="pn-chip pn-chip--${p.estado}">${estadoNombre(p.estado)}</span>
+            ${p.entrega ? `<span class="pn-dato">Entrega ${fecha(p.entrega)}</span>` : ''}
+            ${p.estado !== 'cancelado' ? (debe(p) ? '<span class="pn-dato pn-dato--debe">Sin cobrar</span>' : p.cobrado ? '<span class="pn-dato pn-dato--ok">Cobrado</span>' : '') : ''}
           </span>
         </span>
-        <span class="ad-fila__total">${total(p)}</span>
+        <span class="pn-fila__total">${total(p)}</span>
       </button>`;
-    }).join('') : `<p class="ad-vacio">${pedidos.length ? 'No hay pedidos acá.' : 'Todavía no entró ningún pedido.'}</p>`;
+    }).join('') : `<p class="pn-vacio">${pedidos.length ? 'No hay pedidos acá.' : 'Todavía no entró ningún pedido.'}</p>`;
   }
 
   $('[data-tabs]').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) { filtro = b.dataset.tab; pintar(); } });
@@ -192,7 +192,7 @@
   /* ---------------- hoja de detalle ---------------- */
   const hoja = $('[data-hoja]'), cuerpo = $('[data-hoja-cuerpo]');
   let abierto = null;
-  function abrirHoja(html) { cuerpo.innerHTML = html; hoja.hidden = false; document.body.classList.add('sin-scroll'); hoja.querySelector('.ad-hoja__in').scrollTop = 0; }
+  function abrirHoja(html) { cuerpo.innerHTML = html; hoja.hidden = false; document.body.classList.add('sin-scroll'); hoja.querySelector('.pn-hoja__in').scrollTop = 0; }
   function cerrarHoja() { hoja.hidden = true; document.body.classList.remove('sin-scroll'); abierto = null; }
   $$('[data-cerrar]', hoja).forEach((b) => b.addEventListener('click', cerrarHoja));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !hoja.hidden) cerrarHoja(); });
@@ -204,48 +204,48 @@
     const p = pedidos.find((x) => x.id === id); if (!p) return;
     abierto = p;
     const items = (p.items || []).map((i) => `
-      <li class="ad-item">
-        ${i.foto ? `<a class="ad-item__img" href="${esc(i.foto)}" target="_blank" rel="noopener"><img src="${esc(i.foto)}" alt="${esc(i.nombre)}"></a>` : '<span class="ad-item__img"></span>'}
+      <li class="pn-item">
+        ${i.foto ? `<a class="pn-item__img" href="${esc(i.foto)}" target="_blank" rel="noopener"><img src="${esc(i.foto)}" alt="${esc(i.nombre)}"></a>` : '<span class="pn-item__img"></span>'}
         <div>
           <b>${i.cantidad > 1 ? i.cantidad + ' × ' : ''}${esc(i.nombre)}</b>
-          ${(i.detalle || []).length ? `<ul class="ad-item__det">${i.detalle.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : ''}
+          ${(i.detalle || []).length ? `<ul class="pn-item__det">${i.detalle.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : ''}
           <small>${i.tipo === 'stock' ? 'Pieza en stock' : i.tipo === 'manual' ? '' : 'A medida'}${i.min != null ? ' · ' + rango(i.min, i.max) : ''}${i.link ? ` · <a href="${esc(i.link)}" target="_blank" rel="noopener">ver en la web</a>` : ''}</small>
         </div>
       </li>`).join('');
     const tel = waNum(p.telefono);
     const msg = encodeURIComponent(`Hola ${p.nombre.split(' ')[0]}, te escribo de Decora.te por tu pedido ${codigo(p.id)}.`);
     abrirHoja(`
-      <p class="ad-hoja__cod">${codigo(p.id)} · ${fecha(p.creado, true)}${p.origen !== 'web' ? ' · cargado a mano (' + esc(p.origen) + ')' : ''}</p>
+      <p class="pn-hoja__cod">${codigo(p.id)} · ${fecha(p.creado, true)}${p.origen !== 'web' ? ' · cargado a mano (' + esc(p.origen) + ')' : ''}</p>
       <h2 id="hoja-t">${esc(p.nombre)}</h2>
-      <div class="ad-cliente">
-        ${p.telefono ? `<span>${esc(p.telefono)}</span><a class="ad-btn ad-btn--wa" href="https://wa.me/${tel}?text=${msg}" target="_blank" rel="noopener">Escribirle por WhatsApp</a>` : '<span>Sin teléfono</span>'}
+      <div class="pn-cliente">
+        ${p.telefono ? `<span>${esc(p.telefono)}</span><a class="pn-btn pn-btn--wa" href="https://wa.me/${tel}?text=${msg}" target="_blank" rel="noopener">Escribirle por WhatsApp</a>` : '<span>Sin teléfono</span>'}
         <span>Paga con ${esc(p.pago)}</span>
       </div>
-      ${p.comentarios ? `<p class="ad-coment"><b>Comentario del cliente:</b> ${esc(p.comentarios)}</p>` : ''}
+      ${p.comentarios ? `<p class="pn-coment"><b>Comentario del cliente:</b> ${esc(p.comentarios)}</p>` : ''}
 
       <h3>Estado</h3>
-      <div class="ad-estados" data-estados>${ESTADOS.map((e) => `<button type="button" class="ad-chip ad-chip--${e.id}" data-estado="${e.id}" aria-pressed="${p.estado === e.id}">${e.nombre}</button>`).join('')}</div>
+      <div class="pn-estados" data-estados>${ESTADOS.map((e) => `<button type="button" class="pn-chip pn-chip--${e.id}" data-estado="${e.id}" aria-pressed="${p.estado === e.id}">${e.nombre}</button>`).join('')}</div>
 
       <h3>Lo que pidió</h3>
-      <ul class="ad-items">${items}</ul>
-      <p class="ad-estimado">Total estimado en la web: <b>${rango(p.total_min, p.total_max)}</b></p>
+      <ul class="pn-items">${items}</ul>
+      <p class="pn-estimado">Total estimado en la web: <b>${rango(p.total_min, p.total_max)}</b></p>
 
-      <form class="ad-campos" data-form-pedido>
+      <form class="pn-campos" data-form-pedido>
         <label>Precio acordado <input type="number" name="precio_final" min="0" step="10" inputmode="numeric" value="${p.precio_final ?? ''}" placeholder="${p.total_min === p.total_max ? p.total_min : ''}"></label>
         <label>Fecha de entrega <input type="date" name="entrega" value="${p.entrega || ''}"></label>
-        <fieldset class="ad-cobro">
+        <fieldset class="pn-cobro">
           <legend>Cobro</legend>
-          <div class="ad-cobro__fila">
+          <div class="pn-cobro__fila">
             <label>Cobrado <input type="number" name="cobrado" min="0" step="10" inputmode="numeric" value="${p.cobrado ?? ''}"></label>
             <label>Cómo <select name="cobro_medio"><option value="">—</option>${MEDIOS.map(([v, n]) => `<option value="${v}" ${p.cobro_medio === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
             <label>Cuándo <input type="date" name="cobrado_el" value="${p.cobrado_el || ''}"></label>
           </div>
-          <button class="ad-link" type="button" data-cobrar-todo>Cobrado todo, hoy</button>
+          <button class="pn-link" type="button" data-cobrar-todo>Cobrado todo, hoy</button>
         </fieldset>
-        <label class="ad-notas">Notas (solo las ves vos) <textarea name="notas" rows="3" placeholder="Ej.: quiere el cuero un poco más oscuro">${esc(p.notas || '')}</textarea></label>
-        <div class="ad-acciones">
-          <button class="ad-btn" type="submit">Guardar</button>
-          <button class="ad-link ad-link--peligro" type="button" data-borrar>Borrar pedido</button>
+        <label class="pn-notas">Notas (solo las ves vos) <textarea name="notas" rows="3" placeholder="Ej.: quiere el cuero un poco más oscuro">${esc(p.notas || '')}</textarea></label>
+        <div class="pn-acciones">
+          <button class="pn-btn" type="submit">Guardar</button>
+          <button class="pn-link pn-link--peligro" type="button" data-borrar>Borrar pedido</button>
         </div>
       </form>`);
 
@@ -293,17 +293,17 @@
   function nuevo() {
     abrirHoja(`
       <h2 id="hoja-t">Cargar un pedido</h2>
-      <p class="ad-hoja__sub">Para los que te llegan por WhatsApp, Instagram o en persona: así queda todo en un solo lugar.</p>
-      <form class="ad-campos" data-form-nuevo>
+      <p class="pn-hoja__sub">Para los que te llegan por WhatsApp, Instagram o en persona: así queda todo en un solo lugar.</p>
+      <form class="pn-campos" data-form-nuevo>
         <label>Nombre <input name="nombre" required maxlength="80"></label>
         <label>Teléfono <input name="telefono" inputmode="tel" maxlength="30" placeholder="09…"></label>
         <label>Por dónde llegó <select name="origen">${ORIGENES.filter((o) => o !== 'web').map((o) => `<option value="${o}">${o[0].toUpperCase() + o.slice(1)}</option>`).join('')}</select></label>
-        <label class="ad-notas">Qué pidió (una pieza por renglón) <textarea name="items" rows="3" required placeholder="Cinto faja cebra con hebilla flor&#10;Tarjetero suela"></textarea></label>
+        <label class="pn-notas">Qué pidió (una pieza por renglón) <textarea name="items" rows="3" required placeholder="Cinto faja cebra con hebilla flor&#10;Tarjetero suela"></textarea></label>
         <label>Precio acordado <input type="number" name="precio" min="0" step="10" inputmode="numeric" required></label>
         <label>Va a pagar con <select name="pago"><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option></select></label>
         <label>Fecha de entrega <input type="date" name="entrega"></label>
-        <label class="ad-notas">Notas <textarea name="notas" rows="2"></textarea></label>
-        <div class="ad-acciones"><button class="ad-btn" type="submit">Guardar pedido</button></div>
+        <label class="pn-notas">Notas <textarea name="notas" rows="2"></textarea></label>
+        <div class="pn-acciones"><button class="pn-btn" type="submit">Guardar pedido</button></div>
       </form>`);
     $('[data-form-nuevo]', cuerpo).addEventListener('submit', async (ev) => {
       ev.preventDefault();
@@ -365,16 +365,16 @@
     const lista = stock.filter((p) => (fSt === 'todas' || p.estado === fSt) && (!fCat || p.cat === fCat));
     $('[data-st-lista]').innerHTML = lista.length ? lista.map((p) => {
       const c = costoDe(p), g = p.min - c, pct = p.min ? Math.round(g / p.min * 100) : 0;
-      return `<button class="ad-fila" type="button" data-pieza="${esc(p.id)}">
-        <span class="ad-fila__img">${p.fotos && p.fotos.length ? `<img src="${esc(fotoUrl(p.portada || p.fotos[0]))}" alt="" loading="lazy">` : ''}</span>
-        <span class="ad-fila__txt">
-          <span class="ad-fila__arriba"><b>${esc(p.name)}</b><small>${esc(p.id.toUpperCase())} · ${catNombre(p.cat)}${p.talle ? ' · talle ' + p.talle : ''}</small></span>
-          <span class="ad-fila__que">Costo ${pesos(c)} · ganás ${pesos(g)} (${pct}%)</span>
-          <span class="ad-fila__abajo">${p.estado !== 'disponible' ? `<span class="ad-chip ad-chip--st-${p.estado}">${estadoSt(p.estado)}</span>` : ''}${(p.materiales || []).length ? '' : '<span class="ad-dato ad-dato--debe">Sin materiales cargados</span>'}</span>
+      return `<button class="pn-fila" type="button" data-pieza="${esc(p.id)}">
+        <span class="pn-fila__img">${p.fotos && p.fotos.length ? `<img src="${esc(fotoUrl(p.portada || p.fotos[0]))}" alt="" loading="lazy">` : ''}</span>
+        <span class="pn-fila__txt">
+          <span class="pn-fila__arriba"><b>${esc(p.name)}</b><small>${esc(p.id.toUpperCase())} · ${catNombre(p.cat)}${p.talle ? ' · talle ' + p.talle : ''}</small></span>
+          <span class="pn-fila__que">Costo ${pesos(c)} · ganás ${pesos(g)} (${pct}%)</span>
+          <span class="pn-fila__abajo">${p.estado !== 'disponible' ? `<span class="pn-chip pn-chip--st-${p.estado}">${estadoSt(p.estado)}</span>` : ''}${(p.materiales || []).length ? '' : '<span class="pn-dato pn-dato--debe">Sin materiales cargados</span>'}</span>
         </span>
-        <span class="ad-fila__total">${p.desde ? 'desde ' : ''}${money(p.min)}${p.max > p.min ? '–' + money(p.max).slice(1) : ''}</span>
+        <span class="pn-fila__total">${p.desde ? 'desde ' : ''}${money(p.min)}${p.max > p.min ? '–' + money(p.max).slice(1) : ''}</span>
       </button>`;
-    }).join('') : '<p class="ad-vacio">No hay piezas acá.</p>';
+    }).join('') : '<p class="pn-vacio">No hay piezas acá.</p>';
   }
   $('[data-st-tabs]').addEventListener('click', (e) => { const b = e.target.closest('[data-st-tab]'); if (b) { fSt = b.dataset.stTab; pintarStock(); } });
   $('[data-st-cat]').addEventListener('change', (e) => { fCat = e.target.value; pintarStock(); });
@@ -386,11 +386,11 @@
     const porNombre = cueros.length ? `<optgroup label="Cuero, por nombre">${cueros.map((c) => { const m = mat('cuero:' + c.id); return `<option value="cuero:${esc(c.id)}" ${'cuero:' + c.id === sel ? 'selected' : ''}>${esc(c.nombre)}${m ? ` (${money(m.costo)} / m²)` : ' (sin grupo)'}</option>`; }).join('')}</optgroup>` : '';
     return porNombre + GRUPOS.map(([g, n]) => `<optgroup label="${n}">${materiales.filter((m) => m.grupo === g).map((m) => `<option value="${esc(m.id)}" ${m.id === sel ? 'selected' : ''}>${esc(m.nombre)} (${money(m.costo)} / ${esc(m.unidad)})</option>`).join('')}</optgroup>`).join('');
   }
-  const filaMat = (x = { m: 'cuero-retazo', c: '' }) => `<div class="ad-mat" data-mat-fila>
+  const filaMat = (x = { m: 'cuero-retazo', c: '' }) => `<div class="pn-mat" data-mat-fila>
       <select name="m">${opcionesMat(x.m)}</select>
       <input name="c" type="number" step="any" min="0" inputmode="decimal" value="${x.c}" aria-label="Cantidad">
-      <span class="ad-mat__sub" data-sub></span>
-      <button type="button" class="ad-mat__x" data-quitar aria-label="Quitar">×</button>
+      <span class="pn-mat__sub" data-sub></span>
+      <button type="button" class="pn-mat__x" data-quitar aria-label="Quitar">×</button>
     </div>`;
 
   function abrirPieza(p) {
@@ -398,34 +398,34 @@
     p = p || { id: '', cat: fCat || 'cintos', sub: null, name: '', fotos: [], portada: null, min: '', max: '', desde: false, confirmar: false, largo: null, talle: null, estado: 'disponible', materiales: [], costo_extra: 0, notas: '' };
     const fotos = [...(p.fotos || [])];
     abrirHoja(`
-      <p class="ad-hoja__cod">${nueva ? 'Pieza nueva' : esc(p.id.toUpperCase()) + ' · ' + catNombre(p.cat)}</p>
+      <p class="pn-hoja__cod">${nueva ? 'Pieza nueva' : esc(p.id.toUpperCase()) + ' · ' + catNombre(p.cat)}</p>
       <h2 id="hoja-t">${nueva ? 'Agregar una pieza' : esc(p.name)}</h2>
       <h3>Fotos</h3>
-      <div class="ad-fotos" data-fotos></div>
-      <label class="ad-btn ad-btn--wa ad-subir">Subir fotos <input type="file" accept="image/*" multiple data-subir hidden></label>
-      <p class="ad-hoja__sub">La primera es la que se ve en la tienda. Tocá una foto para ponerla primera.</p>
-      <form class="ad-campos" data-form-pieza>
-        <label class="ad-notas">Nombre <input name="name" required maxlength="90" value="${esc(p.name)}"></label>
+      <div class="pn-fotos" data-fotos></div>
+      <label class="pn-btn pn-btn--wa pn-subir">Subir fotos <input type="file" accept="image/*" multiple data-subir hidden></label>
+      <p class="pn-hoja__sub">La primera es la que se ve en la tienda. Tocá una foto para ponerla primera.</p>
+      <form class="pn-campos" data-form-pieza>
+        <label class="pn-notas">Nombre <input name="name" required maxlength="90" value="${esc(p.name)}"></label>
         <label>Categoría <select name="cat">${CATS.map(([id, n]) => `<option value="${id}" ${p.cat === id ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <label>Tipo <select name="sub" data-sub-sel></select></label>
         <label>Precio <input name="min" type="number" min="0" step="10" inputmode="numeric" required value="${p.min}"></label>
         <label>Precio hasta (si es un rango) <input name="max" type="number" min="0" step="10" inputmode="numeric" value="${p.max > p.min ? p.max : ''}"></label>
-        <label class="ad-check"><input type="checkbox" name="desde" ${p.desde ? 'checked' : ''}> Mostrar «desde»</label>
-        <label class="ad-check"><input type="checkbox" name="confirmar" ${p.confirmar ? 'checked' : ''}> Precio a confirmar</label>
+        <label class="pn-check"><input type="checkbox" name="desde" ${p.desde ? 'checked' : ''}> Mostrar «desde»</label>
+        <label class="pn-check"><input type="checkbox" name="confirmar" ${p.confirmar ? 'checked' : ''}> Precio a confirmar</label>
         <label data-solo-cinto>Largo (cm) <input name="largo" type="number" min="0" step="1" inputmode="numeric" value="${p.largo ?? ''}"></label>
         <label data-solo-cinto>Talle <input name="talle" type="number" readonly value="${p.talle ?? ''}" tabindex="-1"></label>
         <label>Estado <select name="estado">${ESTADOS_ST.map(([id, n]) => `<option value="${id}" ${p.estado === id ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
-        <fieldset class="ad-cobro">
+        <fieldset class="pn-cobro">
           <legend>Materiales (para el costo)</legend>
           <div data-mats>${(p.materiales || []).map(filaMat).join('')}</div>
-          <button class="ad-link" type="button" data-mat-mas>Agregar material</button>
+          <button class="pn-link" type="button" data-mat-mas>Agregar material</button>
           <label>Otros gastos de esta pieza ($) <input name="costo_extra" type="number" min="0" step="1" inputmode="numeric" value="${p.costo_extra || 0}"></label>
-          <p class="ad-costo" data-costo></p>
+          <p class="pn-costo" data-costo></p>
         </fieldset>
-        <label class="ad-notas">Notas (solo las ves vos) <textarea name="notas" rows="2">${esc(p.notas || '')}</textarea></label>
-        <div class="ad-acciones">
-          <button class="ad-btn" type="submit">${nueva ? 'Agregar a la tienda' : 'Guardar'}</button>
-          ${nueva ? '' : '<button class="ad-link ad-link--peligro" type="button" data-borrar-pieza>Borrar pieza</button>'}
+        <label class="pn-notas">Notas (solo las ves vos) <textarea name="notas" rows="2">${esc(p.notas || '')}</textarea></label>
+        <div class="pn-acciones">
+          <button class="pn-btn" type="submit">${nueva ? 'Agregar a la tienda' : 'Guardar'}</button>
+          ${nueva ? '' : '<button class="pn-link pn-link--peligro" type="button" data-borrar-pieza>Borrar pieza</button>'}
         </div>
       </form>`);
     const f = $('[data-form-pieza]', cuerpo);
@@ -454,7 +454,7 @@
 
     // fotos: subir (se achican a 1600 px), elegir la primera, quitar
     const pintarFotos = () => {
-      $('[data-fotos]', cuerpo).innerHTML = fotos.length ? fotos.map((x, i) => `<div class="ad-foto${i ? '' : ' es-primera'}"><button type="button" data-primera="${i}" aria-label="Poner primera"><img src="${esc(fotoUrl(x))}" alt=""></button><button type="button" class="ad-foto__x" data-quitar-foto="${i}" aria-label="Quitar foto">×</button></div>`).join('') : '<p class="ad-dato">Todavía no tiene fotos.</p>';
+      $('[data-fotos]', cuerpo).innerHTML = fotos.length ? fotos.map((x, i) => `<div class="pn-foto${i ? '' : ' es-primera'}"><button type="button" data-primera="${i}" aria-label="Poner primera"><img src="${esc(fotoUrl(x))}" alt=""></button><button type="button" class="pn-foto__x" data-quitar-foto="${i}" aria-label="Quitar foto">×</button></div>`).join('') : '<p class="pn-dato">Todavía no tiene fotos.</p>';
     };
     pintarFotos();
     $('[data-fotos]', cuerpo).addEventListener('click', (e) => {
@@ -522,23 +522,23 @@
   // ---- materiales: precios editables
   function pintarMateriales() {
     const gruposCuero = materiales.filter((m) => m.grupo === 'cuero');
-    const lista = cueros.length ? `<h3 class="ad-mat-t">Cada cuero y su precio</h3>
-      <p class="ad-hoja__sub">A qué grupo pertenece cada cuero. El precio por m² sale del grupo (más abajo, en «Cuero»).</p>
-      <div class="ad-cueros">${cueros.map((c) => { const g = gruposCuero.find((m) => m.id === c.grupo); return `
-        <label class="ad-cuero${c.grupo ? '' : ' sin-grupo'}">
-          <span class="ad-cuero__img" style="background-image:url(img/cuero-${esc(c.id)}-sm.jpg)"></span>
-          <span class="ad-cuero__txt"><b>${esc(c.nombre)}</b>
+    const lista = cueros.length ? `<h3 class="pn-mat-t">Cada cuero y su precio</h3>
+      <p class="pn-hoja__sub">A qué grupo pertenece cada cuero. El precio por m² sale del grupo (más abajo, en «Cuero»).</p>
+      <div class="pn-cueros">${cueros.map((c) => { const g = gruposCuero.find((m) => m.id === c.grupo); return `
+        <label class="pn-cuero${c.grupo ? '' : ' sin-grupo'}">
+          <span class="pn-cuero__img" style="background-image:url(img/cuero-${esc(c.id)}-sm.jpg)"></span>
+          <span class="pn-cuero__txt"><b>${esc(c.nombre)}</b>
             <select data-cuero="${esc(c.id)}"><option value="">Sin definir</option>${gruposCuero.map((m) => `<option value="${esc(m.id)}" ${m.id === c.grupo ? 'selected' : ''}>${esc(m.nombre.replace(/^Cuero /, '').replace(/[()]/g, '').replace(/^./, (l) => l.toUpperCase()))} · ${money(m.costo)}/m²</option>`).join('')}</select>
           </span>
         </label>`; }).join('')}</div>` : '';
     $('[data-mat-lista]').innerHTML = lista + GRUPOS.map(([g, n]) => {
       const ms = materiales.filter((m) => m.grupo === g); if (!ms.length) return '';
-      return `<h3 class="ad-mat-t">${n}</h3><div class="ad-lista">${ms.map((m) => `
-        <form class="ad-matfila" data-mat="${esc(m.id)}">
+      return `<h3 class="pn-mat-t">${n}</h3><div class="pn-lista">${ms.map((m) => `
+        <form class="pn-matfila" data-mat="${esc(m.id)}">
           <input name="nombre" value="${esc(m.nombre)}" aria-label="Nombre">
-          <label class="ad-matfila__costo">$ <input name="costo" type="number" step="any" min="0" inputmode="decimal" value="${Number(m.costo)}" aria-label="Costo"> <small>por ${esc(m.unidad)}</small></label>
+          <label class="pn-matfila__costo">$ <input name="costo" type="number" step="any" min="0" inputmode="decimal" value="${Number(m.costo)}" aria-label="Costo"> <small>por ${esc(m.unidad)}</small></label>
           <input name="nota" value="${esc(m.nota || '')}" placeholder="Nota (proveedor, cómo se compra…)" aria-label="Nota">
-          <button class="ad-link" type="submit">Guardar</button>
+          <button class="pn-link" type="submit">Guardar</button>
         </form>`).join('')}</div>`;
     }).join('');
   }
@@ -547,7 +547,7 @@
     const c = cueros.find((x) => x.id === sel.dataset.cuero);
     try {
       await api(`cueros?id=eq.${encodeURIComponent(c.id)}`, { method: 'PATCH', body: JSON.stringify({ grupo: sel.value || null }) });
-      c.grupo = sel.value || null; sel.closest('.ad-cuero').classList.toggle('sin-grupo', !c.grupo); aviso(`${c.nombre}: guardado.`);
+      c.grupo = sel.value || null; sel.closest('.pn-cuero').classList.toggle('sin-grupo', !c.grupo); aviso(`${c.nombre}: guardado.`);
     } catch (err) { aviso(errorDe(err), true); }
   });
   $('[data-mat-lista]').addEventListener('submit', async (e) => {
@@ -560,13 +560,13 @@
   });
   $('[data-mat-nuevo]').addEventListener('click', () => {
     abrirHoja(`<h2 id="hoja-t">Agregar material</h2>
-      <form class="ad-campos" data-form-mat>
-        <label class="ad-notas">Nombre <input name="nombre" required placeholder="Ej.: Hebilla ovalada chica"></label>
+      <form class="pn-campos" data-form-mat>
+        <label class="pn-notas">Nombre <input name="nombre" required placeholder="Ej.: Hebilla ovalada chica"></label>
         <label>Tipo <select name="grupo">${GRUPOS.map(([g, n]) => `<option value="${g}">${n}</option>`).join('')}</select></label>
         <label>Se cuenta por <select name="unidad"><option value="unidad">unidad</option><option value="m²">m²</option><option value="metro">metro</option><option value="kg">kg</option></select></label>
         <label>Costo ($) <input name="costo" type="number" step="any" min="0" required></label>
-        <label class="ad-notas">Nota <input name="nota"></label>
-        <div class="ad-acciones"><button class="ad-btn" type="submit">Agregar</button></div>
+        <label class="pn-notas">Nota <input name="nota"></label>
+        <div class="pn-acciones"><button class="pn-btn" type="submit">Agregar</button></div>
       </form>`);
     $('[data-form-mat]', cuerpo).addEventListener('submit', async (ev) => {
       ev.preventDefault(); const f = ev.target;
@@ -586,14 +586,14 @@
   function pintarPrecios() {
     $('[data-pr-lista]').innerHTML = GRUPOS_PR.map(([g, n, sub]) => {
       const ps = precios.filter((x) => x.grupo === g); if (!ps.length) return '';
-      return `<h3 class="ad-mat-t">${n}</h3>${sub ? `<p class="ad-hoja__sub">${sub}</p>` : ''}<div class="ad-lista">${ps.map((x) => `
-        <form class="ad-prfila" data-pr="${esc(x.id)}">
-          <span class="ad-prfila__n">${esc(x.nombre)}</span>
-          <label class="ad-matfila__costo">$ <input name="precio" type="number" step="1" min="0" inputmode="numeric" value="${x.precio}" aria-label="Precio" required></label>
-          ${x.precio_max != null ? `<label class="ad-matfila__costo">hasta $ <input name="precio_max" type="number" step="1" min="0" inputmode="numeric" value="${x.precio_max}" aria-label="Precio máximo"></label>` : '<span></span>'}
-          <button class="ad-link" type="submit">Guardar</button>
+      return `<h3 class="pn-mat-t">${n}</h3>${sub ? `<p class="pn-hoja__sub">${sub}</p>` : ''}<div class="pn-lista">${ps.map((x) => `
+        <form class="pn-prfila" data-pr="${esc(x.id)}">
+          <span class="pn-prfila__n">${esc(x.nombre)}</span>
+          <label class="pn-matfila__costo">$ <input name="precio" type="number" step="1" min="0" inputmode="numeric" value="${x.precio}" aria-label="Precio" required></label>
+          ${x.precio_max != null ? `<label class="pn-matfila__costo">hasta $ <input name="precio_max" type="number" step="1" min="0" inputmode="numeric" value="${x.precio_max}" aria-label="Precio máximo"></label>` : '<span></span>'}
+          <button class="pn-link" type="submit">Guardar</button>
         </form>`).join('')}</div>`;
-    }).join('') || '<p class="ad-hoja__sub">No hay precios cargados.</p>';
+    }).join('') || '<p class="pn-hoja__sub">No hay precios cargados.</p>';
   }
   $('[data-pr-lista]').addEventListener('submit', async (e) => {
     e.preventDefault();

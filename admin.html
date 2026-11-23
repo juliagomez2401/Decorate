@@ -10,112 +10,112 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=6">
+  <link rel="stylesheet" href="css/admin.css?v=7">
 </head>
 <body>
-  <header class="ad-hd">
-    <a class="ad-hd__logo" href="https://decorate.com.uy" title="Ver la web"><img src="img/logo-claro.png" alt="Decora.te"></a>
-    <span class="ad-hd__t">Panel</span>
-    <button class="ad-hd__salir" type="button" data-salir hidden>Salir</button>
+  <header class="pn-hd">
+    <a class="pn-hd__logo" href="https://decorate.com.uy" title="Ver la web"><img src="img/logo-claro.png" alt="Decora.te"></a>
+    <span class="pn-hd__t">Panel</span>
+    <button class="pn-hd__salir" type="button" data-salir hidden>Salir</button>
   </header>
-  <nav class="ad-nav" data-nav hidden>
+  <nav class="pn-nav" data-nav hidden>
     <button type="button" data-ir="pedidos" aria-current="page">Pedidos</button>
     <button type="button" data-ir="stock">Stock</button>
     <button type="button" data-ir="materiales">Materiales</button>
     <button type="button" data-ir="precios">Precios</button>
   </nav>
 
-  <main class="ad" data-app>
-    <p class="ad-cargando" data-vista="cargando">Cargando…</p>
+  <main class="pn" data-app>
+    <p class="pn-cargando" data-vista="cargando">Cargando…</p>
 
     <!-- entrar -->
-    <section class="ad-login" data-vista="entrar" hidden>
+    <section class="pn-login" data-vista="entrar" hidden>
       <h1>Hola</h1>
       <p>Entrá con tu mail y tu contraseña.</p>
       <form data-form-entrar>
         <label>Mail <input type="email" name="email" autocomplete="username" required></label>
         <label>Contraseña <input type="password" name="pass" autocomplete="current-password" required></label>
-        <button class="ad-btn" type="submit">Entrar</button>
-        <p class="ad-err" data-err></p>
-        <button class="ad-link" type="button" data-olvide>Me olvidé la contraseña</button>
+        <button class="pn-btn" type="submit">Entrar</button>
+        <p class="pn-err" data-err></p>
+        <button class="pn-link" type="button" data-olvide>Me olvidé la contraseña</button>
       </form>
     </section>
 
     <!-- elegir contraseña (desde el mail de invitación o de "me olvidé") -->
-    <section class="ad-login" data-vista="clave" hidden>
+    <section class="pn-login" data-vista="clave" hidden>
       <h1>Elegí tu contraseña</h1>
       <p>Es solo tuya: con ella entrás al panel desde el celular o la compu.</p>
       <form data-form-clave>
         <label>Contraseña nueva <input type="password" name="pass" autocomplete="new-password" minlength="8" required></label>
         <label>Repetila <input type="password" name="pass2" autocomplete="new-password" minlength="8" required></label>
-        <button class="ad-btn" type="submit">Guardar y entrar</button>
-        <p class="ad-err" data-err></p>
+        <button class="pn-btn" type="submit">Guardar y entrar</button>
+        <p class="pn-err" data-err></p>
       </form>
     </section>
 
     <!-- sin permiso -->
-    <section class="ad-login" data-vista="sin-permiso" hidden>
+    <section class="pn-login" data-vista="sin-permiso" hidden>
       <h1>Esta cuenta no es de administración</h1>
       <p>Para entrar al panel, la cuenta tiene que estar habilitada en Supabase.</p>
     </section>
 
     <!-- pedidos -->
-    <section class="ad-ped" data-vista="pedidos" hidden>
-      <div class="ad-ped__top">
+    <section class="pn-ped" data-vista="pedidos" hidden>
+      <div class="pn-ped__top">
         <h1>Pedidos</h1>
-        <button class="ad-btn" type="button" data-nuevo>Cargar pedido</button>
+        <button class="pn-btn" type="button" data-nuevo>Cargar pedido</button>
       </div>
-      <div class="ad-resumen" data-resumen></div>
-      <div class="ad-filtros">
-        <div class="ad-tabs" data-tabs role="tablist"></div>
-        <input class="ad-buscar" type="search" placeholder="Buscar por nombre, teléfono o número" data-buscar>
+      <div class="pn-resumen" data-resumen></div>
+      <div class="pn-filtros">
+        <div class="pn-tabs" data-tabs role="tablist"></div>
+        <input class="pn-buscar" type="search" placeholder="Buscar por nombre, teléfono o número" data-buscar>
       </div>
-      <div class="ad-lista" data-lista></div>
+      <div class="pn-lista" data-lista></div>
     </section>
 
     <!-- stock: piezas únicas, con su costo y lo que se gana -->
-    <section class="ad-ped" data-vista="stock" hidden>
-      <div class="ad-ped__top">
+    <section class="pn-ped" data-vista="stock" hidden>
+      <div class="pn-ped__top">
         <h1>Stock</h1>
-        <button class="ad-btn" type="button" data-pieza-nueva>Agregar pieza</button>
+        <button class="pn-btn" type="button" data-pieza-nueva>Agregar pieza</button>
       </div>
-      <div class="ad-resumen" data-st-resumen></div>
-      <div class="ad-filtros">
-        <div class="ad-tabs" data-st-tabs role="tablist"></div>
-        <select class="ad-buscar" data-st-cat aria-label="Categoría"></select>
+      <div class="pn-resumen" data-st-resumen></div>
+      <div class="pn-filtros">
+        <div class="pn-tabs" data-st-tabs role="tablist"></div>
+        <select class="pn-buscar" data-st-cat aria-label="Categoría"></select>
       </div>
-      <div class="ad-lista" data-st-lista></div>
+      <div class="pn-lista" data-st-lista></div>
     </section>
 
     <!-- materiales: lo que le cuesta cada cosa (de acá sale el costo de cada pieza) -->
-    <section class="ad-ped" data-vista="materiales" hidden>
-      <div class="ad-ped__top">
+    <section class="pn-ped" data-vista="materiales" hidden>
+      <div class="pn-ped__top">
         <h1>Materiales</h1>
-        <button class="ad-btn" type="button" data-mat-nuevo>Agregar material</button>
+        <button class="pn-btn" type="button" data-mat-nuevo>Agregar material</button>
       </div>
-      <p class="ad-hoja__sub">Lo que te cuesta cada cosa. Si cambia un precio, cambialo acá: el costo de todas las piezas se recalcula solo.</p>
+      <p class="pn-hoja__sub">Lo que te cuesta cada cosa. Si cambia un precio, cambialo acá: el costo de todas las piezas se recalcula solo.</p>
       <div data-mat-lista></div>
     </section>
 
     <!-- precios de venta de lo que se arma a medida (lo que ve el cliente en «Armá el tuyo») -->
-    <section class="ad-ped" data-vista="precios" hidden>
-      <div class="ad-ped__top"><h1>Precios</h1></div>
-      <p class="ad-hoja__sub">Lo que paga el cliente por lo que se arma a medida. Lo que cambies acá se ve en la web al recargar la página. Las piezas en stock tienen su precio en Stock.</p>
+    <section class="pn-ped" data-vista="precios" hidden>
+      <div class="pn-ped__top"><h1>Precios</h1></div>
+      <p class="pn-hoja__sub">Lo que paga el cliente por lo que se arma a medida. Lo que cambies acá se ve en la web al recargar la página. Las piezas en stock tienen su precio en Stock.</p>
       <div data-pr-lista></div>
     </section>
   </main>
 
   <!-- detalle de un pedido / cargar uno nuevo -->
-  <div class="ad-hoja" data-hoja hidden>
-    <div class="ad-hoja__velo" data-cerrar></div>
-    <div class="ad-hoja__in" role="dialog" aria-modal="true" aria-labelledby="hoja-t">
-      <button class="ad-hoja__x" type="button" data-cerrar aria-label="Cerrar">×</button>
+  <div class="pn-hoja" data-hoja hidden>
+    <div class="pn-hoja__velo" data-cerrar></div>
+    <div class="pn-hoja__in" role="dialog" aria-modal="true" aria-labelledby="hoja-t">
+      <button class="pn-hoja__x" type="button" data-cerrar aria-label="Cerrar">×</button>
       <div data-hoja-cuerpo></div>
     </div>
   </div>
 
-  <div class="ad-aviso" data-aviso role="status" aria-live="polite"></div>
+  <div class="pn-aviso" data-aviso role="status" aria-live="polite"></div>
 
-  <script src="js/admin.js?v=5"></script>
+  <script src="js/admin.js?v=6"></script>
 </body>
 </html>
