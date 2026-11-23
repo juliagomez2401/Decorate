@@ -74,6 +74,7 @@
   const SECCIONES = ['pedidos', 'tienda', 'precios'];
   function mostrar(v) {
     $$('[data-vista]').forEach((el) => { el.hidden = el.dataset.vista !== v; });
+    document.body.dataset.vista = v;
     const adentro = SECCIONES.includes(v);
     $('[data-salir]').hidden = !(adentro || v === 'sin-permiso');
     $('[data-nav]').hidden = !adentro;
@@ -329,7 +330,10 @@
     if (cancelar) cancelar.addEventListener('click', async () => { if (confirm('¿Cancelar este pedido?')) await guardarPedido(p, { ...datosDe(f), estado: 'cancelado' }); });
     $('[data-borrar]', cuerpo).addEventListener('click', async () => {
       if (!confirm(`¿Borrar el pedido ${codigo(p.id)} de ${p.nombre}? No se puede deshacer. Si no se hace, mejor cancelalo.`)) return;
-      try { await api(`pedidos?id=eq.${p.id}`, { method: 'DELETE' }); pedidos = pedidos.filter((x) => x.id !== p.id); cerrarHoja(); pintar(); aviso('Pedido borrado.'); }
+      try {
+        await api(`stock?pedido_id=eq.${p.id}&estado=eq.reservada`, { method: 'PATCH', body: JSON.stringify({ estado: 'disponible', pedido_id: null }) });
+        await api(`pedidos?id=eq.${p.id}`, { method: 'DELETE' }); pedidos = pedidos.filter((x) => x.id !== p.id); cerrarHoja(); pintar(); aviso('Pedido borrado. Si tenía piezas de la tienda, volvieron a la venta.');
+      }
       catch (e) { aviso(errorDe(e), true); }
     });
   }
@@ -610,9 +614,19 @@
 
   const marcar = (fila) => { fila.classList.remove('guardado'); void fila.offsetWidth; fila.classList.add('guardado'); };
 
+  // foto de una hebilla o un dije a partir de su id (hebilla:flor-bronce, hebilla-flor-bronce, dije-ala…)
+  const fotoDe = (id) => { const m = String(id).match(/^(hebilla|dije)[:-](.+)$/); return m ? `img/${m[1]}-${m[2]}.png` : ''; };
+  const imgDe = (id) => { const f = fotoDe(id); return f ? `<span class="pn-mini"><img src="${f}" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : ''; };
+
   function pintarPrecios() {
-    $('[data-pr-lista]').innerHTML = GRUPOS_PR.map(([g, n, sub]) => {
+    $('[data-pr-lista]').innerHTML = `<div class="pn-pc">${GRUPOS_PR.map(([g, n, sub]) => {
       const ps = precios.filter((x) => x.grupo === g); if (!ps.length) return '';
+      if (g === 'hebilla') return `<div class="pn-pc-grupo pn-pc-grupo--tiles"><h2>${n}</h2>${sub ? `<p>${sub}</p>` : ''}<div class="pn-tiles">${ps.map((x) => `
+        <div class="pn-tile" data-pr="${esc(x.id)}">
+          <span class="pn-tile__img">${fotoDe(x.id) ? `<img src="${fotoDe(x.id)}" alt="" loading="lazy">` : ''}</span>
+          <span class="pn-tile__n">${esc(x.nombre)}</span>
+          <label class="pn-monto">$ <input name="precio" type="number" step="1" min="0" inputmode="numeric" value="${x.precio}" aria-label="Precio de ${esc(x.nombre)}"></label>
+        </div>`).join('')}</div></div>`;
       return `<div class="pn-pc-grupo"><h2>${n}</h2>${sub ? `<p>${sub}</p>` : ''}<div class="pn-tabla">${ps.map((x) => `
         <div class="pn-fila" data-pr="${esc(x.id)}">
           <span class="pn-fila__n">${esc(x.nombre)}</span>
@@ -621,7 +635,7 @@
             ${x.precio_max != null ? `<label class="pn-monto"><small>a</small> $ <input name="precio_max" type="number" step="1" min="0" inputmode="numeric" value="${x.precio_max}" aria-label="Precio máximo de ${esc(x.nombre)}"></label>` : ''}
           </span>
         </div>`).join('')}</div></div>`;
-    }).join('') || '<p class="pn-vacio">No hay precios cargados.</p>';
+    }).join('')}</div>` || '<p class="pn-vacio">No hay precios cargados.</p>';
   }
   $('[data-pr-lista]').addEventListener('change', async (e) => {
     const fila = e.target.closest('[data-pr]'); if (!fila) return;
@@ -641,14 +655,15 @@
     const nombreGrupo = (m) => m.nombre.replace(/^Cuero /i, '').replace(/[()]/g, '').replace(/^./, (l) => l.toUpperCase());
     const sinGrupo = cueros.filter((c) => !c.grupo).length;
     const fila = (m) => `
-      <div class="pn-fila pn-fila--mat" data-mat="${esc(m.id)}">
+      <div class="pn-fila pn-fila--mat${fotoDe(m.id) ? ' pn-fila--foto' : ''}" data-mat="${esc(m.id)}">
+        ${imgDe(m.id)}
         <input class="pn-fila__nombre" name="nombre" value="${esc(m.nombre)}" aria-label="Nombre">
         <label class="pn-monto">$ <input name="costo" type="number" step="any" min="0" inputmode="decimal" value="${Number(m.costo)}" aria-label="Costo de ${esc(m.nombre)}"> <small>/ ${esc(m.unidad)}</small></label>
         <input class="pn-fila__nota" name="nota" value="${esc(m.nota || '')}" placeholder="Nota" aria-label="Nota">
       </div>`;
     const lista = GRUPOS.map(([g, n]) => {
       const ms = materiales.filter((m) => m.grupo === g); if (!ms.length) return '';
-      return `<div class="pn-pc-grupo"><h2>${n}</h2>${g === 'cuero' ? '<p>Precio por m² de cada grupo de cuero. Abajo elegís a qué grupo va cada cuero.</p>' : ''}<div class="pn-tabla">${ms.map(fila).join('')}</div></div>`;
+      return `<div class="pn-pc-grupo"><h2>${n}</h2>${g === 'cuero' ? '<p>Precio por m² de cada grupo. Abajo, en «Cada cuero», elegís a qué grupo va cada uno.</p>' : ''}<div class="pn-tabla">${ms.map(fila).join('')}</div></div>`;
     }).join('');
     const cuerosHtml = cueros.length ? `<div class="pn-pc-grupo"><h2>Cada cuero</h2><p>A qué grupo pertenece cada cuero${sinGrupo ? ` · <span class="pn-sin">${sinGrupo} sin definir</span>` : ''}.</p>
       <div class="pn-cueros">${cueros.map((c) => `
@@ -658,9 +673,8 @@
             <select data-cuero="${esc(c.id)}" aria-label="Grupo de ${esc(c.nombre)}"><option value="">Sin definir</option>${gruposCuero.map((m) => `<option value="${esc(m.id)}" ${m.id === c.grupo ? 'selected' : ''}>${esc(nombreGrupo(m))} · ${money(m.costo)}/m²</option>`).join('')}</select>
           </span>
         </label>`).join('')}</div></div>` : '';
-    // primero los grupos de cuero, después cada cuero, después el resto
-    const [cuero, ...resto] = lista.split('<div class="pn-pc-grupo">').filter(Boolean).map((x) => '<div class="pn-pc-grupo">' + x);
-    $('[data-mat-lista]').innerHTML = materiales.some((m) => m.grupo === 'cuero') ? cuero + cuerosHtml + resto.join('') : cuerosHtml + lista;
+    // los materiales en columnas; cada cuero, a lo ancho abajo
+    $('[data-mat-lista]').innerHTML = `<div class="pn-pc">${lista}</div>` + cuerosHtml.replace('class="pn-pc-grupo"', 'class="pn-pc-grupo pn-pc-grupo--ancho"');
   }
   $('[data-mat-lista]').addEventListener('change', async (e) => {
     const sel = e.target.closest('[data-cuero]');
