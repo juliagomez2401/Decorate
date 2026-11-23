@@ -19,7 +19,6 @@
   const plus = (n) => (n ? '+' + money(n) : 'Incluido');
   const rangoDe = (items) => ({ min: Math.min(...items.map((i) => i.price)), max: Math.max(...items.map((i) => i.price)) });
   const TACHAS = [{ id: 'no', name: 'Sin tachas', desc: 'Solo el pespunte.' }, { id: 'si', name: 'Con tachas', desc: 'Tachas de metal por el borde.' }];
-  const NOTA_TACHAS = '[PLACEHOLDER] Confirmar si las tachas cambian el precio.';
   // conEstrellas(st): si lleva estrellas, también se ofrece cobre (solo existe en estrellas)
   const METAL = (cuando, conEstrellas = () => false) => ({ key: 'metal', label: 'Metal', titulo: 'El color del metal', hint: 'De los remaches, las tachas y los detalles de metal.', si: cuando, opciones: (st) => D.metales.filter((o) => !o.soloEstrellas || conEstrellas(st)).map((o) => ({ ...o, etiqueta: 'Incluido' })) });
   const metalTxt = (st) => st.metal && 'Metal ' + find(D.metales, st.metal).name.toLowerCase();
@@ -81,7 +80,7 @@
     tarjetero: {
       nombre: 'Tarjetero', titulo: 'Armá tu tarjetero', bajada: 'Arriba, el compartimiento grande para billetes; adelante, dos escalonados para tarjetas. Elegís el cuero y el detalle. Siempre cosido a mano.',
       state: { cuero: null, detalle: null, cuero2: null },
-      precio: () => ({ min: prod('tarjetero').base, max: prod('tarjetero').base }), notaPrecio: '[PLACEHOLDER] Confirmar si el detalle cambia el precio.',
+      precio: () => ({ min: prod('tarjetero').base, max: prod('tarjetero').base }),
       pasos: [
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'Es el cuero de todo el tarjetero.' },
         { key: 'detalle', label: 'Detalle', titulo: 'El detalle', hint: 'El compartimiento del medio puede ir en otro cuero.', opciones: () => [
@@ -133,7 +132,7 @@
     llavero: {
       nombre: 'Llavero', titulo: 'Armá tu llavero', bajada: 'Elegís la forma, el cuero y si lleva tachas o estrellas.',
       state: { forma: null, cuero: null, trenzado: null, cuero2: null, deco: null, metal: null },
-      precio: () => ({ min: prod('llavero').base, max: prod('llavero').base }), notaPrecio: '[PLACEHOLDER] Confirmar si todas las formas tienen el mismo precio.',
+      precio: () => ({ min: prod('llavero').base, max: prod('llavero').base }),
       pasos: [
         { key: 'forma', label: 'Forma', titulo: 'La forma', hint: 'Las que ya hicimos.', opciones: () => [{ id: 'estrella', name: 'Estrella' }, { id: 'estrellas', name: 'Varias estrellas', desc: 'Tres estrellas de distintos tamaños en la misma argolla.' }, { id: 'dos-estrellas', name: 'Dos estrellas', desc: 'La chica cuelga de la grande, que cuelga del mosquetón.' }, { id: 'corazon', name: 'Corazón' }, { id: 'luna', name: 'Luna' }, { id: 'rayo', name: 'Rayo' }, { id: 'gota', name: 'Gota' }].map((o) => ({ desc: '', ...o })) },
         { key: 'cuero', label: 'Cuero', tipo: 'cuero', titulo: 'Elegí el cuero', hint: 'De los dos lados.' },
@@ -147,7 +146,7 @@
     pulsera: {
       nombre: 'Pulsera', titulo: 'Armá tu pulsera', bajada: 'Lisa o con tiento trenzado por los bordes, con tachas, estrellas o las dos.',
       state: { modelo: null, ancho: null, talle: null, cuero: null, cuero2: null, deco: null, cantidad: null, metal: null },
-      precio: (st) => { const o = find(opts('pulsera', 'ancho'), st.ancho); return o ? { min: o.price, max: o.price } : rangoDe(opts('pulsera', 'ancho')); }, notaPrecio: NOTA_TACHAS,
+      precio: (st) => { const o = find(opts('pulsera', 'ancho'), st.ancho); return o ? { min: o.price, max: o.price } : rangoDe(opts('pulsera', 'ancho')); },
       pasos: [
         { key: 'modelo', label: 'Modelo', titulo: '¿Lisa o trenzada?', hint: 'La trenzada lleva un tiento de cuero enlazado por los dos bordes.', opciones: () => [
           { id: 'lisa', name: 'Lisa', desc: 'Tira de cuero con broche.', etiqueta: 'Desde ' + money(250) },

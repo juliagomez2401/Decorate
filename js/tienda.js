@@ -30,7 +30,7 @@
     const a = p.fotos[0], b = p.fotos[1];
     const media = a
       ? `<img src="img/${a}-sm.jpg" srcset="img/${a}-sm.jpg 800w, img/${a}.jpg 1600w" sizes="(min-width: 900px) 34vw, 50vw" alt="${esc(p.alts[0])}" loading="lazy"${p.pos && p.pos[0] ? ` style="object-position:${p.pos[0]}"` : ''}>${b ? `<img class="card__alt" src="img/${b}-sm.jpg" alt="" loading="lazy">` : ''}`
-      : `<span class="placeholder">${esc(p.placeholder)}</span>`;
+      : '<span class="placeholder"></span>';
     return `<article class="card ${extra}">
       <a class="card__media" href="producto.html?p=${p.id}" data-cursor="Ver" aria-label="${esc(p.name)}">${media}</a>
       <div>
@@ -81,7 +81,7 @@
   if (cats) {
     cats.innerHTML = D.categorias.map((c, i) => `
       <a class="cat ${i === 0 ? 'cat--main' : ''}" href="${c.href}" data-cursor="Ver">
-        <span class="cat__media">${c.foto ? `<img src="img/${c.foto}-sm.jpg" srcset="img/${c.foto}-sm.jpg 1000w, img/${c.foto}.jpg 2000w" sizes="(min-width: 900px) ${i === 0 ? 50 : 25}vw, ${i === 0 ? 100 : 50}vw" alt="" loading="lazy" style="object-position:${c.pos || '50% 50%'}">` : '<span class="placeholder placeholder--dark">[PLACEHOLDER] Foto</span>'}</span>
+        <span class="cat__media">${c.foto ? `<img src="img/${c.foto}-sm.jpg" srcset="img/${c.foto}-sm.jpg 1000w, img/${c.foto}.jpg 2000w" sizes="(min-width: 900px) ${i === 0 ? 50 : 25}vw, ${i === 0 ? 100 : 50}vw" alt="" loading="lazy" style="object-position:${c.pos || '50% 50%'}">` : '<span class="placeholder placeholder--dark"></span>'}</span>
         <span class="cat__txt"><b>${esc(c.name)}</b><small>Desde ${money(c.desde)}</small></span>
       </a>`).join('') + `
       <a class="cat cat--make" href="#armar">
@@ -370,7 +370,7 @@
             <p class="eyebrow"><a href="tienda.html">Tienda</a> · <a href="${c.href}">${esc(c.name)}</a>${subName ? ` · <a href="${c.href}&s=${s.sub}">${esc(subName)}</a>` : ''}</p>
             <h1 class="pdp__name">${esc(s.name)}</h1>
             <p class="pdp__price">${stockPrice(s)}</p>
-            ${s.confirmar ? '<p class="pdp__note"><span class="placeholder">[PLACEHOLDER] Precio exacto de esta pieza a confirmar</span></p>' : ''}
+            ${s.confirmar ? '<p class="pdp__note">El precio exacto te lo confirmamos por WhatsApp.</p>' : ''}
             <p class="pdp__stock"><span></span>Pieza única · en stock${s.talle ? ` · talle ${s.talle}` : ''}</p>
             <div class="pdp__buy pdp__buy--one" data-buy>
               <button type="button" class="btn" data-add-stock>Agregar al carrito</button>
@@ -381,7 +381,6 @@
             <ul class="pdp__notes">
               <li><span>Código</span><span>${s.id.toUpperCase()}</span></li>
               ${s.talle ? `<li><span>Talle</span><span>${s.talle}</span></li>` : ''}
-              ${s.talle ? '' : '<li><span>Medidas</span><span class="placeholder">[PLACEHOLDER] Medidas de la pieza</span></li>'}
               <li><span>Elaboración</span><span>Hecho a mano</span></li>
               <li><span>Pago</span><span>Efectivo o transferencia</span></li>
             </ul>
@@ -441,6 +440,9 @@
     const p = prod(id);
     if (!p) {
       pdp.innerHTML = `<div class="wrap" style="padding:calc(var(--top) + 80px) var(--gutter) 120px"><h1 class="display display--md">No encontramos esa pieza</h1><p style="margin:20px 0 30px" class="muted">Puede que el enlace esté incompleto.</p><a class="btn" href="tienda.html">Ver la tienda</a></div>`;
+    } else if (true) {
+      // las piezas a medida se arman en el armador: esta página quedó de antes
+      location.replace('arma.html?p=' + encodeURIComponent(p.id));
     } else {
       document.title = `${p.name} · Decora.te`;
       const sel = {};
@@ -449,7 +451,7 @@
       let qty = 1;
       const shots = p.fotos.length
         ? p.fotos.map((f, i) => `<figure class="pdp__shot"><img src="img/${f}${i ? '-sm' : ''}.jpg" srcset="img/${f}-sm.jpg 800w, img/${f}.jpg 1600w" sizes="(min-width: 900px) 56vw, 100vw" alt="${esc(p.alts[i] || p.name)}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}${p.pos && p.pos[i] ? ` style="object-position:${p.pos[i]}"` : ''}></figure>`).join('')
-        : `<figure class="pdp__shot"><span class="placeholder">${esc(p.placeholder)}</span></figure>`;
+        : '<figure class="pdp__shot"><span class="placeholder"></span></figure>';
       pdp.innerHTML = `
         <div class="wrap pdp">
           <div class="pdp__media${s.fotos.length > 1 ? ' has-thumbs' : ''}">

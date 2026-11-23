@@ -187,8 +187,8 @@ window.DT = {
     },
     {
       id: 'portafuego', name: 'Portafuego', line: 'Para llevar',
-      fotos: [],
-      placeholder: '[PLACEHOLDER] Foto del portafuego sobre fondo neutro',
+      fotos: ['stock/338'],
+      alts: ['Portafuego de cuero'],
       desc: 'Funda de cuero para el encendedor, en dos tamaños.',
       opciones: [{ key: 'tamano', label: 'Tamaño', items: [{ id: 'chico', name: 'Chico', price: 150 }, { id: 'grande', name: 'Grande', price: 200 }] }],
       cuero: true,
