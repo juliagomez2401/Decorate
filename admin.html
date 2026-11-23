@@ -7,23 +7,22 @@
   <title>Panel · Decora.te</title>
   <meta name="theme-color" content="#3d2619">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1410'/%3E%3Cpath d='M16 25s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 24 14c0 6-8 11-8 11z' fill='%23efe7da'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="img/icono.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=7">
+  <link rel="stylesheet" href="css/admin.css?v=8">
 </head>
 <body>
   <header class="pn-hd">
     <a class="pn-hd__logo" href="https://decorate.com.uy" title="Ver la web"><img src="img/logo-claro.png" alt="Decora.te"></a>
-    <span class="pn-hd__t">Panel</span>
+    <nav class="pn-nav" data-nav hidden aria-label="Secciones">
+      <button type="button" data-ir="pedidos" aria-current="page">Pedidos<small data-nav-nuevos></small></button>
+      <button type="button" data-ir="tienda">Tienda</button>
+      <button type="button" data-ir="precios">Precios y costos</button>
+    </nav>
     <button class="pn-hd__salir" type="button" data-salir hidden>Salir</button>
   </header>
-  <nav class="pn-nav" data-nav hidden>
-    <button type="button" data-ir="pedidos" aria-current="page">Pedidos</button>
-    <button type="button" data-ir="stock">Stock</button>
-    <button type="button" data-ir="materiales">Materiales</button>
-    <button type="button" data-ir="precios">Precios</button>
-  </nav>
 
   <main class="pn" data-app>
     <p class="pn-cargando" data-vista="cargando">Cargando…</p>
@@ -60,52 +59,53 @@
     </section>
 
     <!-- pedidos -->
-    <section class="pn-ped" data-vista="pedidos" hidden>
-      <div class="pn-ped__top">
+    <section class="pn-sec" data-vista="pedidos" hidden>
+      <div class="pn-sec__top">
         <h1>Pedidos</h1>
-        <button class="pn-btn" type="button" data-nuevo>Cargar pedido</button>
+        <button class="pn-btn pn-btn--chico" type="button" data-nuevo>Cargar pedido</button>
       </div>
-      <div class="pn-resumen" data-resumen></div>
-      <div class="pn-filtros">
+      <p class="pn-resumen" data-resumen></p>
+      <div class="pn-barra">
         <div class="pn-tabs" data-tabs role="tablist"></div>
-        <input class="pn-buscar" type="search" placeholder="Buscar por nombre, teléfono o número" data-buscar>
+        <input class="pn-buscar" type="search" placeholder="Buscar nombre, teléfono o número" data-buscar>
       </div>
-      <div class="pn-lista" data-lista></div>
+      <div data-lista></div>
     </section>
 
-    <!-- stock: piezas únicas, con su costo y lo que se gana -->
-    <section class="pn-ped" data-vista="stock" hidden>
-      <div class="pn-ped__top">
-        <h1>Stock</h1>
-        <button class="pn-btn" type="button" data-pieza-nueva>Agregar pieza</button>
+    <!-- tienda: las piezas únicas a la venta -->
+    <section class="pn-sec" data-vista="tienda" hidden>
+      <div class="pn-sec__top">
+        <h1>Tienda</h1>
+        <button class="pn-btn pn-btn--chico" type="button" data-pieza-nueva>Agregar pieza</button>
       </div>
-      <div class="pn-resumen" data-st-resumen></div>
-      <div class="pn-filtros">
-        <div class="pn-tabs" data-st-tabs role="tablist"></div>
-        <select class="pn-buscar" data-st-cat aria-label="Categoría"></select>
+      <p class="pn-resumen" data-st-resumen></p>
+      <div class="pn-barra">
+        <div class="pn-tabs" data-st-cats role="tablist"></div>
+        <label class="pn-mostrar">Mostrar <select data-st-estado></select></label>
       </div>
-      <div class="pn-lista" data-st-lista></div>
+      <div class="pn-grilla" data-st-lista></div>
     </section>
 
-    <!-- materiales: lo que le cuesta cada cosa (de acá sale el costo de cada pieza) -->
-    <section class="pn-ped" data-vista="materiales" hidden>
-      <div class="pn-ped__top">
-        <h1>Materiales</h1>
-        <button class="pn-btn" type="button" data-mat-nuevo>Agregar material</button>
+    <!-- precios de venta del armador y costos de materiales -->
+    <section class="pn-sec" data-vista="precios" hidden>
+      <div class="pn-sec__top"><h1>Precios y costos</h1></div>
+      <div class="pn-tabs pn-tabs--grande" role="tablist" data-pc-tabs>
+        <button type="button" role="tab" data-pc="cobras" aria-selected="true">Lo que cobrás</button>
+        <button type="button" role="tab" data-pc="cuesta" aria-selected="false">Lo que te cuesta</button>
       </div>
-      <p class="pn-hoja__sub">Lo que te cuesta cada cosa. Si cambia un precio, cambialo acá: el costo de todas las piezas se recalcula solo.</p>
-      <div data-mat-lista></div>
-    </section>
-
-    <!-- precios de venta de lo que se arma a medida (lo que ve el cliente en «Armá el tuyo») -->
-    <section class="pn-ped" data-vista="precios" hidden>
-      <div class="pn-ped__top"><h1>Precios</h1></div>
-      <p class="pn-hoja__sub">Lo que paga el cliente por lo que se arma a medida. Lo que cambies acá se ve en la web al recargar la página. Las piezas en stock tienen su precio en Stock.</p>
-      <div data-pr-lista></div>
+      <div data-pc-vista="cobras">
+        <p class="pn-intro">Lo que paga el cliente por lo que se arma a medida en «Armá el tuyo». Se guarda solo al cambiarlo y se ve en la web al recargar. Las piezas de la tienda tienen su precio en cada pieza.</p>
+        <div data-pr-lista></div>
+      </div>
+      <div data-pc-vista="cuesta" hidden>
+        <p class="pn-intro">Lo que te cuesta cada material. Con esto se calcula cuánto ganás con cada pieza de la tienda. Se guarda solo al cambiarlo.</p>
+        <div data-mat-lista></div>
+        <button class="pn-btn pn-btn--borde" type="button" data-mat-nuevo>Agregar material</button>
+      </div>
     </section>
   </main>
 
-  <!-- detalle de un pedido / cargar uno nuevo -->
+  <!-- hoja: detalle de un pedido, de una pieza, o cargar algo nuevo -->
   <div class="pn-hoja" data-hoja hidden>
     <div class="pn-hoja__velo" data-cerrar></div>
     <div class="pn-hoja__in" role="dialog" aria-modal="true" aria-labelledby="hoja-t">
@@ -116,6 +116,6 @@
 
   <div class="pn-aviso" data-aviso role="status" aria-live="polite"></div>
 
-  <script src="js/admin.js?v=7"></script>
+  <script src="js/admin.js?v=8"></script>
 </body>
 </html>
