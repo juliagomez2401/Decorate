@@ -297,7 +297,7 @@
       const a = e.target.closest('a[href^="tienda.html"]');
       if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
-      if (a.getAttribute('href') === location.pathname.split('/').pop() + location.search) return;
+      if (a.getAttribute('href') === 'tienda.html' + location.search) return;   // ya está en esa (con o sin .html en la dirección)
       swap(true, a.getAttribute('href'));
     });
     window.addEventListener('popstate', () => swap(false));

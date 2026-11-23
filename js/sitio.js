@@ -355,7 +355,9 @@
     const a = e.target.closest('a[href]');
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || a.target === '_blank') return;
     const url = new URL(a.href, location.href);
-    if (url.origin !== location.origin || url.pathname !== location.pathname || url.search !== location.search) return;
+    // en Cloudflare las páginas van sin .html (/tienda), en GitHub con (/tienda.html): se comparan igual
+    const limpio = (x) => x.replace(/(index)?(\.html)?$/, '');
+    if (url.origin !== location.origin || limpio(url.pathname) !== limpio(location.pathname) || url.search !== location.search) return;
     const t = url.hash.length > 1 && $(url.hash);
     e.preventDefault();
     closeMenu(); closeSearch();
