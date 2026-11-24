@@ -237,21 +237,21 @@
   /* ---------------- fila de piezas en stock (inicio) ---------------- */
   const stockRow = $('[data-stock-row]');
   if (stockRow) {
-    // cambian cada 12 horas (a las 00:00 y a las 12:00, hora del celular o la compu): una pieza de cada
-    // categoría con foto horizontal, para que la fila quede pareja
+    // «Piezas únicas en stock»: solo piezas únicas (no pulseras, collares, llaveros ni portafuegos) y no agotadas.
+    // Cambian cada 12 horas (a las 00:00 y a las 12:00, hora del celular o la compu): dos de cada categoría
+    // con foto horizontal (cintos y tarjeteros), para que la fila quede pareja
     const HORIZ = {
       cintos: ['d1', 'd2', 'd3', 'd4', 'd5', 'd6', 'f1', 'f2', 'f3', 'f4'],
       tarjeteros: ['t1', 't2', 't3', 't4', 't5', 't10', 't12', 't14', 't15'],
-      pulseras: ['pu1', 'pu2', 'pu3', 'pu4', 'pu5', 'pu6', 'pu7', 'pu8', 'pu10', 'pu12', 'pu13', 'pu14', 'pu16', 'pu17', 'pu18', 'pu20', 'pu22'],
-      collares: ['co1', 'co2', 'co3', 'co4', 'co5', 'co6', 'co7', 'co8', 'co9', 'co10', 'co11', 'co12'],
     };
     const turno = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 43200000);
-    const lista = Object.keys(HORIZ).map((cat, k) => {
-      const hay = HORIZ[cat].map((id) => STOCK.find((s) => s.id === id)).filter(Boolean);   // las que siguen en stock
-      if (!hay.length) return null;
+    const lista = Object.keys(HORIZ).flatMap((cat, k) => {
+      const hay = HORIZ[cat].map((id) => STOCK.find((s) => s.id === id)).filter((s) => s && esUnica(s) && !agotada(s));   // las que siguen a la venta
+      if (!hay.length) return [];
       let x = (turno * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13;   // mezcla
-      return hay[(x >>> 0) % hay.length];
-    }).filter(Boolean);
+      const i = (x >>> 0) % hay.length;
+      return hay.length > 1 ? [hay[i], hay[(i + 1 + ((x >>> 8) % (hay.length - 1))) % hay.length]] : [hay[i]];
+    });
     stockRow.innerHTML = lista.map(itemCard).join('');
   }
 
