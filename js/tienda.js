@@ -107,8 +107,8 @@
   const FOTOS_V = '4';
   const stockImg = (n, sm = true) => (/^https?:/.test(n) ? n : `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`);
 
-  // pulseras y collares no son piezas únicas (se puede pedir más de una); las pulseras se hacen en todos los talles
-  const NO_UNICAS = ['pulseras', 'collares'];
+  // pulseras, collares, llaveros y portafuegos no son piezas únicas (se puede pedir más de una); las pulseras se hacen en todos los talles
+  const NO_UNICAS = ['pulseras', 'collares', 'llaveros', 'portafuegos'];
   const esUnica = (s) => !NO_UNICAS.includes(s.cat);
   const TALLES_P = ['XS', 'S', 'M', 'L', 'XL', 'Regulable'];
   const pideTalle = (s) => s.cat === 'pulseras';
