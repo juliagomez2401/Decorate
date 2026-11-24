@@ -2130,3 +2130,30 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 
 /* celular: que el botón de WhatsApp no tape el final del pie */
 @media (max-width: 899px) { .ft { padding-bottom: calc(88px + env(safe-area-inset-bottom)); } }
+
+/* tarjeta de la tienda: link a la ficha y, abajo, el botón para sumar al carrito */
+.item__link { display: grid; gap: 4px; align-content: start; color: inherit; text-decoration: none; }
+.item__buy { margin-top: 10px; min-height: 40px; }
+.item__add { width: 100%; min-height: 40px; padding: 0 10px; border: 1px solid var(--tinta); background: transparent; color: var(--tinta); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: background-color .3s var(--ease), color .3s var(--ease); }
+.item__add:hover { background: var(--tinta); color: var(--crema); }
+.item__agotada, .item__ok { display: grid; place-items: center; min-height: 40px; margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--cuero); border: 1px dashed var(--linea); }
+.item__ok { border-style: solid; }
+.item--agotada .item__img img { opacity: .55; }
+.item__talles { display: grid; gap: 6px; }
+.item__talles > span { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--cuero); }
+.item__talles > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.item__talles button { min-height: 34px; padding: 0 2px; border: 1px solid var(--linea); background: transparent; color: var(--tinta); font-size: 12px; font-weight: 600; cursor: pointer; }
+.item__talles button:hover { border-color: var(--tinta); background: var(--tinta); color: var(--crema); }
+.item__talles button[data-talle-card="Regulable"] { grid-column: span 3; letter-spacing: .08em; }
+@media (min-width: 700px) { .item__talles > div { grid-template-columns: repeat(5, 1fr); } .item__talles button[data-talle-card="Regulable"] { grid-column: 1 / -1; } }
+.shop__grid--vert .item__add, .shop__grid--vert .item__agotada { font-size: 10px; letter-spacing: .1em; }
+
+/* ficha: talles de pulsera y pieza agotada */
+.pdp__talles { display: grid; gap: 8px; margin: 4px 0 18px; }
+.pdp__talles-t { font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--cuero); }
+.pdp__talles div { display: flex; flex-wrap: wrap; gap: 6px; }
+.pdp__talles button { min-width: 48px; min-height: 44px; padding: 0 12px; border: 1px solid var(--linea); background: transparent; color: var(--tinta); font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color .2s, background-color .2s, color .2s; }
+.pdp__talles button:hover { border-color: var(--tinta); }
+.pdp__talles button[aria-checked="true"] { background: var(--tinta); border-color: var(--tinta); color: var(--crema); }
+.pdp__talles small { font-size: 12.5px; line-height: 1.5; color: var(--cuero); }
+.pdp__stock--no span { background: var(--cuero) !important; }

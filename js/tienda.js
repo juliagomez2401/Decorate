@@ -107,14 +107,61 @@
   const FOTOS_V = '4';
   const stockImg = (n, sm = true) => (/^https?:/.test(n) ? n : `img/stock/${n}${sm ? '-sm' : ''}.jpg?v=${FOTOS_V}`);
 
-  function itemCard(s) {
-    const a = s.portada || s.fotos[0], b = s.hover;
-    return `<a class="item" href="producto.html?id=${s.id}">
-      <span class="item__img"><img src="${stockImg(a)}" alt="${esc(s.name)}" loading="lazy">${b ? `<img class="item__alt" src="${stockImg(b)}" alt="" loading="lazy">` : ''}<span class="item__tag">Pieza única</span></span>
-      <span class="item__name">${esc(s.name)}</span>
-      <span class="item__price">${stockPrice(s)}</span>
-    </a>`;
+  // pulseras y collares no son piezas únicas (se puede pedir más de una); las pulseras se hacen en todos los talles
+  const NO_UNICAS = ['pulseras', 'collares'];
+  const esUnica = (s) => !NO_UNICAS.includes(s.cat);
+  const TALLES_P = ['XS', 'S', 'M', 'L', 'XL', 'Regulable'];
+  const pideTalle = (s) => s.cat === 'pulseras';
+  const agotada = (s) => s.estado === 'agotada';
+  const enCarrito = (s) => Cart.items.some((i) => i.key === 'stock|' + s.id);
+  function sumarStock(s, talle) {
+    Cart.add({
+      key: 'stock|' + s.id + (talle ? '|' + talle : ''), kind: 'stock', unica: esUnica(s), id: s.id, name: s.name,
+      detail: (esUnica(s) ? ['Pieza única'] : []).concat(['Código ' + s.id.toUpperCase()], talle ? ['Talle ' + talle] : s.talle && !pideTalle(s) ? ['Talle ' + s.talle] : [], s.confirmar ? ['Precio a confirmar'] : []),
+      min: s.min, max: s.max, confirmar: s.confirmar, foto: S.fotoStock(s.portada || s.fotos[0]), qty: 1,
+    });
   }
+  const botonCard = (s) => (agotada(s) ? '<span class="item__agotada">Agotada</span>'
+    : `<button type="button" class="item__add" data-add-card>${esUnica(s) && enCarrito(s) ? 'En el carrito' : 'Agregar al carrito'}</button>`);
+
+  function itemCard(s) {
+    const a = s.portada || s.fotos[0], b = s.hover, tag = agotada(s) ? 'Agotada' : esUnica(s) ? 'Pieza única' : '';
+    return `<div class="item${agotada(s) ? ' item--agotada' : ''}">
+      <a class="item__link" href="producto.html?id=${s.id}">
+        <span class="item__img"><img src="${stockImg(a)}" alt="${esc(s.name)}" loading="lazy">${b ? `<img class="item__alt" src="${stockImg(b)}" alt="" loading="lazy">` : ''}${tag ? `<span class="item__tag">${tag}</span>` : ''}</span>
+        <span class="item__name">${esc(s.name)}</span>
+        <span class="item__price">${stockPrice(s)}</span>
+      </a>
+      <div class="item__buy" data-buy-card="${esc(s.id)}">${botonCard(s)}</div>
+    </div>`;
+  }
+  // botón de cada tarjeta: suma al carrito; en las pulseras, primero se elige el talle ahí mismo
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-talle-card]'), b = e.target.closest('[data-add-card]');
+    if (!t && !b) return;
+    const box = (t || b).closest('[data-buy-card]'), s = STOCK.find((x) => x.id === box.dataset.buyCard);
+    if (!s || agotada(s)) return;
+    if (t) {
+      sumarStock(s, t.dataset.talleCard);
+      box.innerHTML = `<p class="item__ok">Agregada, talle ${esc(t.dataset.talleCard)}</p>`;
+      S.openDrawer();
+      setTimeout(() => { box.innerHTML = botonCard(s); }, 2600);
+      return;
+    }
+    if (pideTalle(s)) {
+      box.innerHTML = `<div class="item__talles"><span>Elegí el talle</span><div>${TALLES_P.map((x) => `<button type="button" data-talle-card="${x}">${x}</button>`).join('')}</div></div>`;
+      return;
+    }
+    if (esUnica(s) && enCarrito(s)) { S.openDrawer(); return; }
+    sumarStock(s);
+    b.textContent = esUnica(s) ? 'En el carrito' : 'Agregado';
+    S.openDrawer();
+    if (!esUnica(s)) setTimeout(() => { b.textContent = 'Agregar al carrito'; }, 2000);
+  });
+  // si se saca algo del carrito, la tarjeta vuelve a ofrecerlo
+  document.addEventListener('carrito', () => {
+    $$('[data-buy-card]').forEach((box) => { const s = STOCK.find((x) => x.id === box.dataset.buyCard), b = box.querySelector('[data-add-card]'); if (s && b && esUnica(s)) b.textContent = enCarrito(s) ? 'En el carrito' : 'Agregar al carrito'; });
+  });
   // Tarjeta "Armá el tuyo": misma forma que las fotos de su categoría (los llaveros son verticales)
   const VERTICALES = ['llaveros', 'porta-lentes', 'portafuegos'];
   const gridClass = (id) => 'shop__grid' + (VERTICALES.includes(id) ? ' shop__grid--vert' : '');
@@ -371,16 +418,18 @@
             <h1 class="pdp__name">${esc(s.name)}</h1>
             <p class="pdp__price">${stockPrice(s)}</p>
             ${s.confirmar ? '<p class="pdp__note">El precio exacto te lo confirmamos por WhatsApp.</p>' : ''}
-            <p class="pdp__stock"><span></span>Pieza única · en stock${s.talle ? ` · talle ${s.talle}` : ''}</p>
-            <div class="pdp__buy pdp__buy--one" data-buy>
+            ${agotada(s) ? '<p class="pdp__stock pdp__stock--no"><span></span>Agotada por ahora. Escribinos y te avisamos cuando vuelva.</p>'
+              : `<p class="pdp__stock"><span></span>${esUnica(s) ? 'Pieza única · en stock' : 'En stock'}${pideTalle(s) ? ' · en todos los talles' : s.talle ? ` · talle ${s.talle}` : ''}</p>`}
+            ${!agotada(s) && pideTalle(s) ? `<div class="pdp__talles" data-talles><span class="pdp__talles-t">Talle</span><div role="radiogroup" aria-label="Talle">${TALLES_P.map((x) => `<button type="button" role="radio" aria-checked="false" data-talle="${x}">${x}</button>`).join('')}</div><small>Medí el contorno de tu muñeca: XS 13 a 14,5 cm · S 14,5 a 16 · M 16 a 17,5 · L 17,5 a 19 · XL 19 a 21. Regulable se ajusta a cualquier muñeca.</small></div>` : ''}
+            ${agotada(s) ? '' : `<div class="pdp__buy pdp__buy--one" data-buy>
               <button type="button" class="btn" data-add-stock>Agregar al carrito</button>
-            </div>
+            </div>`}
             <p class="added" data-added aria-live="polite"></p>
             <a class="link" href="${ask}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
             ${c.custom ? `<a class="pdp__custom" href="${c.custom.href}"><small>¿Lo querés en otro cuero?</small><b>${esc(c.custom.label)}</b></a>` : ''}
             <ul class="pdp__notes">
               <li><span>Código</span><span>${s.id.toUpperCase()}</span></li>
-              ${s.talle ? `<li><span>Talle</span><span>${s.talle}</span></li>` : ''}
+              ${s.talle && !pideTalle(s) ? `<li><span>Talle</span><span>${s.talle}</span></li>` : ''}
               <li><span>Elaboración</span><span>Hecho a mano</span></li>
               <li><span>Pago</span><span>Efectivo o transferencia</span></li>
             </ul>
@@ -392,16 +441,20 @@
             <div class="${gridClass(c.id)} shop__grid--rel4">${related.map(itemCard).join('')}</div>
           </div>
         </section>` : ''}
-        <div class="pdp-bar" data-pdp-bar aria-hidden="true">
+        ${agotada(s) ? '' : `<div class="pdp-bar" data-pdp-bar aria-hidden="true">
           <div><span class="pdp-bar__name">${esc(s.name)}</span><span class="pdp-bar__price">${stockPrice(s)}</span></div>
           <button type="button" class="btn" data-add-stock tabindex="-1">Agregar al carrito</button>
-        </div>`;
+        </div>`}`;
+      let talle = null;
       pdpEl.addEventListener('click', (e) => {
+        const tb = e.target.closest('[data-talle]');
+        if (tb) { talle = tb.dataset.talle; $$('[data-talle]', pdpEl).forEach((x) => x.setAttribute('aria-checked', x === tb)); $('[data-added]', pdpEl).textContent = ''; return; }
         if (!e.target.closest('[data-add-stock]')) return;
-        const already = Cart.items.some((i) => i.key === 'stock|' + s.id);
-        if (already) { $('[data-added]', pdpEl).textContent = 'Ya está en tu carrito.'; S.openDrawer(); return; }
-        Cart.add({ key: 'stock|' + s.id, kind: 'stock', id: s.id, name: s.name, detail: ['Pieza única', 'Código ' + s.id.toUpperCase()].concat(s.talle ? ['Talle ' + s.talle] : [], s.confirmar ? ['Precio a confirmar'] : []), min: s.min, max: s.max, confirmar: s.confirmar, foto: S.fotoStock(s.portada || s.fotos[0]), qty: 1 });
-        $('[data-added]', pdpEl).textContent = 'Agregado al carrito.';
+        const msg = $('[data-added]', pdpEl);
+        if (pideTalle(s) && !talle) { msg.textContent = 'Elegí tu talle primero.'; S.scrollToEl ? S.scrollToEl($('[data-talles]', pdpEl), -140) : $('[data-talles]', pdpEl).scrollIntoView({ block: 'center' }); return; }
+        if (esUnica(s) && enCarrito(s)) { msg.textContent = 'Ya está en tu carrito.'; S.openDrawer(); return; }
+        sumarStock(s, pideTalle(s) ? talle : null);
+        msg.textContent = pideTalle(s) ? `Agregada al carrito, talle ${talle}.` : 'Agregado al carrito.';
         S.openDrawer();
       });
       const gal = $('[data-gallery]', pdpEl);

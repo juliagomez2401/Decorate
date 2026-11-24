@@ -36,7 +36,7 @@
       this.save();
     },
     remove(uid) { this.items = this.items.filter((i) => i.uid !== uid); this.save(); },
-    setQty(uid, q) { const it = this.items.find((i) => i.uid === uid); if (!it) return; it.qty = Math.max(1, Math.min(it.kind === 'stock' ? 1 : 20, q)); this.save(); }, // las piezas en stock son únicas
+    setQty(uid, q) { const it = this.items.find((i) => i.uid === uid); if (!it) return; it.qty = Math.max(1, Math.min(it.kind === 'stock' && it.unica !== false ? 1 : 20, q)); this.save(); }, // las piezas en stock son únicas
     clear() { this.items = []; this.save(); },
     count() { return this.items.reduce((a, i) => a + i.qty, 0); },
     total() { return this.items.reduce((a, i) => ({ min: a.min + i.min * i.qty, max: a.max + i.max * i.qty }), { min: 0, max: 0 }); },

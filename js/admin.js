@@ -74,7 +74,7 @@
   const SECCIONES = ['pedidos', 'tienda', 'precios'];
   function mostrar(v) {
     $$('[data-vista]').forEach((el) => { el.hidden = el.dataset.vista !== v; });
-    document.body.dataset.vista = v;
+    document.body.dataset.seccion = v;
     const adentro = SECCIONES.includes(v);
     $('[data-salir]').hidden = !(adentro || v === 'sin-permiso');
     $('[data-nav]').hidden = !adentro;
@@ -273,7 +273,7 @@
         <div class="pn-bloque">
           <h3 class="pn-bloque__t">Precio y entrega</h3>
           <div class="pn-campos">
-            <label>Precio acordado <input type="number" name="precio_final" min="0" step="10" inputmode="numeric" value="${p.precio_final ?? ''}" placeholder="${p.total_min === p.total_max ? p.total_min : ''}"></label>
+            <label>Precio acordado <input type="number" name="precio_final" min="0" step="1" inputmode="numeric" value="${p.precio_final ?? ''}" placeholder="${p.total_min === p.total_max ? p.total_min : ''}"></label>
             <label>Fecha de entrega <input type="date" name="entrega" value="${p.entrega || ''}"></label>
           </div>
         </div>
@@ -281,7 +281,7 @@
           <h3 class="pn-bloque__t">Cobro</h3>
           <div class="pn-cobro">
             <div class="pn-cobro__estado" data-cobro-estado></div>
-            <label>Cobrado ($) <input type="number" name="cobrado" min="0" step="10" inputmode="numeric" value="${p.cobrado ?? ''}"></label>
+            <label>Cobrado ($) <input type="number" name="cobrado" min="0" step="1" inputmode="numeric" value="${p.cobrado ?? ''}"></label>
             <label>Cómo <select name="cobro_medio"><option value="">—</option>${MEDIOS.map(([v, n]) => `<option value="${v}" ${p.cobro_medio === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
             <label class="pn-ancho">Cuándo <input type="date" name="cobrado_el" value="${p.cobrado_el || ''}"></label>
           </div>
@@ -367,7 +367,7 @@
             <label>Teléfono <input name="telefono" inputmode="tel" maxlength="30" placeholder="09…"></label>
             <label>Por dónde llegó <select name="origen">${ORIGENES.filter((o) => o !== 'web').map((o) => `<option value="${o}">${o[0].toUpperCase() + o.slice(1)}</option>`).join('')}</select></label>
             <label class="pn-ancho">Qué pidió (una pieza por renglón) <textarea name="items" rows="3" required placeholder="Cinto faja cebra con hebilla flor&#10;Tarjetero suela"></textarea></label>
-            <label>Precio acordado <input type="number" name="precio" min="0" step="10" inputmode="numeric" required></label>
+            <label>Precio acordado <input type="number" name="precio" min="0" step="1" inputmode="numeric" required></label>
             <label>Va a pagar con <select name="pago"><option value="transferencia">Transferencia</option><option value="efectivo">Efectivo</option></select></label>
             <label class="pn-ancho">Fecha de entrega <input type="date" name="entrega"></label>
             <label class="pn-ancho">Notas <textarea name="notas" rows="2"></textarea></label>
@@ -394,11 +394,10 @@
   /* =========================================================
      TIENDA: piezas únicas. Costo de cada pieza = materiales × su precio + otros gastos
      ========================================================= */
-  const TALLES_PULSERA = [['XS', '13 a 14,5 cm'], ['S', '14,5 a 16 cm'], ['M', '16 a 17,5 cm'], ['L', '17,5 a 19 cm'], ['XL', '19 a 21 cm']];
   const CATS = [['cintos', 'Cintos'], ['tarjeteros', 'Tarjeteros'], ['porta-lentes', 'Estuches de lentes'], ['portafuegos', 'Portafuegos'], ['llaveros', 'Llaveros'], ['pulseras', 'Pulseras'], ['collares', 'Collares']];
   const SUBS = { cintos: [['decorativos', 'Decorativos'], ['funcionales', 'Funcionales']], pulseras: [['anchas', 'Anchas'], ['finas', 'Finas']] };
   const PREFIJO = { cintos: 'c', tarjeteros: 't', 'porta-lentes': 'p', portafuegos: 'pf', llaveros: 'l', pulseras: 'pu', collares: 'co' };
-  const ESTADOS_ST = [['disponible', 'A la venta'], ['reservada', 'Reservada'], ['vendida', 'Vendida'], ['oculta', 'Oculta']];
+  const ESTADOS_ST = [['disponible', 'A la venta'], ['agotada', 'Agotada'], ['reservada', 'Reservada'], ['vendida', 'Vendida'], ['oculta', 'Oculta']];
   const GRUPOS = [['cuero', 'Cuero'], ['hebilla', 'Hebillas'], ['herraje', 'Herrajes'], ['dije', 'Dijes'], ['otro', 'Otros']];
   const catNombre = (id) => (CATS.find((c) => c[0] === id) || [, id])[1];
   const estadoSt = (id) => (ESTADOS_ST.find((e) => e[0] === id) || [, id])[1];
@@ -421,8 +420,8 @@
 
   function pintarStock() {
     const cuenta = (id) => stock.filter((p) => p.estado === id).length;
-    const disp = cuenta('disponible'), res = cuenta('reservada'), vend = cuenta('vendida');
-    $('[data-st-resumen]').innerHTML = [`<b>${disp}</b> a la venta`, res ? `<b>${res}</b> ${res === 1 ? 'reservada' : 'reservadas'}` : '', vend ? `<b>${vend}</b> ${vend === 1 ? 'vendida' : 'vendidas'}` : ''].filter(Boolean).join(' · ');
+    const disp = cuenta('disponible'), res = cuenta('reservada'), vend = cuenta('vendida'), ago = cuenta('agotada');
+    $('[data-st-resumen]').innerHTML = [`<b>${disp}</b> a la venta`, ago ? `<b>${ago}</b> ${ago === 1 ? 'agotada' : 'agotadas'}` : '', res ? `<b>${res}</b> ${res === 1 ? 'reservada' : 'reservadas'}` : '', vend ? `<b>${vend}</b> ${vend === 1 ? 'vendida' : 'vendidas'}` : ''].filter(Boolean).join(' · ');
     const enEstado = stock.filter((p) => fSt === 'todas' || p.estado === fSt);
     $('[data-st-cats]').innerHTML = [['', 'Todas'], ...CATS].map(([id, n]) => {
       const c = enEstado.filter((p) => !id || p.cat === id).length;
@@ -432,7 +431,7 @@
     sel.innerHTML = [...ESTADOS_ST, ['todas', 'Todas']].map(([id, n]) => `<option value="${id}" ${fSt === id ? 'selected' : ''}>${n} (${id === 'todas' ? stock.length : cuenta(id)})</option>`).join('');
     const lista = enEstado.filter((p) => !fCat || p.cat === fCat);
     $('[data-st-lista]').innerHTML = lista.length ? lista.map((p) => `
-      <button class="pn-pieza${['vendida', 'oculta'].includes(p.estado) ? ' pn-pieza--apagada' : ''}" type="button" data-pieza="${esc(p.id)}">
+      <button class="pn-pieza${['vendida', 'oculta', 'agotada'].includes(p.estado) ? ' pn-pieza--apagada' : ''}" type="button" data-pieza="${esc(p.id)}">
         <span class="pn-pieza__img">${p.fotos && p.fotos.length ? `<img src="${esc(fotoUrl(p.portada || p.fotos[0]))}" alt="" loading="lazy">` : ''}${p.estado !== 'disponible' ? `<span class="pn-pieza__estado pn-pieza__estado--${p.estado}">${estadoSt(p.estado)}</span>` : ''}</span>
         <span class="pn-pieza__n">${esc(p.name)}</span>
         <span class="pn-pieza__p">${precioPieza(p)}<small>${esc(p.id.toUpperCase())}</small></span>
@@ -474,14 +473,13 @@
             <label>Tipo <select name="sub" data-sub-sel></select></label>
             <label data-solo-cinto>Largo (cm) <input name="largo" type="number" min="0" step="1" inputmode="numeric" value="${p.largo ?? ''}"></label>
             <label data-solo-cinto>Talle <input name="talle" type="number" readonly value="${p.cat === 'cintos' ? p.talle ?? '' : ''}" tabindex="-1" placeholder="sale del largo"></label>
-            <label data-solo-pulsera class="pn-ancho">Talle <select name="talle_p"><option value="">Sin talle</option>${TALLES_PULSERA.map(([t, cm]) => `<option value="${t}" ${p.talle === t ? 'selected' : ''}>${t} (${cm})</option>`).join('')}</select></label>
           </div>
         </div>
         <div class="pn-bloque">
           <h3 class="pn-bloque__t">Precio</h3>
           <div class="pn-campos">
-            <label>Precio <input name="min" type="number" min="0" step="10" inputmode="numeric" required value="${p.min}"></label>
-            <label>Hasta (si es un rango) <input name="max" type="number" min="0" step="10" inputmode="numeric" value="${p.max > p.min ? p.max : ''}"></label>
+            <label>Precio <input name="min" type="number" min="0" step="1" inputmode="numeric" required value="${p.min}"></label>
+            <label>Hasta (si es un rango) <input name="max" type="number" min="0" step="1" inputmode="numeric" value="${p.max > p.min ? p.max : ''}"></label>
             <label class="pn-check pn-ancho"><input type="checkbox" name="desde" ${p.desde ? 'checked' : ''}> Mostrar «desde» antes del precio</label>
             <label class="pn-check pn-ancho"><input type="checkbox" name="confirmar" ${p.confirmar ? 'checked' : ''}> Precio a confirmar por WhatsApp</label>
           </div>
@@ -515,7 +513,6 @@
       f.sub.innerHTML = subs.length ? subs.map(([id, n]) => `<option value="${id}" ${p.sub === id ? 'selected' : ''}>${n}</option>`).join('') : '<option value="">—</option>';
       f.sub.closest('label').hidden = !subs.length;
       $$('[data-solo-cinto]', f).forEach((el) => { el.hidden = f.cat.value !== 'cintos'; });
-      $$('[data-solo-pulsera]', f).forEach((el) => { el.hidden = f.cat.value !== 'pulseras'; });
     };
     subSel(); f.cat.addEventListener('change', subSel);
     f.largo.addEventListener('input', () => { f.talle.value = f.largo.value ? 5 * Math.round(f.largo.value / 5) : ''; });
@@ -562,7 +559,7 @@
       const datos = {
         name: f.name.value.trim(), cat: f.cat.value, sub: (SUBS[f.cat.value] ? f.sub.value : null) || null,
         min, max, desde: f.desde.checked, confirmar: f.confirmar.checked,
-        largo: f.cat.value === 'cintos' ? num(f.largo.value) : null, talle: f.cat.value === 'cintos' ? (num(f.talle.value) ? String(num(f.talle.value)) : null) : f.cat.value === 'pulseras' ? f.talle_p.value || null : null,
+        largo: f.cat.value === 'cintos' ? num(f.largo.value) : null, talle: f.cat.value === 'cintos' ? (num(f.talle.value) ? String(num(f.talle.value)) : null) : null,   // las pulseras se hacen en todos los talles: el cliente lo elige en la web
         estado: f.estado.value, materiales: leerMats(), costo_extra: num(f.costo_extra.value) || 0, notas: f.notas.value.trim() || null,
         fotos: fotos.map(String), portada: fotos.length ? String(fotos[0]) : null, hover: fotos.length > 1 && p.hover && fotos.map(String).includes(String(p.hover)) ? String(p.hover) : null,
       };

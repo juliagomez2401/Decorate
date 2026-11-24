@@ -4,7 +4,7 @@
 (function () {
   var URL_ = 'https://tptuqviwbztmqsymgvgm.supabase.co';
   var KEY = 'sb_publishable_7bzfhpKaQ5iBORWqX96Cfg_HpNDTeok';
-  var COLS = 'id,cat,sub,name,fotos,portada,hover,min,max,desde,confirmar,largo,talle';
+  var COLS = 'id,cat,sub,name,fotos,portada,hover,min,max,desde,confirmar,largo,talle,estado';
   var num = function (v) { return v != null && /^\d+$/.test(String(v)) ? Number(v) : v; };   // '79' → 79; los links quedan
   var traer = function (path) {
     return fetch(URL_ + '/rest/v1/' + path, { headers: { apikey: KEY } })

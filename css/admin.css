@@ -209,13 +209,13 @@ input[readonly] { background: transparent; border-color: transparent; padding-le
 .pn-ayuda { margin: 10px 0 0; font-size: 12.5px; color: var(--tenue); }
 
 /* opciones de una sola elección en fila (estado de la pieza) */
-.pn-seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--linea-f); }
-.pn-seg label { display: block; position: relative; }
+.pn-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.pn-seg label { display: block; position: relative; flex: 1 1 auto; }
 .pn-seg input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
-.pn-seg span { display: grid; place-items: center; min-height: 42px; padding: 0 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--suave); cursor: pointer; transition: background-color .2s, color .2s; }
-.pn-seg label + label span { border-left: 1px solid var(--linea-f); }
-.pn-seg input:checked + span { background: var(--tabaco); color: var(--crema-luz); }
-.pn-seg input:focus-visible + span { outline: 2px solid var(--cognac); outline-offset: -2px; }
+.pn-seg span { display: grid; place-items: center; min-height: 42px; padding: 0 12px; border: 1px solid var(--linea-f); font-size: 12.5px; font-weight: 600; white-space: nowrap; color: var(--suave); cursor: pointer; transition: background-color .2s, color .2s, border-color .2s; }
+.pn-seg span:hover { border-color: var(--suave); }
+.pn-seg input:checked + span { background: var(--tabaco); border-color: var(--tabaco); color: var(--crema-luz); }
+.pn-seg input:focus-visible + span { outline: 2px solid var(--cognac); outline-offset: 1px; }
 
 /* pieza: costo, plegado */
 .pn-costos { border-top: 1px solid var(--linea); }
@@ -239,8 +239,8 @@ input[readonly] { background: transparent; border-color: transparent; padding-le
 
 /* ---------- precios y costos ---------- */
 /* tienda y precios usan todo el ancho de la pantalla */
-body[data-vista="tienda"] .pn, body[data-vista="precios"] .pn { max-width: none; }
-@media (min-width: 760px) { body[data-vista="tienda"] .pn, body[data-vista="precios"] .pn { padding-left: 32px; padding-right: 32px; } }
+body[data-seccion="tienda"] .pn, body[data-seccion="precios"] .pn { max-width: none; }
+@media (min-width: 760px) { body[data-seccion="tienda"] .pn, body[data-seccion="precios"] .pn { padding-left: 32px; padding-right: 32px; } }
 /* grupos en columnas, uno al lado del otro */
 .pn-pc { columns: 330px; column-gap: 40px; margin-top: 22px; }
 .pn-pc-grupo { break-inside: avoid; margin: 0 0 30px; }

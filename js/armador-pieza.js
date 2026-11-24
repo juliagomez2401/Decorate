@@ -34,7 +34,7 @@
     { id: 'no', name: 'Sin decoración', desc: 'El cuero solo.' }, { id: 'estrellas', name: 'Estrellas', desc: 'Estrellas de metal.' },
     { id: 'remaches', name: 'Remaches', desc: 'Remaches de metal.' }, { id: 'estrellas-remaches', name: 'Estrellas y remaches', desc: 'Intercalados.' }];
   // talle de pulsera: el contorno de la muñeca
-  const TALLES_PULSERA = [{ id: 'XS', name: 'XS', desc: '13 a 14,5 cm' }, { id: 'S', name: 'S', desc: '14,5 a 16 cm' }, { id: 'M', name: 'M', desc: '16 a 17,5 cm' }, { id: 'L', name: 'L', desc: '17,5 a 19 cm' }, { id: 'XL', name: 'XL', desc: '19 a 21 cm' }];
+  const TALLES_PULSERA = [{ id: 'XS', name: 'XS', desc: '13 a 14,5 cm' }, { id: 'S', name: 'S', desc: '14,5 a 16 cm' }, { id: 'M', name: 'M', desc: '16 a 17,5 cm' }, { id: 'L', name: 'L', desc: '17,5 a 19 cm' }, { id: 'XL', name: 'XL', desc: '19 a 21 cm' }, { id: 'Regulable', name: 'Regulable', desc: 'Se ajusta a cualquier muñeca.' }];
   const CANTIDAD = [{ id: '5', name: 'Cinco', desc: 'Repartidas parejo en todo el largo.' }, { id: 'toda', name: 'En toda la pulsera', desc: 'Una fila de punta a punta.' }];
   const CANTIDAD_COLLAR = [{ id: '5', name: 'Cinco', desc: 'Repartidas parejo adelante.' }, { id: 'toda', name: 'En todo el collar', desc: 'Una fila de punta a punta.' }];
   const DECO_METAL = [
