@@ -23,6 +23,9 @@
     return conHora ? `${f}, ${d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' })}` : f;
   };
 
+  // links y fotos que vienen de un pedido (los manda el navegador del cliente): solo se usan si son https://
+  const seguro = (u) => (/^https:\/\/[^\s"'<>]+$/i.test(String(u || '')) ? String(u) : '');
+
   const ESTADOS = [
     { id: 'nuevo', nombre: 'Nuevo' },
     { id: 'confirmado', nombre: 'Confirmado' },
@@ -163,7 +166,7 @@
   const GRUPOS_PED = [['nuevo', 'Nuevos, para confirmar'], ['confirmado', 'Confirmados'], ['en_produccion', 'En producción'], ['listo', 'Listos para entregar']];
 
   function filaPedido(p, conEstado) {
-    const foto = (p.items || []).map((i) => i.foto).find(Boolean);
+    const foto = (p.items || []).map((i) => seguro(i.foto)).find(Boolean);
     const que = (p.items || []).map((i) => (i.cantidad > 1 ? i.cantidad + ' × ' : '') + i.nombre).join(' · ');
     const meta = [
       conEstado ? `<span class="es-estado">${estadoNombre(p.estado)}</span>` : '',
@@ -236,7 +239,7 @@
 
   function abrir(id) {
     const p = pedidos.find((x) => x.id === id); if (!p) return;
-    const items = (p.items || []).map((i) => `
+    const items = (p.items || []).map((i) => ({ ...i, foto: seguro(i.foto), link: seguro(i.link) })).map((i) => `
       <li class="pn-item">
         ${i.foto ? `<a class="pn-item__img" href="${esc(i.foto)}" target="_blank" rel="noopener"><img src="${esc(i.foto)}" alt="${esc(i.nombre)}"></a>` : '<span class="pn-item__img"></span>'}
         <div>

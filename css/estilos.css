@@ -2157,3 +2157,6 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 .pdp__talles button[aria-checked="true"] { background: var(--tinta); border-color: var(--tinta); color: var(--crema); }
 .pdp__talles small { font-size: 12.5px; line-height: 1.5; color: var(--cuero); }
 .pdp__stock--no span { background: var(--cuero) !important; }
+
+/* el contenido ocupa al menos la pantalla mientras se arma (tienda, ficha): así el pie no aparece arriba y después salta */
+main { min-height: 100vh; min-height: 100svh; }
