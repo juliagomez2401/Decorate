@@ -126,7 +126,7 @@
 
   function itemCard(s) {
     const a = s.portada || s.fotos[0], b = s.hover, tag = agotada(s) ? 'Agotada' : esUnica(s) ? 'Pieza única' : '';
-    return `<div class="item${agotada(s) ? ' item--agotada' : ''}">
+    return `<div class="item item--pieza${agotada(s) ? ' item--agotada' : ''}">
       <a class="item__link" href="producto.html?id=${s.id}">
         <span class="item__img"><img src="${stockImg(a)}" alt="${esc(s.name)}" loading="lazy">${b ? `<img class="item__alt" src="${stockImg(b)}" alt="" loading="lazy">` : ''}${tag ? `<span class="item__tag">${tag}</span>` : ''}</span>
         <span class="item__name">${esc(s.name)}</span>
@@ -310,7 +310,7 @@
       } else {
         document.title = 'Tienda · Decora.te';
         $('[data-shop-title]', shop).textContent = 'Tienda';
-        $('[data-shop-count]', shop).textContent = `${STOCK.length} piezas únicas en stock`;
+        $('[data-shop-count]', shop).textContent = `${STOCK.length} piezas en stock`;
         grid.className = 'shop__groups';
         grid.innerHTML = D.categorias.map((x) => {
           const its = STOCK.filter((s) => s.cat === x.id);

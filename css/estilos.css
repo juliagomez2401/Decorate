@@ -2133,7 +2133,7 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 
 /* tarjeta de la tienda: link a la ficha y, abajo, el botón para sumar al carrito */
 .item__link { display: grid; gap: 4px; align-content: start; color: inherit; text-decoration: none; }
-.item__buy { margin-top: 10px; min-height: 40px; }
+.item__buy { margin-top: 10px; min-height: 40px; }  /* (ver abajo: va siempre al fondo de la tarjeta) */
 .item__add { width: 100%; min-height: 40px; padding: 0 10px; border: 1px solid var(--tinta); background: transparent; color: var(--tinta); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; cursor: pointer; transition: background-color .3s var(--ease), color .3s var(--ease); }
 .item__add:hover { background: var(--tinta); color: var(--crema); }
 .item__agotada, .item__ok { display: grid; place-items: center; min-height: 40px; margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--cuero); border: 1px dashed var(--linea); }
@@ -2160,3 +2160,16 @@ body:has(.elegir:not([hidden])) .wa-float { transform: none; }
 
 /* el contenido ocupa al menos la pantalla mientras se arma (tienda, ficha): así el pie no aparece arriba y después salta */
 main { min-height: 100vh; min-height: 100svh; }
+
+/* el botón de cada pieza queda siempre a la misma altura: las tarjetas de una fila miden igual y el botón va al fondo */
+.item--pieza { display: flex; flex-direction: column; }
+.item--pieza .item__link { flex: 1 1 auto; align-content: start; }
+.item--pieza .item__buy { margin-top: auto; padding-top: 12px; }
+.stockrow__grid, .shop__grid { align-items: stretch; }
+.shop__grid > .item--custom { align-self: start; }
+/* en el inicio las piezas van sobre fondo oscuro: botón claro */
+.stockrow .item__add { border-color: rgba(241, 230, 212, .6); color: var(--crema-luz, #f1e6d4); }
+.stockrow .item__add:hover { background: var(--crema-luz, #f1e6d4); border-color: var(--crema-luz, #f1e6d4); color: var(--tabaco, #3d2619); }
+.stockrow .item__agotada, .stockrow .item__ok, .stockrow .item__talles > span { color: #d8b483; border-color: rgba(241, 230, 212, .3); }
+.stockrow .item__talles button { border-color: rgba(241, 230, 212, .4); color: var(--crema-luz, #f1e6d4); }
+.stockrow .item__talles button:hover { background: var(--crema-luz, #f1e6d4); color: var(--tabaco, #3d2619); }
