@@ -401,6 +401,18 @@
     } else {
       const c = cat(s.cat);
       document.title = `${s.name} · Decora.te`;
+      // para Google: descripción de la página y datos del producto (nombre, foto, precio, stock)
+      const urlFoto = (n) => new URL(stockImg(n, false), location.href).href;
+      const descr = `${s.name}. Pieza de cuero hecha a mano en Uruguay por Decora.te.`;
+      const md = document.querySelector('meta[name="description"]'); if (md) md.setAttribute('content', descr);
+      const ld = document.createElement('script'); ld.type = 'application/ld+json';
+      ld.textContent = JSON.stringify({
+        '@context': 'https://schema.org', '@type': 'Product', name: s.name, description: descr, sku: s.id.toUpperCase(),
+        image: s.fotos.slice(0, 4).map(urlFoto), brand: { '@type': 'Brand', name: 'Decora.te' },
+        offers: { '@type': 'Offer', url: `https://decorate.com.uy/producto?id=${s.id}`, priceCurrency: 'UYU', price: s.min,
+          availability: agotada(s) ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition' },
+      });
+      document.head.appendChild(ld);
       const subName = s.sub && c.subs ? c.subs.find((x) => x.id === s.sub).name : '';
       const shots = s.fotos.map((n, i) => `<figure class="pdp__shot${i ? '' : ' is-on'}" data-shot="${i}"><img src="${stockImg(n, i > 0)}" srcset="${stockImg(n)} 760w, ${stockImg(n, false)} 1600w" sizes="(min-width: 900px) 56vw, 100vw" alt="${esc(s.name)}${i ? '' : ''}" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></figure>`).join('');
       const related = STOCK.filter((x) => x.cat === s.cat && x.id !== s.id).slice(0, 4);

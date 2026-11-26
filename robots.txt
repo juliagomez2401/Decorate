@@ -1,0 +1,7 @@
+# Decora.te: la tienda se puede recorrer entera; el panel, el carrito y las herramientas internas no van en Google.
+User-agent: *
+Disallow: /admin
+Disallow: /carrito
+Disallow: /herramientas/
+
+Sitemap: https://decorate.com.uy/sitemap.xml
